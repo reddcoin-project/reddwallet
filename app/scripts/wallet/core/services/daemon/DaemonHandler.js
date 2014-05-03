@@ -131,7 +131,7 @@ App.Wallet.DaemonHandler = (function () {
 
             win.on('close', function() {
                 self.daemon.kill();
-                //this.close(true);
+                this.close(true);
             });
 
             // We use a timeout to make sure the daemon is fully initialized.
