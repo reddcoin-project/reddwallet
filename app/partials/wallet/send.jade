@@ -1,0 +1,27 @@
+h1.page-header Send
+p
+    | You can send Reddcoin to any address from here, or choose one from your address list.
+    | Always check the amount and the receiving address before sending coins.
+
+<hr>
+
+form.form-horizontal
+    .form-group
+        label.col-sm-3.control-label Address
+        .col-sm-9
+            input.form-control(ng-model="send.address")
+    .form-group
+        label.col-sm-3.control-label Amount
+        .col-sm-9
+            input.form-control(ng-model="send.amount")
+    .form-group
+        label.col-sm-3.control-label Your Comment
+        .col-sm-9
+            input.form-control(ng-model="send.payerComment")
+    .form-group
+        label.col-sm-3.control-label Their Comment
+        .col-sm-9
+            input.form-control(ng-model="send.payeeComment")
+    .form-group
+        .col-sm-9.col-sm-offset-3
+            button.btn.btn-primary.pull-right(ng-click="confirmSend()") Send
