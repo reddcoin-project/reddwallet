@@ -1,0 +1,19 @@
+h1.page-header Receive
+p
+    | These are your Reddcoin addresses for receiving payments.
+    | You may want to give a different one to each sender so you can keep track of who is paying you.
+
+table.table
+    thead
+        tr
+            th Label
+            th Balance
+            th Address
+    tbody
+        tr(ng-repeat='account in wallet.accounts')
+            td
+                | {{ account.label }}
+                em(ng-show="account.label==''") Blank
+
+            td {{ account.balance }}
+            td {{ account.address }}
