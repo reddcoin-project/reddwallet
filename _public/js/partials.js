@@ -1,11 +1,5 @@
 angular.module('partials', [])
 .run(['$templateCache', function($templateCache) {
-  return $templateCache.put('/partials/initialize.html', [
-'',
-'<h1><img src="reddcoin_logo.png" width="64" style="bottom: 5px;" class="reddcoin-icon">{{ loadingStatus }}</h1>',
-'<p>{{ loadingStatusError }}</p>',''].join("\n"));
-}])
-.run(['$templateCache', function($templateCache) {
   return $templateCache.put('/partials/addresses.html', [
 '',
 '<h1 class="page-header">Addresses</h1>',
@@ -13,6 +7,17 @@ angular.module('partials', [])
 '  These are your Reddcoin addresses for sending payments.',
 '  Always check the amount and the receiving address before sending coins.',
 '</p>',''].join("\n"));
+}])
+.run(['$templateCache', function($templateCache) {
+  return $templateCache.put('/partials/dashboard.html', [
+'',
+'<h1 class="page-header">Dashboard</h1>',''].join("\n"));
+}])
+.run(['$templateCache', function($templateCache) {
+  return $templateCache.put('/partials/initialize.html', [
+'',
+'<h1><img src="reddcoin_logo.png" width="64" style="bottom: 5px;" class="reddcoin-icon">{{ loadingStatus }}</h1>',
+'<p>{{ loadingStatusError }}</p>',''].join("\n"));
 }])
 .run(['$templateCache', function($templateCache) {
   return $templateCache.put('/partials/nav.html', [
@@ -98,9 +103,4 @@ angular.module('partials', [])
 '  This is a list of all transactions that have taken place.',
 '  Double click on a transaction to bring up more information.',
 '</p>',''].join("\n"));
-}])
-.run(['$templateCache', function($templateCache) {
-  return $templateCache.put('/partials/dashboard.html', [
-'',
-'<h1 class="page-header">Dashboard</h1>',''].join("\n"));
 }]);
