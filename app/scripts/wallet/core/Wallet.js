@@ -40,14 +40,13 @@ App.Wallet.factory('wallet',
                     var self = this;
 
                     client.exec('settxfee', data.fee, function(err, info) {
-                        console.log(err);
-                        console.log(info);
                         if (info || info == 'true') {
                             client.exec('sendtoaddress', data.address, parseFloat(data.amount), data.payerComment, data.payeeComment, function(err, info) {
-
-                                console.log(err);
-                                console.log(info);
-
+                                if (err == null) {
+                                    console.log("Transaction Complete");
+                                } else {
+                                    console.log(err);
+                                }
                             });
                         }
                     });
@@ -116,9 +115,11 @@ App.Wallet.factory('wallet',
                 initialize: function() {
                     var self = this;
 
-                    $rootScope.$on('daemon.initialization.success', function () {
-                        self.updateInfo();
-                        self.updateAccounts();
+                    $rootScope.$on('daemon.ready', function (ready) {
+                        if (ready) {
+                            self.updateInfo();
+                            self.updateAccounts();
+                        }
                     });
 
                     $rootScope.$on('daemon.notifications.block', function () {
