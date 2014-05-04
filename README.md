@@ -15,9 +15,11 @@ You need the following stuff installed on your machine:
 - [Brunch](http://brunch.io/) via a global npm installation: `npm install -g brunch`.
 - [Bower](http://bower.io/) via a global npm installation: `npm install -g bower`.
 
-### 2. Clone
+### 2. Clone & Install
 
-Clone this repo!
+- Clone the repo
+- Run 'npm install' in the project root
+- Run 'bower install' in the project root
 
 ### 3. Workflow
 
