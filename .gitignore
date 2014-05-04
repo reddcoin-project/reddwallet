@@ -21,3 +21,6 @@ bower_components/
 # build stuff.
 dist
 dist/*
+
+_public/js/dontUseMe
+_public/js/dontUseMe.map
