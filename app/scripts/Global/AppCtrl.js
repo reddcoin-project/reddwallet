@@ -1,8 +1,8 @@
 App.Global.controller(
     'AppCtrl',
     [
-        '$scope', '$location', '$resource', '$rootScope', 'daemonManager', 'wallet',
-        function($scope, $location, $resource, $rootScope, daemonManager, wallet) {
+        '$scope', '$location', '$resource', '$rootScope', 'DaemonManager', 'wallet',
+        function($scope, $location, $resource, $rootScope, DaemonManager, wallet) {
 
             $scope.wallet = wallet;
 
@@ -10,10 +10,8 @@ App.Global.controller(
                 running: false
             };
 
-            $scope.daemon.running = daemonManager.getHandler().isRunning();
-
-            $scope.$on('daemon.initialized', function(result) {
-                $scope.daemon.running = result;
+            $rootScope.$on('daemon.bootstrapped', function(event, message) {
+                $scope.daemon.running = message.result;
             });
 
             $scope.$location = $location;

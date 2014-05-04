@@ -3,10 +3,10 @@ App.Wallet.factory('wallet',
         '$q',
         '$timeout',
         '$rootScope',
-        'daemonManager',
-        function ($q, $timeout, $rootScope, daemonManager) {
+        'DaemonManager',
+        function ($q, $timeout, $rootScope, DaemonManager) {
 
-            var client = daemonManager.getClient();
+            var client = DaemonManager.getClient();
 
             var WalletModel = function () {
 
@@ -115,8 +115,8 @@ App.Wallet.factory('wallet',
                 initialize: function() {
                     var self = this;
 
-                    $rootScope.$on('daemon.ready', function (ready) {
-                        if (ready) {
+                    $rootScope.$on('daemon.bootstrapped', function (event, message) {
+                        if (message.result) {
                             self.updateInfo();
                             self.updateAccounts();
                         }
