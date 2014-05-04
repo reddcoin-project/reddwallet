@@ -6,6 +6,8 @@ App.Wallet.DaemonHandler = (function () {
         this.$timeout = $timeout;
         this.$rootScope = $rootScope;
 
+        this.db = NeDB.get().collection('settings');
+
         this.node = {
             os: require('os'),
             fs: require('fs'),
@@ -41,14 +43,12 @@ App.Wallet.DaemonHandler = (function () {
         this.running = false;
         this.deferred = this.$q.defer();
         this.error = null;
-        this.lastNotification = new Date().getTime();
 
     }
 
     Handler.prototype = {
 
         hasValidDaemon: function() {
-            var arch = this.node.os.arch();
             var platform = this.node.os.platform();
             return this.daemonMap[platform] !== undefined;
         },
@@ -72,16 +72,49 @@ App.Wallet.DaemonHandler = (function () {
             return this.node.os.platform() === 'win32';
         },
 
+        saveDaemonPid: function(callback) {
+            var self = this;
+            this.db.findOne({ "type": "daemon" }, function (err, doc) {
+                if (doc == null) {
+                    self.db.insert({
+                        type: 'daemon',
+                        pid: self.daemon.pid
+                    }, function() {
+                        typeof callback === 'function' && callback();
+                    });
+                } else {
+                    doc.pid = self.daemon.pid;
+                    self.db.update({_id:doc._id}, { $set: doc }, function() {
+                        typeof callback === 'function' && callback();
+                    });
+                }
+            });
+        },
+
+        killExistingPid: function(callback) {
+            var self = this;
+            this.db.findOne({ "type": "daemon" }, function (err, doc) {
+                if (doc == null) return;
+                try {
+                    process.kill(doc.pid);
+                    self.db.remove({_id:doc._id}, {});
+                    typeof callback === 'function' && callback(true);
+                } catch (error) {
+                    // Could not kill, simple..
+                    typeof callback === 'function' && callback(false);
+                }
+            });
+        },
+
         start: function () {
+
+            var self = this;
 
             if (this.isInitialized()) {
                 console.log("Cannot start the daemon handler again without resetting first.");
                 return this.deferred;
-            }
-
-            if (!this.hasValidDaemon()) {
+            } else if (!this.hasValidDaemon()) {
                 this.error = 'This operating system does not support running the Reddcoin daemon.';
-
                 this.deferred.reject(false);
                 this.$rootScope.$broadcast('daemon.initialized', false);
 
@@ -106,46 +139,56 @@ App.Wallet.DaemonHandler = (function () {
                 this.node.childProcess.exec('chmod 777 ' + this.daemonFilePath);
             }
 
-            this.daemon = this.node.childProcess.spawn(this.daemonFilePath, [
-                '-alertnotify=echo "ALERT:%s"',
-                '-blocknotify=echo "BLOCK:%s"',
-                '-walletnotify=echo "WALLET:%s"'
-            ]);
-
-            setInterval(function() {
-                self.$rootScope.$emit('daemon.notifications.block');
-            }, 30 * 1000);
-
-            this.daemon.stdout.on('data', function (data) {
-                self.$rootScope.$emit('daemon.notifications.block');
-            });
-
-            this.daemon.stderr.on('data', function (data) {
-                win.close();
-            });
-
-            this.daemon.on('close', function (data) {
-                console.log("Daemon child process has ended...");
-                //win.close();
-            });
-
-            win.on('close', function() {
-                self.daemon.kill();
-                this.close(true);
-            });
+            // We need to kill any existing processes by the pid...
+            this.killExistingPid();
 
             // We use a timeout to make sure the daemon is fully initialized.
-            var self = this;
             this.$timeout(function() {
 
-                self.running = true;
-                self.initialized = true;
-                self.deferred.resolve(true);
-                self.$rootScope.$broadcast('daemon.initialized', true);
-                self.$rootScope.$broadcast('daemon.initialization.success');
+                self.daemon = self.node.childProcess.spawn(self.daemonFilePath, [
+                    '-alertnotify=echo "ALERT:%s"',
+                    '-walletnotify=echo "WALLET:%s"',
+                    //'-blocknotify=echo "BLOCK:%s"'
+                ]);
+
+                self.saveDaemonPid();
+
+                setInterval(function() {
+                    self.$rootScope.$emit('daemon.notifications.block');
+                }, 30 * 1000);
+
+                self.daemon.stdout.on('data', function (data) {
+                    console.log("stdout data!");
+                    //console.log(data);
+                    self.$rootScope.$emit('daemon.notifications.block');
+                });
+
+                self.daemon.stderr.on('error', function (data) {
+                    console.log('daemon error');
+                });
+
+                self.daemon.on('close', function (data) {
+                    console.log("on daemon close");
+                    console.log("Daemon child process has ended...");
+                    //win.close();
+                });
+
+                win.on('close', function() {
+                    self.daemon.kill();
+                    this.close(true);
+                });
+
+                self.$timeout(function() {
+                    self.running = true;
+                    self.initialized = true;
+                    self.deferred.resolve(true);
+                    self.$rootScope.$broadcast('daemon.initialized', true);
+                    self.$rootScope.$broadcast('daemon.ready', true);
+                    console.log("Daemon Ready");
+                }, 1500);
 
                 return true;
-            }, 1000); // Resolve after delay so the child process has time to start...
+            }, 500); // Resolve after delay so the child process has time to start...
 
             return this.deferred.promise;
         },
