@@ -7,13 +7,15 @@ table.table
     thead
         tr
             th Label
-            th Balance
             th Address
+            th
     tbody
         tr(ng-repeat='account in wallet.accounts')
             td
                 | {{ account.label }}
                 em(ng-show="account.label==''") Blank
 
-            td {{ account.balance }}
             td {{ account.address }}
+
+            td
+                a(href="", ng-click="copy($index)") Copy

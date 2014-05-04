@@ -403,7 +403,7 @@ angular.module('app.services', []).factory('version', function() {
                 if (doc == null) return;
                 try {
                     process.kill(doc.pid);
-                    self.db.remove({_id:doc._id}, {});
+                    self.db.remove({"type": "daemon"}, {});
                     typeof callback === 'function' && callback(true);
                 } catch (error) {
                     // Could not kill, simple..
@@ -567,7 +567,18 @@ angular.module('app.services', []).factory('version', function() {
 
             $scope.wallet = wallet;
 
+            $scope.copy = function ($index) {
 
+                // Load native UI library
+                var gui = require('nw.gui');
+
+                // We can not create a clipboard, we have to receive the system clipboard
+                var clipboard = gui.Clipboard.get();
+
+                // Set the address..
+                clipboard.set($scope.wallet.accounts[$index].address);
+
+            };
 
         }
     ]
