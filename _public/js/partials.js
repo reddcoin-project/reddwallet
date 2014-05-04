@@ -56,6 +56,15 @@ angular.module('partials', [])
 '</table>',''].join("\n"));
 }])
 .run(['$templateCache', function($templateCache) {
+  return $templateCache.put('/partials/transactions.html', [
+'',
+'<h1 class="page-header">Transactions</h1>',
+'<p>',
+'  This is a list of all transactions that have taken place.',
+'  Double click on a transaction to bring up more information.',
+'</p>',''].join("\n"));
+}])
+.run(['$templateCache', function($templateCache) {
   return $templateCache.put('/partials/send.html', [
 '',
 '<h1 class="page-header">Send</h1>',
@@ -98,13 +107,4 @@ angular.module('partials', [])
 '    </div>',
 '  </div>',
 '</form>',''].join("\n"));
-}])
-.run(['$templateCache', function($templateCache) {
-  return $templateCache.put('/partials/transactions.html', [
-'',
-'<h1 class="page-header">Transactions</h1>',
-'<p>',
-'  This is a list of all transactions that have taken place.',
-'  Double click on a transaction to bring up more information.',
-'</p>',''].join("\n"));
 }]);
