@@ -3,7 +3,7 @@ p
     | You can send Reddcoin to any address from here, or choose one from your address list.
     | Always check the amount and the receiving address before sending coins.
 
-<hr>
+hr
 
 form.form-horizontal
     .form-group
@@ -13,7 +13,7 @@ form.form-horizontal
     .form-group
         label.col-sm-3.control-label Amount
         .col-sm-9
-            input.form-control(ng-model="send.amount")
+            input.form-control(type='text', ng-model="send.amount", ng-change="updateMetaTotal()", maxlength="15")
     .form-group
         label.col-sm-3.control-label Your Comment
         .col-sm-9
@@ -23,5 +23,8 @@ form.form-horizontal
         .col-sm-9
             input.form-control(ng-model="send.payeeComment")
     .form-group
-        .col-sm-9.col-sm-offset-3
+        .col-sm-9
+            .alert.alert-actions
+                | Amount + Fee (0.001): {{ meta.totalAmount | number:8 }}
+        .col-sm-3
             button.btn.btn-primary.pull-right(ng-click="confirmSend()") Send
