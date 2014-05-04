@@ -2,7 +2,7 @@ App.Wallet.controller(
     'SendCtrl',
     [
         '$scope',
-        'daemonManager',
+        'DaemonManager',
         'wallet',
         function ($scope, daemon, wallet) {
 

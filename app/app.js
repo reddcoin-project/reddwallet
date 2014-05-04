@@ -1,8 +1,11 @@
 'use strict';
 
-var App = angular.module('app', ['ngCookies', 'ngResource', 'ngRoute', 'ngAnimate', 'app.wallet', 'app.global', 'app.directives', 'app.filters', 'app.services', 'partials']);
+var App = angular.module('app', ['ngCookies', 'ngResource', 'ngRoute', 'ngAnimate', 'app.wallet', 'app.global', 'app.daemon', 'app.directives', 'app.filters', 'app.services', 'partials']);
+
+// Setting up namespaces for the applications
 App.Wallet = angular.module('app.wallet', []);
 App.Global = angular.module('app.global', []);
+App.Daemon = angular.module('app.daemon', []);
 
 App.config([
     '$routeProvider', '$locationProvider', function ($routeProvider, $locationProvider, config) {
@@ -20,14 +23,12 @@ App.config([
     }
 ]);
 
-App.run(['$rootScope', '$route', '$location', 'daemonManager', function ($rootScope, $route, $location, daemonManager) {
-
-    var handler = daemonManager.getHandler();
+App.run(['$rootScope', '$route', '$location', 'DaemonManager', function ($rootScope, $route, $location, DaemonManager) {
 
     $rootScope.$on("$routeChangeStart", function (event, next) {
         if (next != undefined && next.$$route != undefined) {
 
-            if (!handler.isRunning() && !handler.isInitialized()) {
+            if (!DaemonManager.isRunning()) {
                 $location.path('/initialize');
             }
 
