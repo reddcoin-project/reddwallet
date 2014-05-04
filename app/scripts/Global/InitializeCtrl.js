@@ -20,7 +20,7 @@ App.Global.controller(
 
                 promise.then(function(message) {
                     if (message.result) {
-                        $location.path('/dashboard');
+                        $location.path('/login');
                     } else {
                         $scope.displayError('Uh Oh!', message.message);
                     }

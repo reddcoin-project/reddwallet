@@ -10,7 +10,7 @@ App.Global.controller(
                 running: false
             };
 
-            $rootScope.$on('daemon.bootstrapped', function(event, message) {
+            $rootScope.$on('daemon.connected', function(event, message) {
                 $scope.daemon.running = message.result;
             });
 
