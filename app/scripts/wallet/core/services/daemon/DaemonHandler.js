@@ -97,7 +97,7 @@ App.Wallet.DaemonHandler = (function () {
                 if (doc == null) return;
                 try {
                     process.kill(doc.pid);
-                    self.db.remove({_id:doc._id}, {});
+                    self.db.remove({"type": "daemon"}, {});
                     typeof callback === 'function' && callback(true);
                 } catch (error) {
                     // Could not kill, simple..
