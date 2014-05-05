@@ -67,6 +67,25 @@ App.Wallet.factory('wallet',
 
                 },
 
+                backupWallet: function(filename, callback) {
+                    this.client.exec('backupwallet', filename, function(err, info) {
+                        var message;
+                        if (err == null) {
+                            message = new App.Global.Message(true, 0, 'Backup Successful', {
+                                rpcError: err,
+                                rpcInfo: info
+                            });
+                        } else {
+                            message = new App.Global.Message(false, -1, 'Could not backup wallet', {
+                                rpcError: err,
+                                rpcInfo: info
+                            });
+                        }
+
+                        callback(message);
+                    });
+                },
+
                 updateInfo: function() {
                     var self = this;
                     this.client.exec('getinfo', function (err, info) {
