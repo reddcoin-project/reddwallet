@@ -30,7 +30,7 @@ App.Daemon.Bootstrap = (function () {
 
         this.daemonDirPath = this.app.dataPath + '/daemon';
         this.configPath = this.daemonDirPath + "/reddcoin.conf";
-        this.pidPath = this.app.dataPath + "/reddwallet.pid";
+        this.pidPath = this.daemonDirPath + "/reddwallet.pid";
 
         this.daemonConfig = {};
 
