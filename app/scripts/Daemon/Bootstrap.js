@@ -12,7 +12,7 @@ App.Daemon.Bootstrap = (function () {
 
     function Bootstrap ($q, $timeout, $rootScope) {
 
-        this.debugEnabled = true;
+        this.debugEnabled = false;
 
         this.$q = $q;
         this.$timeout = $timeout;
@@ -184,7 +184,7 @@ App.Daemon.Bootstrap = (function () {
             });
 
             this.daemon.on('close', function (data) {
-                this.fs.unlink(this.pidPath, function(ex) {
+                self.fs.unlink(this.pidPath, function(ex) {
                     if (ex != null) {
                         this.debug(ex);
                     }
