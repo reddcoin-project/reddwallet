@@ -6,10 +6,9 @@ App.Wallet.factory('wallet',
         'DaemonManager',
         function ($q, $timeout, $rootScope, DaemonManager) {
 
-            var client = DaemonManager.getClient();
-
             var WalletModel = function () {
 
+                this.client = null;
                 this.info = {
                     "version": "",
                     "protocolversion": "",
@@ -32,33 +31,78 @@ App.Wallet.factory('wallet',
 
                 ];
 
+                var self = this;
+                DaemonManager.getBootstrap().getPromise().then(function(message) {
+                    if (message.result) {
+                        var config = DaemonManager.getBootstrap().daemonConfig;
+                        self.client = require('node-reddcoin')({
+                            port: config.rpcport,
+                            user: config.rpcuser,
+                            pass: config.rpcpassword
+                        });
+                        self.initialize();
+                    }
+
+                    return message;
+                });
+
             };
 
             WalletModel.prototype = {
 
-                send: function(data) {
+                send: function(data, callback) {
                     var self = this;
 
-                    client.exec('settxfee', data.fee, function(err, info) {
+                    this.client.exec('settxfee', data.fee, function(err, info) {
                         if (info || info == 'true') {
-                            client.exec('sendtoaddress', data.address, parseFloat(data.amount), data.payerComment, data.payeeComment, function(err, info) {
+                            self.client.exec('sendtoaddress', data.address, parseFloat(data.amount), data.payerComment, data.payeeComment, function(err, info) {
+                                var message;
                                 if (err == null) {
-                                    console.log("Transaction Complete");
+                                    message = new App.Global.Message(true, 0, 'Transaction Complete', {
+                                        rpcError: err,
+                                        rpcInfo: info
+                                    });
                                 } else {
-                                    console.log(err);
+                                    message = new App.Global.Message(false, 3, 'Error', {
+                                        rpcError: err,
+                                        rpcInfo: info
+                                    });
                                 }
+
+                                typeof callback === 'function' && callback(message);
                             });
                         }
                     });
 
                 },
 
+                backupWallet: function(filename, callback) {
+                    this.client.exec('backupwallet', filename, function(err, info) {
+                        var message;
+                        if (err == null) {
+                            message = new App.Global.Message(true, 0, 'Backup Successful', {
+                                rpcError: err,
+                                rpcInfo: info
+                            });
+                        } else {
+                            message = new App.Global.Message(false, -1, 'Could not backup wallet', {
+                                rpcError: err,
+                                rpcInfo: info
+                            });
+                        }
+
+                        typeof callback === 'function' && callback(message);
+                    });
+                },
+
                 updateInfo: function() {
                     var self = this;
-                    client.exec('getinfo', function (err, info) {
+                    this.client.exec('getinfo', function (err, info) {
                         if (err == null) {
                             self.info = info;
                             $rootScope.$apply();
+                        } else {
+                            console.log(err);
                         }
                     });
                 },
@@ -68,7 +112,7 @@ App.Wallet.factory('wallet',
                     var async = require('async');
                     var self = this;
 
-                    client.exec('listaccounts', function (err, accountList) {
+                    this.client.exec('listaccounts', function (err, accountList) {
                         if (err == null) {
 
                             var accounts = [];
@@ -89,7 +133,7 @@ App.Wallet.factory('wallet',
 
                                                 accounts.push(newAccount);
 
-                                                client.exec('getaccountaddress', newAccount.label, function(err, address) {
+                                                self.client.exec('getaccountaddress', newAccount.label, function(err, address) {
                                                     if (err != null) {
                                                         console.log(err);
                                                         callback(false);
@@ -115,12 +159,8 @@ App.Wallet.factory('wallet',
                 initialize: function() {
                     var self = this;
 
-                    $rootScope.$on('daemon.bootstrapped', function (event, message) {
-                        if (message.result) {
-                            self.updateInfo();
-                            self.updateAccounts();
-                        }
-                    });
+                    self.updateInfo();
+                    self.updateAccounts();
 
                     $rootScope.$on('daemon.notifications.block', function () {
                         self.updateInfo();

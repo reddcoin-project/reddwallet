@@ -36,10 +36,12 @@ App.Global.Message = (function () {
  Error Codes
  ===========
 
+-1 : Unknown Error
+ 0 : No Error
  1 : The operating system running the application does not have a supported reddcoind daemon.
  2 : The deamon for the selected operating system cannot be find, most likely a file path issue or
      was failed to be bundled with the wallet.
- 3 :
+ 3 : There was an error sending an transaction. See the rpc error for more details.
 
 
 */

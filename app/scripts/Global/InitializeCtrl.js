@@ -1,10 +1,23 @@
 App.Global.controller(
     'InitializeCtrl',
     [
-        '$scope', '$location', '$resource', '$rootScope', 'DaemonManager', 'wallet',
-        function($scope, $location, $resource, $rootScope, DaemonManager, wallet) {
+        '$scope', '$location', '$resource', '$rootScope', 'DaemonManager',
+        function($scope, $location, $resource, $rootScope, DaemonManager) {
 
             var bootstrap = DaemonManager.getBootstrap();
+
+            bootstrap.getPromise().then(
+                function success(message) {
+                    if (message.result) {
+                        $location.path('/dashboard');
+                    }
+
+                    return message;
+                },
+                function error (message) {
+                    $scope.displayError('Uh Oh!', message.message);
+                }
+            );
 
             $scope.loadingStatus = 'Loading...';
 
@@ -14,18 +27,8 @@ App.Global.controller(
             };
 
             $scope.initialize = function() {
-                wallet.initialize();
-
-                var promise = bootstrap.startLocal();
-
-                promise.then(function(message) {
-                    if (message.result) {
-                        $location.path('/dashboard');
-                    } else {
-                        $scope.displayError('Uh Oh!', message.message);
-                    }
-                });
-
+                // WHERE IT ALL BEGINS, THE BIRTH OF THE WALLET!
+                bootstrap.startLocal();
             };
 
             $scope.initialize();

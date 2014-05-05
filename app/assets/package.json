@@ -1,37 +1,37 @@
 {
-  "author": "Reddcoin",
-  "name": "ReddWallet",
-  "description": "Reddcoin wallet built ontop of node-webkit",
-  "version": "0.0.1",
-  "homepage": "",
-  "private": true,
-  "repository": {
-    "type": "git",
-    "url": ""
-  },
-  "main": "index.html",
-  "node-main": "",
-  "single-instance": true,
-  "chromium-args": "",
-  "dom_storage_quota": 1024,
-  "window": {
-    "//": "ReddWallet",
-    "title": "ReddWallet",
-    "icon": "reddcoin-favi.png",
-    "toolbar": true,
-    "frame": true,
-    "position": "center",
-    "width": 900,
-    "height": 600,
-    "min_width": 780,
-    "min_height": 540,
-    "resizable": true,
-    "always-on-top": false,
-    "fullscreen": false
-  },
-  "dependencies": {
-    "nedb": "~0.9.4",
-    "node-reddcoin": "~0.3.9",
-    "async": "~0.8.0"
-  }
+    "author": "Reddcoin",
+    "name": "ReddWallet",
+    "description": "Reddcoin wallet built ontop of node-webkit",
+    "version": "0.0.1",
+    "homepage": "",
+    "private": true,
+    "repository": {
+        "type": "git",
+        "url": ""
+    },
+    "main": "index.html",
+    "node-main": "",
+    "single-instance": true,
+    "chromium-args": "",
+    "dom_storage_quota": 1024,
+    "window": {
+        "//": "ReddWallet",
+        "title": "ReddWallet",
+        "icon": "reddcoin-favi.png",
+        "toolbar": true,
+        "frame": true,
+        "position": "center",
+        "width": 900,
+        "height": 600,
+        "min_width": 780,
+        "min_height": 540,
+        "resizable": true,
+        "always-on-top": false,
+        "fullscreen": false
+    },
+    "dependencies": {
+        "nedb": "~0.9.4",
+        "node-reddcoin": "~0.3.9",
+        "async": "~0.8.0"
+    }
 }

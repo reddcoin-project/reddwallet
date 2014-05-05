@@ -626,56 +626,22 @@ a {
 
 .view-animate.ng-leave {
   -webkit-transition: none;
-  -moz-transition: none;
-  -o-transition: none;
   transition: none;
 }
 
 .view-animate.ng-enter {
-  -ms-opacity: 0;
   opacity: 0;
 }
 
 .view-animate.ng-enter.ng-enter-active {
-  -ms-opacity: 1;
   opacity: 1;
 }
 
 .view-animate.ng-leave {
-  -ms-opacity: 1;
   opacity: 1;
 }
 
 .view-animate.ng-leave.ng-leave-active {
-  -ms-opacity: 0;
-  opacity: 0;
-}
-
-.sidebar-animate.ng-add,
-.sidebar-animate.ng-remove {
-  -webkit-transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 0.5s;
-  -moz-transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 0.5s;
-  -o-transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 0.5s;
-  transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 0.5s;
-}
-
-.sidebar-animate.ng-add {
-  -ms-opacity: 0;
-  opacity: 0;
-}
-
-.sidebar-animate.ng-add.ng-add-active {
-  -ms-opacity: 1;
-  opacity: 1;
-}
-
-.sidebar-animate.ng-remove {
-  -ms-opacity: 1;
-  opacity: 1;
-}
-
-.sidebar-animate.ng-remove.ng-remove-active {
-  -ms-opacity: 0;
   opacity: 0;
 }
 
@@ -702,3 +668,83 @@ a {
   font-size: 20px;
   font-weight: 300;
 }
+
+
+.loading-logo {
+  -webkit-animation: loadingLogoFrames ease-in-out 0.5s;
+  -webkit-animation-iteration-count: 99999;
+  -webkit-transform-origin: 1;
+  -webkit-animation-fill-mode:forwards; /*Chrome 16+, Safari 4+*/
+}
+
+@-webkit-keyframes loadingLogoFrames {
+  0% {
+    left:0px;
+    top:-75px;
+    opacity:0.9;
+    -webkit-transform:  rotate(0deg) scaleX(3) scaleY(3) ;
+  }
+  50% {
+    left:0px;
+    top:-75px;
+    opacity:1;
+    -webkit-transform:  rotate(5deg) scaleX(3.25) scaleY(3.25) ;
+  }
+  100% {
+    left:0px;
+    top:-75px;
+    opacity:0.9;
+    -webkit-transform:  rotate(0deg) scaleX(3) scaleY(3) ;
+  }
+}
+
+/* ANGULAR STRAP STUFF */
+/*
+.alert.bottom-right {
+  right: 0;
+  margin-right: 20px;
+}
+
+.alert.bottom, .alert.bottom-left, .alert.bottom-right {
+  position: fixed;
+  bottom: 0;
+  z-index: 1050;
+}
+*/
+
+.alert {
+  -webkit-transition:slidedown cubic-bezier(0.250, 0.460, 0.450, 0.940) 0.5s;
+  transition:slidedown cubic-bezier(0.250, 0.460, 0.450, 0.940) 0.5s;
+}
+
+#alerts-container {
+  position: fixed;
+  bottom: 0;
+  z-index: 1050;
+  right: 0;
+  margin-right: 20px;
+}
+
+.am-fade.ng-enter, .am-fade.ng-leave {
+  -webkit-transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 0.5s;
+}
+
+.am-fade.ng-enter {
+  opacity: 0;
+}
+
+.am-fade.ng-enter.ng-enter-active {
+  opacity: 1;
+}
+
+.am-fade.ng-leave.ng-leave-active {
+  opacity: 0;
+}
+
+
+
+
+
+
+
+

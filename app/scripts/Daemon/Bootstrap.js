@@ -12,7 +12,7 @@ App.Daemon.Bootstrap = (function () {
 
     function Bootstrap ($q, $timeout, $rootScope) {
 
-        this.debugEnabled = true;
+        this.debugEnabled = false;
 
         this.$q = $q;
         this.$timeout = $timeout;
@@ -24,10 +24,15 @@ App.Daemon.Bootstrap = (function () {
         this.deferred = $q.defer();
         this.daemonFilePath = null;
         this.gui = require('nw.gui');
+        this.app = this.gui.App;
         this.win = this.gui.Window.get();
         this.childProcess = require('child_process');
 
-        this.dbSettings = App.Global.NeDB.collection('settings');
+        this.daemonDirPath = this.app.dataPath + '/daemon';
+        this.configPath = this.daemonDirPath + "/reddcoin.conf";
+        this.pidPath = this.app.dataPath + "/reddwallet.pid";
+
+        this.daemonConfig = {};
 
         this.daemonMap = {
             'linux': {
@@ -51,7 +56,7 @@ App.Daemon.Bootstrap = (function () {
 
         /**
          * # Main Function
-         *
+
          * Start the local daemon
          */
         startLocal: function () {
@@ -68,13 +73,18 @@ App.Daemon.Bootstrap = (function () {
                 return this.deferred.promise;
             }
 
+            this.initializeConfiguration();
+            this.parseConfigurationFile();
+
             this.runOsSpecificTasks();
 
             this.killExistingPid();
 
             this.spawnDaemon();
 
-            this.setupDaemonListeners()
+            this.saveDaemonPid();
+
+            this.setupDaemonListeners();
 
             // We will do a timeout function to give the daemon change to initialize..
             this.$timeout(function() {
@@ -84,7 +94,7 @@ App.Daemon.Bootstrap = (function () {
                 self.deferred.resolve(message);
 
                 self.debug(message);
-            }, 1000);
+            }, 1500);
 
             // Setup an internal to emit a notification of a 'block' as want the wallet to stay up to date even
             // if no actions are performed. If the wallet is connected to an already started external daemon
@@ -95,6 +105,58 @@ App.Daemon.Bootstrap = (function () {
             }, 15 * 1000);
 
             return this.deferred.promise;
+        },
+
+        /**
+         * This will check if the data directory contains the ReddWallet daemon folder & configuration. If it doesn't
+         * then it will create the folder and configuration file. After that it will set the config by reading the file.
+         */
+        initializeConfiguration: function() {
+
+            if (!this.fs.existsSync(this.daemonDirPath)) {
+                this.fs.mkdirSync(this.daemonDirPath);
+            }
+
+            if (!this.fs.existsSync(this.configPath)) {
+                var defaultConf = this.fs.readFileSync('daemons/reddcoin.default.conf', {
+                    encoding: 'utf8'
+                });
+
+                var self = this;
+                // Replace the %PASSWORD with a random value..
+                var crypto = require('crypto');
+                crypto.randomBytes(32, function(ex, buf) {
+                    if (ex == null) {
+                        defaultConf = defaultConf.replace("%PASSWORD", crypto.pseudoRandomBytes(32).toString('hex'));
+                    } else {
+                        defaultConf = defaultConf.replace("%PASSWORD", buf.toString('hex'));
+                    }
+                });
+
+                self.fs.writeFileSync(self.configPath, defaultConf);
+            }
+        },
+
+        parseConfigurationFile: function () {
+
+            try {
+                var conf = this.fs.readFileSync(this.configPath, {
+                    encoding: 'utf8'
+                });
+            } catch (ex) {
+                this.debug("An error occurred trying to read the config file " + this.configPath);
+                this.debug(ex);
+            }
+
+            var lines = conf.split("\n");
+            for (var i = 0; i < lines.length; i++) {
+                var parts = lines[i].split("=");
+                if (parts.length == 2) {
+                    this.daemonConfig[parts[0].trim()] = parts[1].trim();
+                }
+            }
+
+            this.debug(this.daemonConfig);
         },
 
         /**
@@ -122,6 +184,11 @@ App.Daemon.Bootstrap = (function () {
             });
 
             this.daemon.on('close', function (data) {
+                self.fs.unlink(self.pidPath, function(ex) {
+                    if (ex != null) {
+                        self.debug(ex);
+                    }
+                });
                 self.debug("Daemon child process has ended.");
             });
         },
@@ -131,12 +198,13 @@ App.Daemon.Bootstrap = (function () {
          */
         spawnDaemon: function() {
             this.daemon = this.childProcess.spawn(this.daemonFilePath, [
+                '-conf=' + this.configPath,
+                '-datadir=' + this.daemonDirPath,
+                '-pid=' + this.pidPath,
                 '-alertnotify=echo "ALERT:%s"',
                 '-walletnotify=echo "WALLET:%s"'
                 //'-blocknotify=echo "BLOCK:%s"'
             ]);
-
-            this.saveDaemonPid();
         },
 
         /**
@@ -210,21 +278,8 @@ App.Daemon.Bootstrap = (function () {
          * @param {function=} callback
          */
         saveDaemonPid: function(callback) {
-            var self = this;
-            this.dbSettings.findOne({ "type": "daemon" }, function (err, doc) {
-                if (doc == null) {
-                    self.dbSettings.insert({
-                        type: 'daemon',
-                        pid: self.daemon.pid
-                    }, function() {
-                        typeof callback === 'function' && callback();
-                    });
-                } else {
-                    doc.pid = self.daemon.pid;
-                    self.dbSettings.update({_id:doc._id}, { $set: doc }, function() {
-                        typeof callback === 'function' && callback();
-                    });
-                }
+            this.fs.writeFileSync(this.pidPath, this.daemon.pid, {
+                flag: 'w'
             });
         },
 
@@ -235,22 +290,16 @@ App.Daemon.Bootstrap = (function () {
          * @param {function=} callback
          */
         killExistingPid: function(callback) {
-            var self = this;
-            this.dbSettings.findOne({ "type": "daemon" }, function (err, doc) {
-                if (doc == null) return;
-
+            if (this.fs.existsSync(this.pidPath)) {
+                var pid = this.fs.readFileSync(this.pidPath, {
+                    encoding: 'utf8'
+                });
                 try {
-                    process.kill(doc.pid);
-
-                    self.dbSettings.remove({"type": "daemon"}, {});
-
-                    typeof callback === 'function' && callback(true);
-                } catch (error) {
-                    self.debug(error);
-
-                    typeof callback === 'function' && callback(false);
+                    process.kill(pid, 'SIGTERM');
+                } catch (ex) {
+                    this.debug("Error trying to kill pid, most likely no process exists with that pid");
                 }
-            });
+            }
         },
 
         /**
