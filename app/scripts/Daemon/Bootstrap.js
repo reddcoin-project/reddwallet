@@ -184,7 +184,7 @@ App.Daemon.Bootstrap = (function () {
             });
 
             this.daemon.on('close', function (data) {
-                self.fs.unlink(this.pidPath, function(ex) {
+                self.fs.unlink(self.pidPath, function(ex) {
                     if (ex != null) {
                         this.debug(ex);
                     }
