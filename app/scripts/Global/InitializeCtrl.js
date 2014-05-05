@@ -9,7 +9,7 @@ App.Global.controller(
             bootstrap.getPromise().then(
                 function success(message) {
                     if (message.result) {
-                        //$location.path('/login');
+                        $location.path('/dashboard');
                     }
 
                     return message;
