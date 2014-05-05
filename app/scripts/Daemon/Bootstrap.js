@@ -30,7 +30,7 @@ App.Daemon.Bootstrap = (function () {
 
         this.daemonDirPath = this.app.dataPath + '/daemon';
         this.configPath = this.daemonDirPath + "/reddcoin.conf";
-        this.pidPath = this.daemonDirPath + "/reddwallet.pid";
+        this.pidPath = this.app.dataPath + "/reddwallet.pid";
 
         this.daemonConfig = {};
 
@@ -184,6 +184,11 @@ App.Daemon.Bootstrap = (function () {
             });
 
             this.daemon.on('close', function (data) {
+                this.fs.unlink(this.pidPath, function(ex) {
+                    if (ex != null) {
+                        this.debug(ex);
+                    }
+                });
                 self.debug("Daemon child process has ended.");
             });
         },
