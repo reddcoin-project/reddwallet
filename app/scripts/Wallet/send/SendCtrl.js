@@ -14,7 +14,7 @@ App.Wallet.controller(
                 address: 'Rer7K4AwRhUYshzzPeamRkC9cV7M6BSz3P',
                 payerComment: '',
                 payeeComment: '',
-                fee: 0.001
+                fee: parseFloat(daemon.daemonConfig.paytxfee)
             };
 
             $scope.meta = {
