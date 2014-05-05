@@ -289,8 +289,11 @@ App.Daemon.Bootstrap = (function () {
                 var pid = this.fs.readFileSync(this.pidPath, {
                     encoding: 'utf8'
                 });
-
-                process.kill(pid, 'SIGTERM');
+                try {
+                    process.kill(pid, 'SIGTERM');
+                } catch (ex) {
+                    this.debug("Error trying to kill pid, most likely no process exists with that pid");
+                }
             }
         },
 
