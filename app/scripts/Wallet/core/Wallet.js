@@ -59,6 +59,8 @@ App.Wallet.factory('wallet',
                         if (err == null) {
                             self.info = info;
                             $rootScope.$apply();
+                        } else {
+                            console.log(err);
                         }
                     });
                 },

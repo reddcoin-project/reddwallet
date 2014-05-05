@@ -702,3 +702,37 @@ a {
   font-size: 20px;
   font-weight: 300;
 }
+
+
+.loading-logo {
+  -webkit-animation: loadingLogoFrames ease-in-out 0.75s;
+  -webkit-animation-iteration-count: 1;
+  -webkit-transform-origin: 1;
+  -webkit-animation-fill-mode:forwards; /*Chrome 16+, Safari 4+*/
+}
+
+@-webkit-keyframes loadingLogoFrames {
+  0% {
+    left:0px;
+    top:-200px;
+    opacity:0;
+    -webkit-transform:  rotate(0deg) scaleX(7) scaleY(7) ;
+  }
+  100% {
+    left:0px;
+    top:-75px;
+    opacity:1;
+    -webkit-transform:  rotate(360deg) scaleX(3) scaleY(3) ;
+  }
+}
+
+
+
+
+
+
+
+
+
+
+

@@ -84,7 +84,7 @@ App.Daemon.Bootstrap = (function () {
                 self.deferred.resolve(message);
 
                 self.debug(message);
-            }, 1000);
+            }, 1500);
 
             // Setup an internal to emit a notification of a 'block' as want the wallet to stay up to date even
             // if no actions are performed. If the wallet is connected to an already started external daemon
