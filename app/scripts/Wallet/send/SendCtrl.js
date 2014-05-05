@@ -2,9 +2,10 @@ App.Wallet.controller(
     'SendCtrl',
     [
         '$scope',
+        '$alert',
         'DaemonManager',
         'wallet',
-        function ($scope, daemon, wallet) {
+        function ($scope, $alert, daemon, wallet) {
 
             $scope.wallet = wallet;
 
@@ -20,8 +21,25 @@ App.Wallet.controller(
                 totalAmount: 0
             };
 
+            /**
+             * @todo: Actually build in a confirmation box.. maybe validate properly when sent has been hit/disable send
+             */
             $scope.confirmSend = function() {
-                wallet.send($scope.send);
+                wallet.send($scope.send, function(message) {
+                    if (message.result) {
+                        $alert({
+                            "title": "Sent " + $scope.send.amount + " RDD ",
+                            "content": "to " + $scope.send.address,
+                            "type": "success"
+                        });
+                    } else {
+                        $alert({
+                            "title": "Error",
+                            "content": $scope.send.amount,
+                            "type": "warning"
+                        });
+                    }
+                });
             };
 
             $scope.updateMetaTotal = function() {
@@ -29,6 +47,7 @@ App.Wallet.controller(
                 if (result == null || result == undefined || isNaN(result)) {
                     result = "Invalid Amount";
                 }
+
                 $scope.meta.totalAmount = result;
             };
 

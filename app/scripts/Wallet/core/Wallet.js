@@ -50,17 +50,26 @@ App.Wallet.factory('wallet',
 
             WalletModel.prototype = {
 
-                send: function(data) {
+                send: function(data, callback) {
                     var self = this;
 
                     this.client.exec('settxfee', data.fee, function(err, info) {
                         if (info || info == 'true') {
                             self.client.exec('sendtoaddress', data.address, parseFloat(data.amount), data.payerComment, data.payeeComment, function(err, info) {
+                                var message;
                                 if (err == null) {
-                                    console.log("Transaction Complete");
+                                    message = new App.Global.Message(true, 0, 'Transaction Complete', {
+                                        rpcError: err,
+                                        rpcInfo: info
+                                    });
                                 } else {
-                                    console.log(err);
+                                    message = new App.Global.Message(false, 3, 'Error', {
+                                        rpcError: err,
+                                        rpcInfo: info
+                                    });
                                 }
+
+                                typeof callback === 'function' && callback(message);
                             });
                         }
                     });
@@ -82,7 +91,7 @@ App.Wallet.factory('wallet',
                             });
                         }
 
-                        callback(message);
+                        typeof callback === 'function' && callback(message);
                     });
                 },
 
