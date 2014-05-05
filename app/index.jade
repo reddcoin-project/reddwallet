@@ -36,11 +36,7 @@ html(lang='en', ng-app='app')
                 .navbar-collapse.collapse
                     form.navbar-form.navbar-right
                         input.form-control(type='text', placeholder='Transaction...')
-                    ul.nav.navbar-nav.navbar-right
-                        li
-                            a(href='#') Settings
-                        li
-                            a(href='#') Help
+                    div(ng-include="'/partials/topNav.html'")
 
         .container-fluid
             .row.view-animate-container
@@ -57,3 +53,6 @@ html(lang='en', ng-app='app')
 
                 .col-sm-9.col-sm-offset-3.col-md-9.col-md-offset-3.col-lg-10.col-lg-offset-2.main(ng-class="{loading: !daemon.running}")
                     .view-animate(ng-view, ng-app)
+
+        // For notifications
+        div#alerts-container
