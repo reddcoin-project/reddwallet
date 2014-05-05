@@ -50,6 +50,10 @@ App.Wallet.factory('wallet',
 
             WalletModel.prototype = {
 
+                lockWallet: function(callback) {
+                    // commadn is walletlock  error: {"code":-15,"message":"Error: running with an unencrypted wallet, but walletlock was called."}
+                },
+
                 send: function(data, callback) {
                     var self = this;
 
