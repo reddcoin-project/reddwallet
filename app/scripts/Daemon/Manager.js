@@ -11,11 +11,6 @@ App.Daemon.factory('DaemonManager',
 
                 this.bootstrap = new App.Daemon.Bootstrap($q, $timeout, $rootScope);
 
-                this.client = require('node-reddcoin')({
-                    user: 'user',
-                    pass: 'password'
-                });
-
                 this.initialize();
 
             }
@@ -36,10 +31,6 @@ App.Daemon.factory('DaemonManager',
                         return message;
                     });
 
-                },
-
-                getClient: function () {
-                    return this.client;
                 },
 
                 getBootstrap: function() {

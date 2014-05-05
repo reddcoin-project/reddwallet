@@ -705,8 +705,8 @@ a {
 
 
 .loading-logo {
-  -webkit-animation: loadingLogoFrames ease-in-out 0.75s;
-  -webkit-animation-iteration-count: 1;
+  -webkit-animation: loadingLogoFrames ease-in-out 0.5s;
+  -webkit-animation-iteration-count: 99999;
   -webkit-transform-origin: 1;
   -webkit-animation-fill-mode:forwards; /*Chrome 16+, Safari 4+*/
 }
@@ -714,15 +714,21 @@ a {
 @-webkit-keyframes loadingLogoFrames {
   0% {
     left:0px;
-    top:-200px;
-    opacity:0;
-    -webkit-transform:  rotate(0deg) scaleX(7) scaleY(7) ;
+    top:-75px;
+    opacity:0.9;
+    -webkit-transform:  rotate(0deg) scaleX(3) scaleY(3) ;
+  }
+  50% {
+    left:0px;
+    top:-75px;
+    opacity:1;
+    -webkit-transform:  rotate(5deg) scaleX(3.25) scaleY(3.25) ;
   }
   100% {
     left:0px;
     top:-75px;
-    opacity:1;
-    -webkit-transform:  rotate(360deg) scaleX(3) scaleY(3) ;
+    opacity:0.9;
+    -webkit-transform:  rotate(0deg) scaleX(3) scaleY(3) ;
   }
 }
 

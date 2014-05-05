@@ -24,8 +24,15 @@ App.Daemon.Bootstrap = (function () {
         this.deferred = $q.defer();
         this.daemonFilePath = null;
         this.gui = require('nw.gui');
+        this.app = this.gui.App;
         this.win = this.gui.Window.get();
         this.childProcess = require('child_process');
+
+        this.daemonDirPath = this.app.dataPath + '/daemon';
+        this.configPath = this.daemonDirPath + "/reddcoin.conf";
+        this.pidPath = this.daemonDirPath + "/reddwallet.pid";
+
+        this.daemonConfig = {};
 
         this.dbSettings = App.Global.NeDB.collection('settings');
 
@@ -51,7 +58,7 @@ App.Daemon.Bootstrap = (function () {
 
         /**
          * # Main Function
-         *
+
          * Start the local daemon
          */
         startLocal: function () {
@@ -68,13 +75,18 @@ App.Daemon.Bootstrap = (function () {
                 return this.deferred.promise;
             }
 
+            this.initializeConfiguration();
+            this.parseConfigurationFile();
+
             this.runOsSpecificTasks();
 
-            this.killExistingPid();
+            //this.killExistingPid();
 
             this.spawnDaemon();
 
-            this.setupDaemonListeners()
+            //this.saveDaemonPid();
+
+            this.setupDaemonListeners();
 
             // We will do a timeout function to give the daemon change to initialize..
             this.$timeout(function() {
@@ -95,6 +107,58 @@ App.Daemon.Bootstrap = (function () {
             }, 15 * 1000);
 
             return this.deferred.promise;
+        },
+
+        /**
+         * This will check if the data directory contains the ReddWallet daemon folder & configuration. If it doesn't
+         * then it will create the folder and configuration file. After that it will set the config by reading the file.
+         */
+        initializeConfiguration: function() {
+
+            if (!this.fs.existsSync(this.daemonDirPath)) {
+                this.fs.mkdirSync(this.daemonDirPath);
+            }
+
+            if (!this.fs.existsSync(this.configPath)) {
+                var defaultConf = this.fs.readFileSync('daemons/reddcoin.default.conf', {
+                    encoding: 'utf8'
+                });
+
+                var self = this;
+                // Replace the %PASSWORD with a random value..
+                var crypto = require('crypto');
+                crypto.randomBytes(32, function(ex, buf) {
+                    if (ex == null) {
+                        defaultConf = defaultConf.replace("%PASSWORD", crypto.pseudoRandomBytes(32).toString('hex'));
+                    } else {
+                        defaultConf = defaultConf.replace("%PASSWORD", buf.toString('hex'));
+                    }
+                });
+
+                self.fs.writeFileSync(self.configPath, defaultConf);
+            }
+        },
+
+        parseConfigurationFile: function () {
+
+            try {
+                var conf = this.fs.readFileSync(this.configPath, {
+                    encoding: 'utf8'
+                });
+            } catch (ex) {
+                this.debug("An error occurred trying to read the config file " + this.configPath);
+                this.debug(ex);
+            }
+
+            var lines = conf.split("\n");
+            for (var i = 0; i < lines.length; i++) {
+                var parts = lines[i].split("=");
+                if (parts.length == 2) {
+                    this.daemonConfig[parts[0].trim()] = parts[1].trim();
+                }
+            }
+
+            this.debug(this.daemonConfig);
         },
 
         /**
@@ -131,12 +195,13 @@ App.Daemon.Bootstrap = (function () {
          */
         spawnDaemon: function() {
             this.daemon = this.childProcess.spawn(this.daemonFilePath, [
+                '-conf=' + this.configPath,
+                '-datadir=' + this.daemonDirPath,
+                '-pid=' + this.pidPath,
                 '-alertnotify=echo "ALERT:%s"',
                 '-walletnotify=echo "WALLET:%s"'
                 //'-blocknotify=echo "BLOCK:%s"'
             ]);
-
-            this.saveDaemonPid();
         },
 
         /**

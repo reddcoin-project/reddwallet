@@ -6,10 +6,9 @@ App.Wallet.factory('wallet',
         'DaemonManager',
         function ($q, $timeout, $rootScope, DaemonManager) {
 
-            var client = DaemonManager.getClient();
-
             var WalletModel = function () {
 
+                this.client = null;
                 this.info = {
                     "version": "",
                     "protocolversion": "",
@@ -32,6 +31,21 @@ App.Wallet.factory('wallet',
 
                 ];
 
+                var self = this;
+                DaemonManager.getBootstrap().getPromise().then(function(message) {
+                    if (message.result) {
+                        var config = DaemonManager.getBootstrap().daemonConfig;
+                        self.client = require('node-reddcoin')({
+                            port: config.rpcport,
+                            user: config.rpcuser,
+                            pass: config.rpcpassword
+                        });
+                        self.initialize();
+                    }
+
+                    return message;
+                });
+
             };
 
             WalletModel.prototype = {
@@ -39,9 +53,9 @@ App.Wallet.factory('wallet',
                 send: function(data) {
                     var self = this;
 
-                    client.exec('settxfee', data.fee, function(err, info) {
+                    this.client.exec('settxfee', data.fee, function(err, info) {
                         if (info || info == 'true') {
-                            client.exec('sendtoaddress', data.address, parseFloat(data.amount), data.payerComment, data.payeeComment, function(err, info) {
+                            self.client.exec('sendtoaddress', data.address, parseFloat(data.amount), data.payerComment, data.payeeComment, function(err, info) {
                                 if (err == null) {
                                     console.log("Transaction Complete");
                                 } else {
@@ -55,7 +69,7 @@ App.Wallet.factory('wallet',
 
                 updateInfo: function() {
                     var self = this;
-                    client.exec('getinfo', function (err, info) {
+                    this.client.exec('getinfo', function (err, info) {
                         if (err == null) {
                             self.info = info;
                             $rootScope.$apply();
@@ -70,7 +84,7 @@ App.Wallet.factory('wallet',
                     var async = require('async');
                     var self = this;
 
-                    client.exec('listaccounts', function (err, accountList) {
+                    this.client.exec('listaccounts', function (err, accountList) {
                         if (err == null) {
 
                             var accounts = [];
@@ -91,7 +105,7 @@ App.Wallet.factory('wallet',
 
                                                 accounts.push(newAccount);
 
-                                                client.exec('getaccountaddress', newAccount.label, function(err, address) {
+                                                self.client.exec('getaccountaddress', newAccount.label, function(err, address) {
                                                     if (err != null) {
                                                         console.log(err);
                                                         callback(false);
@@ -117,12 +131,8 @@ App.Wallet.factory('wallet',
                 initialize: function() {
                     var self = this;
 
-                    $rootScope.$on('daemon.bootstrapped', function (event, message) {
-                        if (message.result) {
-                            self.updateInfo();
-                            self.updateAccounts();
-                        }
-                    });
+                    self.updateInfo();
+                    self.updateAccounts();
 
                     $rootScope.$on('daemon.notifications.block', function () {
                         self.updateInfo();

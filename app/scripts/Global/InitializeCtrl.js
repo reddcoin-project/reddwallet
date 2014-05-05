@@ -14,7 +14,6 @@ App.Global.controller(
             };
 
             $scope.initialize = function() {
-                wallet.initialize();
 
                 var promise = bootstrap.startLocal();
 
