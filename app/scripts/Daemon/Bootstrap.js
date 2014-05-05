@@ -34,8 +34,6 @@ App.Daemon.Bootstrap = (function () {
 
         this.daemonConfig = {};
 
-        this.dbSettings = App.Global.NeDB.collection('settings');
-
         this.daemonMap = {
             'linux': {
                 'x32': 'daemons/reddcoind-linux32',
@@ -80,11 +78,11 @@ App.Daemon.Bootstrap = (function () {
 
             this.runOsSpecificTasks();
 
-            //this.killExistingPid();
+            this.killExistingPid();
 
             this.spawnDaemon();
 
-            //this.saveDaemonPid();
+            this.saveDaemonPid();
 
             this.setupDaemonListeners();
 
@@ -275,21 +273,8 @@ App.Daemon.Bootstrap = (function () {
          * @param {function=} callback
          */
         saveDaemonPid: function(callback) {
-            var self = this;
-            this.dbSettings.findOne({ "type": "daemon" }, function (err, doc) {
-                if (doc == null) {
-                    self.dbSettings.insert({
-                        type: 'daemon',
-                        pid: self.daemon.pid
-                    }, function() {
-                        typeof callback === 'function' && callback();
-                    });
-                } else {
-                    doc.pid = self.daemon.pid;
-                    self.dbSettings.update({_id:doc._id}, { $set: doc }, function() {
-                        typeof callback === 'function' && callback();
-                    });
-                }
+            this.fs.writeFileSync(this.pidPath, this.daemon.pid, {
+                flag: 'w'
             });
         },
 
@@ -300,22 +285,13 @@ App.Daemon.Bootstrap = (function () {
          * @param {function=} callback
          */
         killExistingPid: function(callback) {
-            var self = this;
-            this.dbSettings.findOne({ "type": "daemon" }, function (err, doc) {
-                if (doc == null) return;
+            if (this.fs.existsSync(this.pidPath)) {
+                var pid = this.fs.readFileSync(this.pidPath, {
+                    encoding: 'utf8'
+                });
 
-                try {
-                    process.kill(doc.pid);
-
-                    self.dbSettings.remove({"type": "daemon"}, {});
-
-                    typeof callback === 'function' && callback(true);
-                } catch (error) {
-                    self.debug(error);
-
-                    typeof callback === 'function' && callback(false);
-                }
-            });
+                process.kill(pid, 'SIGTERM');
+            }
         },
 
         /**
