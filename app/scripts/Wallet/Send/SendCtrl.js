@@ -15,7 +15,7 @@ App.Wallet.controller(
                 totalAmount: 0
             };
 
-            $scope.reset = function(notification) {
+            $scope.reset = function() {
                 $scope.send = {
                     amount: 1,
                     address: 'Rer7K4AwRhUYshzzPeamRkC9cV7M6BSz3P',
