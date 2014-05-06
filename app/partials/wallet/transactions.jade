@@ -1,4 +1,17 @@
 h1.page-header Transactions
-p
-    | This is a list of all transactions that have taken place.
-    | Double click on a transaction to bring up more information.
+
+.row
+    .col-sm-12
+        input.form-control.pull-right.col-sm-3(ng-model="receiveFilter", placeholder="Filter amount/address")
+
+table.table
+    thead
+        tr
+            th(style="width: 258px") Date
+            th Amount
+            th(style="width: 290px") Address
+    tbody
+        tr.hover-row(ng-repeat='trans in transactions | filter:receiveFilter', ng-click="viewTransaction($index)")
+            td {{ trans.time * 1000 | date:'yyyy-MM-dd HH:mm:ss Z' }}
+            td {{ trans.amount }}
+            td {{ trans.address }}

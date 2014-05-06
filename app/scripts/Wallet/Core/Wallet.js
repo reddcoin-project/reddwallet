@@ -50,6 +50,30 @@ App.Wallet.factory('wallet',
 
             WalletModel.prototype = {
 
+                getTransactions: function() {
+                    var self = this;
+                    var deferred = $q.defer();
+
+                    this.client.exec('listtransactions', function (err, info) {
+                        var message;
+                        if (err != null) {
+                            message = new App.Global.Message(false, 3, 'Error', {
+                                rpcError: err,
+                                rpcInfo: info
+                            });
+                            deferred.reject(message);
+                        } else {
+                            message = new App.Global.Message(true, 0, 'Fetched Transactions', {
+                                rpcError: err,
+                                rpcInfo: info
+                            });
+                            deferred.resolve(message);
+                        }
+                    });
+
+                    return deferred.promise;
+                },
+
                 lockWallet: function(callback) {
                     // commadn is walletlock  error: {"code":-15,"message":"Error: running with an unencrypted wallet, but walletlock was called."}
                 },
