@@ -6,11 +6,12 @@ p
 table.table
     thead
         tr
-            th Label
-            th Address
+            th(style="width: 25%") Label
+            th(style="width: 55%") Address
             th
+                input.form-control.col-sm-2(ng-model="receiveFilter", placeholder="Filter...")
     tbody
-        tr(ng-repeat='account in wallet.accounts')
+        tr(ng-repeat='account in wallet.accounts | filter:receiveFilter')
             td
                 | {{ account.label }}
                 em(ng-show="account.label==''") Blank

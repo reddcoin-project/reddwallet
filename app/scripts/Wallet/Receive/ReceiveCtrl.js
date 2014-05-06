@@ -17,16 +17,16 @@ App.Wallet.controller(
                 // We can not create a clipboard, we have to receive the system clipboard
                 var clipboard = gui.Clipboard.get();
 
-                var address = $scope.wallet.accounts[$index].address;
+                var account = $scope.wallet.accounts[$index];
 
                 // Set the address..
-                clipboard.set(address);
+                clipboard.set(account.address);
 
                 $alert({
-                    "title": "Copied",
-                    "content": address,
+                    "title": "Copied " + account.label,
+                    "content": account.address,
                     "type": "info",
-                    duration: 1
+                    duration: 1.5
                 });
 
             };
