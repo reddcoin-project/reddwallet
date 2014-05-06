@@ -29,6 +29,14 @@ form.form-horizontal
         .col-sm-6.lead
             strong {{ meta.totalAmount | number:8 }}
         .col-sm-3
-            .btn-group-sm.pull-right
-                button.btn.btn-warning(ng-click="reset()") Reset
-                button.btn.btn-primary(ng-click="confirmSend()", ng-disabled="disableSend") Send
+            .btn-group.pull-right
+                button.btn.btn-warning.btn-sm(ng-click="reset()") Reset
+                button.btn.btn-primary.btn-sm(
+                    ng-click="confirmSend()",
+                    ng-disabled="disableSend"
+                ) Send
+
+    .alert.alert-info(ng-show="meta.totalAmount > wallet.info.balance")
+        strong The amount entered exceeds your total balance.
+
+

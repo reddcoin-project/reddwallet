@@ -40,23 +40,29 @@ App.Wallet.controller(
                 });
 
                 confirm.$scope.confirm = function() {
-                    wallet.send($scope.send, function(message) {
-                        if (message.result) {
+                    var promise = wallet.send($scope.send);
+                    promise.then(
+                        function success(message) {
                             $alert({
                                 "title": "Sent " + $scope.send.amount + " RDD ",
                                 "content": "to " + $scope.send.address,
                                 "type": "success"
                             });
                             $scope.reset();
-                        } else {
-                            console.log(message.rpcError);
+                        },
+                        function error(message) {
+                            var errorMessage = "Please double check the amount & address";
+                            if (message.rpcError.code == -14) {
+                                errorMessage = "Incorrect passphrase."
+                            }
+
                             $alert({
                                 "title": "Sending Failed",
-                                "content": "Please double check the amount & address",
+                                "content": errorMessage,
                                 "type": "warning"
                             });
                         }
-                    });
+                    );
                 };
 
                 confirm.$promise.then(confirm.show);
@@ -64,13 +70,14 @@ App.Wallet.controller(
 
             $scope.updateMetaTotal = function() {
                 var result = parseFloat($scope.send.amount) + parseFloat($scope.send.fee);
-
-                if (result == null || result == undefined || isNaN(result) || $scope.send.address == '') {
+                if (result == null || isNaN(result) || $scope.send.address == '') {
                     result = "";
                     $scope.disableSend = true;
                 } else {
                     $scope.disableSend = false;
                 }
+
+                $scope.disableSend = result > $scope.wallet.info.balance;
 
                 $scope.meta.totalAmount = result;
             };
