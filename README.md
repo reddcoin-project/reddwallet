@@ -46,7 +46,6 @@ The steps for the temporary solution until the issue is fixed:
 - Install node-webkit globally `npm -g install nodewebkit` as mentioned above.
 - Rename the global `package.json` file to something else (eg `_package.json`). You'll probably need `sudo`.  `cd /usr/local/lib/node_modules/nodewebkit` then `sudo mv package.json _package.json`.
 - Run the app directly from inside the `/_public` folder. `cd _public` and then `nodewebkit .`. (Hence the reason for global install).
-- You can also try and run the `npm run app-mac` which automatically does the step above. You still need the global node-webkit package though.
 
 ### Windows
 

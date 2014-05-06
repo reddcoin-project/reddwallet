@@ -12,7 +12,6 @@
     "compiler": "brunch watch -P",
     "test": "karma start test/karma.conf.js",
     "app": "nodewebkit _public",
-    "app-mac": "cd _public && nodewebkit .",
     "deploy": "grunt"
   },
   "dependencies": {
