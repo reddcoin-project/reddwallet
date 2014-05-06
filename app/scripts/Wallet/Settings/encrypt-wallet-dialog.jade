@@ -1,6 +1,6 @@
 .modal(tabindex='-1', role='dialog')
     .modal-dialog
-        .modal-content
+        form.modal-content
             .modal-header(ng-show='title')
                 button.close(type='button', ng-click='$hide()') ×
                 h4.modal-title(ng-bind='title')
@@ -19,7 +19,7 @@
             .modal-footer
                 button.btn.btn-sm.btn-default.pull-left(type='button', ng-click='$hide()') Cancel
                 button.btn.btn-sm.btn-primary(
-                    type='button',
+                    type='submit',
                     ng-click='confirm(passphrase);$hide()',
                     ng-disabled="passphrase != confirmPassphrase || passphrase == ''"
                 ) Encrypt Wallet
