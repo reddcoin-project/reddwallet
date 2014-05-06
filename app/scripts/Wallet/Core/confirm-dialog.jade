@@ -4,7 +4,7 @@
             .modal-header(ng-show='title')
                 button.close(type='button', ng-click='$hide()') ×
                 h4.modal-title(ng-bind='title')
-            .modal-body(ng-bind='content')
+            .modal-body(ng-bind-html='content')
             .modal-footer
                 button.btn.btn-sm.btn-default.pull-left(type='button', ng-click='$hide()') Close
                 button.btn.btn-sm.btn-primary(type='button', ng-click='confirm();$hide()') Confirm
