@@ -42,5 +42,4 @@ App.Global.Message = (function () {
  2 : The daemon for the selected operating system cannot be find, most likely a file path issue or
      was failed to be bundled with the wallet.
  3 : There was an error sending the command to the daemon. See the rpc error for more details.
-
 */

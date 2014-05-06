@@ -1,14 +1,18 @@
 App.Wallet.factory('wallet',
     [
         '$q',
+        '$modal',
         '$timeout',
         '$rootScope',
         'DaemonManager',
-        function ($q, $timeout, $rootScope, DaemonManager) {
+        function ($q, $modal, $timeout, $rootScope, DaemonManager) {
 
             var WalletModel = function () {
 
                 this.client = null;
+
+                this.isEncrypted = false;
+
                 this.info = {
                     "version": "",
                     "protocolversion": "",
@@ -27,6 +31,7 @@ App.Wallet.factory('wallet',
                     "errors": ""
                 };
 
+
                 this.accounts = [
 
                 ];
@@ -38,7 +43,8 @@ App.Wallet.factory('wallet',
                         self.client = require('node-reddcoin')({
                             port: config.rpcport,
                             user: config.rpcuser,
-                            pass: config.rpcpassword
+                            pass: config.rpcpassword,
+                            passphrasecallback: self.handlePassPhraseCallback
                         });
                         self.initialize();
                     }
@@ -50,77 +56,94 @@ App.Wallet.factory('wallet',
 
             WalletModel.prototype = {
 
+                rpcToMessage: function (deferred, err, info) {
+                    var message;
+                    if (err == null) {
+                        message = new App.Global.Message(true, 0, '', {
+                            rpcError: err,
+                            rpcInfo: info
+                        });
+                        deferred.resolve(message);
+                    } else {
+                        message = new App.Global.Message(false, 3, 'Error', {
+                            rpcError: err,
+                            rpcInfo: info
+                        });
+                        console.log(message);
+                        deferred.reject(message);
+                    }
+
+                    return message;
+                },
+
                 getTransactions: function() {
                     var self = this;
                     var deferred = $q.defer();
 
                     this.client.exec('listtransactions', function (err, info) {
-                        var message;
-                        if (err != null) {
-                            message = new App.Global.Message(false, 3, 'Error', {
-                                rpcError: err,
-                                rpcInfo: info
+                        self.rpcToMessage(deferred, err, info);
+                    });
+
+                    return deferred.promise;
+                },
+
+                changePassphrase: function (oldPassphrase, newPassphrase) {
+                    var self = this;
+                    var deferred = $q.defer();
+
+                    this.client.exec('walletpassphrasechange', oldPassphrase, newPassphrase, function (err, info) {
+                        self.rpcToMessage(deferred, err, info);
+                    });
+
+                    return deferred.promise;
+                },
+
+                encryptWallet: function(passphrase) {
+                    var self = this;
+                    var deferred = $q.defer();
+
+                    this.client.exec('encryptwallet', passphrase, function (err, info) {
+                        self.rpcToMessage(deferred, err, info);
+                    });
+
+                    return deferred.promise;
+                },
+
+                lockWallet: function() {
+                    var self = this;
+                    var deferred = $q.defer();
+
+                    this.client.exec('walletlock', function (err, info) {
+                        self.rpcToMessage(deferred, err, info);
+                    });
+
+                    return deferred.promise;
+                },
+
+                send: function(data) {
+                    var self = this;
+                    var deferred = $q.defer();
+
+                    this.client.exec('settxfee', data.fee, function(err, info) {
+                        if (info || info == 'true') {
+                            self.client.exec('sendtoaddress', data.address, parseFloat(data.amount), data.payerComment, data.payeeComment, function(err, info) {
+                                self.rpcToMessage(deferred, err, info);
                             });
-                            deferred.reject(message);
-                        } else {
-                            message = new App.Global.Message(true, 0, 'Fetched Transactions', {
-                                rpcError: err,
-                                rpcInfo: info
-                            });
-                            deferred.resolve(message);
                         }
                     });
 
                     return deferred.promise;
                 },
 
-                lockWallet: function(callback) {
-                    // commadn is walletlock  error: {"code":-15,"message":"Error: running with an unencrypted wallet, but walletlock was called."}
-                },
-
-                send: function(data, callback) {
+                backupWallet: function(filename) {
                     var self = this;
+                    var deferred = $q.defer();
 
-                    this.client.exec('settxfee', data.fee, function(err, info) {
-                        if (info || info == 'true') {
-                            self.client.exec('sendtoaddress', data.address, parseFloat(data.amount), data.payerComment, data.payeeComment, function(err, info) {
-                                var message;
-                                if (err == null) {
-                                    message = new App.Global.Message(true, 0, 'Transaction Complete', {
-                                        rpcError: err,
-                                        rpcInfo: info
-                                    });
-                                } else {
-                                    message = new App.Global.Message(false, 3, 'Error', {
-                                        rpcError: err,
-                                        rpcInfo: info
-                                    });
-                                }
-
-                                typeof callback === 'function' && callback(message);
-                            });
-                        }
-                    });
-
-                },
-
-                backupWallet: function(filename, callback) {
                     this.client.exec('backupwallet', filename, function(err, info) {
-                        var message;
-                        if (err == null) {
-                            message = new App.Global.Message(true, 0, 'Backup Successful', {
-                                rpcError: err,
-                                rpcInfo: info
-                            });
-                        } else {
-                            message = new App.Global.Message(false, -1, 'Could not backup wallet', {
-                                rpcError: err,
-                                rpcInfo: info
-                            });
-                        }
-
-                        typeof callback === 'function' && callback(message);
+                        self.rpcToMessage(deferred, err, info);
                     });
+
+                    return deferred.promise;
                 },
 
                 updateInfo: function() {
@@ -184,17 +207,52 @@ App.Wallet.factory('wallet',
                     });
                 },
 
+                updateWalletLock: function() {
+                    var self = this;
+                    this.lockWallet().then(
+                        function success(message) {
+                            self.isEncrypted = true;
+                        },
+                        function failure(message) {
+                            self.isEncrypted = false;
+                        }
+                    );
+                },
+
                 initialize: function() {
                     var self = this;
 
                     self.updateInfo();
                     self.updateAccounts();
+                    self.updateWalletLock();
 
                     $rootScope.$on('daemon.notifications.block', function () {
                         self.updateInfo();
-                        self.updateAccounts();
                     });
 
+                },
+
+                handlePassPhraseCallback: function (command, args, callback) {
+
+                    var modal = $modal({
+                        title: 'Wallet Passphrase',
+                        content: "This action requires your passphrase.",
+                        template: 'scripts/Wallet/Core/unlock-wallet-dialog.html',
+                        show: false
+                    });
+
+                    modal.$scope.passphrase = '';
+                    modal.$scope.confirm = function(passphrase) {
+
+                        if (passphrase == '' || passphrase == null) {
+                            callback(new Error('No passphrase entered.'));
+                        }
+
+                        callback(null, passphrase, 1);
+
+                    };
+
+                    modal.$promise.then(modal.show);
                 }
 
             };

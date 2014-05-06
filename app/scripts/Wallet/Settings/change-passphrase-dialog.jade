@@ -1,0 +1,27 @@
+.modal(tabindex='-1', role='dialog')
+    .modal-dialog
+        .modal-content
+            .modal-header(ng-show='title')
+                button.close(type='button', ng-click='$hide()') ×
+                h4.modal-title(ng-bind='title')
+            .modal-body
+
+                div(ng-bind-html='content', style="margin-bottom: 10px;")
+
+                .form-group
+                    input.form-control(type="password", ng-model="oldPassphrase", placeholder="Old Passphrase")
+                .form-group
+                    input.form-control(type="password", ng-model="newPassphrase", placeholder="New Passphrase")
+                .form-group
+                    input.form-control(type="password", ng-model="confirmPassphrase", placeholder="Confirm Passphrase")
+
+                .alert.alert-info.no-top-margin.no-bottom-margin(ng-show="newPassphrase != confirmPassphrase && confirmPassphrase != ''")
+                    | The confirmation passphrase does not match.
+
+            .modal-footer
+                button.btn.btn-sm.btn-default.pull-left(type='button', ng-click='$hide()') Cancel
+                button.btn.btn-sm.btn-primary(
+                    type='button',
+                    ng-click='confirm(oldPassphrase, newPassphrase);$hide()',
+                    ng-disabled="newPassphrase != confirmPassphrase || newPassphrase == '' || oldPassphrase == ''"
+                ) Change Passphrase
