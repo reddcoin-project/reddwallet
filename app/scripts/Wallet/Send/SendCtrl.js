@@ -33,8 +33,8 @@ App.Wallet.controller(
 
                 var confirm = $modal({
                     title: 'Confirm Send',
-                    content: "Please confirm the amount of <strong>" + $scope.send.amount + " RDD</strong> " +
-                             "to send to <strong>" + $scope.send.address + "</strong>.",
+                    content: "Please confirm that you want to send the amount of <strong>" + $scope.send.amount + " RDD</strong> " +
+                             "to the address <strong>" + $scope.send.address + "</strong>.",
                     template: 'scripts/Wallet/Core/confirm-dialog.html',
                     show: false
                 });
