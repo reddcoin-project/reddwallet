@@ -20,6 +20,7 @@ var App = angular.module('app', [
 App.Wallet = angular.module('app.wallet', []);
 App.Global = angular.module('app.global', []);
 App.Daemon = angular.module('app.daemon', []);
+App.Utils = angular.module('app.utils', []);
 
 App.config([
     '$routeProvider', '$locationProvider', function ($routeProvider, $locationProvider, config) {

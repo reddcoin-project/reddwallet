@@ -1,4 +1,6 @@
-h1.page-header Send
+h1.page-header
+    | Send
+    small.pull-right Fee {{ send.fee }}
 p
     | You can send Reddcoin to any address from here, or choose one from your address list.
     | Always check the amount and the receiving address before sending coins.
@@ -9,11 +11,11 @@ form.form-horizontal
     .form-group
         label.col-sm-3.control-label Address
         .col-sm-9
-            input.form-control(ng-model="send.address")
+            input.form-control(ng-model="send.address", required)
     .form-group
         label.col-sm-3.control-label Amount
         .col-sm-9
-            input.form-control(type='text', ng-model="send.amount", ng-change="updateMetaTotal()", maxlength="15")
+            input.form-control(type='text', ng-model="send.amount", ng-change="updateMetaTotal()", maxlength="15", required, min="1")
     .form-group
         label.col-sm-3.control-label Your Comment
         .col-sm-9
@@ -23,8 +25,10 @@ form.form-horizontal
         .col-sm-9
             input.form-control(ng-model="send.payeeComment")
     .form-group
-        .col-sm-9
-            .alert.alert-actions
-                | Amount + Fee (0.001): {{ meta.totalAmount | number:8 }}
+        label.col-sm-3.lead(style='text-align: right;') Total
+        .col-sm-6.lead
+            strong {{ meta.totalAmount | number:8 }}
         .col-sm-3
-            button.btn.btn-primary.pull-right(ng-click="confirmSend()") Send
+            .btn-group-sm.pull-right
+                button.btn.btn-warning(ng-click="reset()") Reset
+                button.btn.btn-primary(ng-click="confirmSend()", ng-disabled="disableSend") Send
