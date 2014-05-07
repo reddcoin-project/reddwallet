@@ -37,7 +37,7 @@ App.Wallet.factory('wallet',
                 ];
 
                 var self = this;
-                DaemonManager.getBootstrap().getPromise().then(function(message) {
+                DaemonManager.getBootstrap().getPromise().then(function (message) {
                     if (message.result) {
                         var config = DaemonManager.getBootstrap().daemonConfig;
                         self.client = require('node-reddcoin')({
@@ -76,7 +76,7 @@ App.Wallet.factory('wallet',
                     return message;
                 },
 
-                getTransactions: function() {
+                getTransactions: function () {
                     var self = this;
                     var deferred = $q.defer();
 
@@ -98,7 +98,7 @@ App.Wallet.factory('wallet',
                     return deferred.promise;
                 },
 
-                encryptWallet: function(passphrase) {
+                encryptWallet: function (passphrase) {
                     var self = this;
                     var deferred = $q.defer();
 
@@ -109,7 +109,11 @@ App.Wallet.factory('wallet',
                     return deferred.promise;
                 },
 
-                lockWallet: function() {
+                newAddress: function (addressLabel) {
+
+                },
+
+                lockWallet: function () {
                     var self = this;
                     var deferred = $q.defer();
 
@@ -120,13 +124,13 @@ App.Wallet.factory('wallet',
                     return deferred.promise;
                 },
 
-                send: function(data) {
+                send: function (data) {
                     var self = this;
                     var deferred = $q.defer();
 
-                    this.client.exec('settxfee', data.fee, function(err, info) {
+                    this.client.exec('settxfee', data.fee, function (err, info) {
                         if (info || info == 'true') {
-                            self.client.exec('sendtoaddress', data.address, parseFloat(data.amount), data.payerComment, data.payeeComment, function(err, info) {
+                            self.client.exec('sendtoaddress', data.address, parseFloat(data.amount), data.payerComment, data.payeeComment, function (err, info) {
                                 self.rpcToMessage(deferred, err, info);
                             });
                         }
@@ -135,18 +139,18 @@ App.Wallet.factory('wallet',
                     return deferred.promise;
                 },
 
-                backupWallet: function(filename) {
+                backupWallet: function (filename) {
                     var self = this;
                     var deferred = $q.defer();
 
-                    this.client.exec('backupwallet', filename, function(err, info) {
+                    this.client.exec('backupwallet', filename, function (err, info) {
                         self.rpcToMessage(deferred, err, info);
                     });
 
                     return deferred.promise;
                 },
 
-                updateInfo: function() {
+                updateInfo: function () {
                     var self = this;
                     this.client.exec('getinfo', function (err, info) {
                         if (err == null) {
@@ -158,7 +162,7 @@ App.Wallet.factory('wallet',
                     });
                 },
 
-                updateAccounts: function() {
+                updateAccounts: function () {
 
                     var async = require('async');
                     var self = this;
@@ -174,7 +178,7 @@ App.Wallet.factory('wallet',
                                 (function (key) {
                                     async.series(
                                         {
-                                            one: function(callback) {
+                                            one: function (callback) {
 
                                                 var newAccount = {
                                                     label: key,
@@ -184,7 +188,7 @@ App.Wallet.factory('wallet',
 
                                                 accounts.push(newAccount);
 
-                                                self.client.exec('getaccountaddress', newAccount.label, function(err, address) {
+                                                self.client.exec('getaccountaddress', newAccount.label, function (err, address) {
                                                     if (err != null) {
                                                         console.log(err);
                                                         callback(false);
@@ -207,19 +211,19 @@ App.Wallet.factory('wallet',
                     });
                 },
 
-                updateWalletLock: function() {
+                updateWalletLock: function () {
                     var self = this;
                     this.lockWallet().then(
-                        function success(message) {
+                        function success (message) {
                             self.isEncrypted = true;
                         },
-                        function failure(message) {
+                        function failure (message) {
                             self.isEncrypted = false;
                         }
                     );
                 },
 
-                initialize: function() {
+                initialize: function () {
                     var self = this;
 
                     self.updateInfo();
@@ -242,7 +246,7 @@ App.Wallet.factory('wallet',
                     });
 
                     modal.$scope.passphrase = '';
-                    modal.$scope.confirm = function(passphrase) {
+                    modal.$scope.confirm = function (passphrase) {
 
                         if (passphrase == '' || passphrase == null) {
                             callback(new Error('No passphrase entered.'));
