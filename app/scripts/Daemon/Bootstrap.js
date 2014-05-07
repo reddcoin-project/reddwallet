@@ -300,6 +300,23 @@ App.Daemon.Bootstrap = (function () {
                     this.debug("Error trying to kill pid, most likely no process exists with that pid");
                 }
             }
+
+            // We will now try and kill it using the daemon method - stop
+            if (1==2) {
+                try {
+                    var self = this;
+                    this.childProcess.exec(this.daemonFilePath, [
+                        '-conf=' + this.configPath,
+                        '-datadir=' + this.daemonDirPath,
+                        '-pid=' + this.pidPath,
+                        'stop'
+                    ], function() {
+                        self.debug("Tried killing any daemons using built-in method.")
+                    });
+                } catch (ex) {
+
+                }
+            }
         },
 
         /**
