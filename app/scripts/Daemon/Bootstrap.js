@@ -12,7 +12,8 @@ App.Daemon.Bootstrap = (function () {
 
     function Bootstrap ($q, $timeout, $rootScope) {
 
-        this.debugEnabled = false;
+        this.debugEnabled = true;
+        this.killMethod = 'pid'; // either pid or daemon (buggy atm)
 
         this.$q = $q;
         this.$timeout = $timeout;
@@ -21,7 +22,9 @@ App.Daemon.Bootstrap = (function () {
         this.os = require('os');
         this.fs = require('fs');
         this.daemon = null;
+
         this.deferred = $q.defer();
+
         this.daemonFilePath = null;
         this.gui = require('nw.gui');
         this.app = this.gui.App;
@@ -78,7 +81,22 @@ App.Daemon.Bootstrap = (function () {
 
             this.runOsSpecificTasks();
 
-            this.killExistingPid();
+            var killPromise = this.killExistingPid();
+
+            killPromise.then(
+                function success() {
+                    self.startDaemonLaunch();
+                },
+                function error() {
+                    self.startDaemonLaunch();
+                }
+            );
+
+            return this.deferred.promise;
+        },
+
+        startDaemonLaunch: function() {
+            var self = this;
 
             this.spawnDaemon();
 
@@ -103,8 +121,6 @@ App.Daemon.Bootstrap = (function () {
             setInterval(function() {
                 self.$rootScope.$broadcast('daemon.notifications.block');
             }, 15 * 1000);
-
-            return this.deferred.promise;
         },
 
         /**
@@ -287,36 +303,51 @@ App.Daemon.Bootstrap = (function () {
          * Retrieves the previously saved process ID and tries to kill it, it then deletes
          * the record from the DB.
          *
-         * @param {function=} callback
          */
-        killExistingPid: function(callback) {
-            if (this.fs.existsSync(this.pidPath)) {
-                var pid = this.fs.readFileSync(this.pidPath, {
-                    encoding: 'utf8'
-                });
-                try {
-                    process.kill(pid, 'SIGTERM');
-                } catch (ex) {
-                    this.debug("Error trying to kill pid, most likely no process exists with that pid");
+        killExistingPid: function() {
+            var self = this;
+            var deferred = this.$q.defer();
+
+            if (this.killMethod == 'pid') {
+                if (this.fs.existsSync(this.pidPath)) {
+                    var pid = this.fs.readFileSync(this.pidPath, {
+                        encoding: 'utf8'
+                    });
+                    try {
+                        process.kill(pid, 'SIGTERM');
+                        this.$timeout(function() {
+                            this.debug("Resolved");
+                            deferred.resolve(true);
+                        }, 500);
+                    } catch (ex) {
+                        this.debug("Error trying to kill pid, most likely no process exists with that pid");
+                        deferred.reject(false);
+                    }
+                } else {
+                    deferred.resolve(true);
                 }
             }
 
-            // We will now try and kill it using the daemon method - stop
-            if (1==2) {
+            if (this.killMethod == 'daemon') {
                 try {
-                    var self = this;
                     this.childProcess.exec(this.daemonFilePath, [
                         '-conf=' + this.configPath,
                         '-datadir=' + this.daemonDirPath,
                         '-pid=' + this.pidPath,
                         'stop'
                     ], function() {
-                        self.debug("Tried killing any daemons using built-in method.")
+                        self.$timeout(function() {
+                            self.debug("Tried killing any daemons using built-in method.")
+                            deferred.resolve(true);
+                        }, 500);
                     });
                 } catch (ex) {
-
+                    self.debug(ex);
+                    deferred.reject(false);
                 }
             }
+
+            return deferred.promise;
         },
 
         /**

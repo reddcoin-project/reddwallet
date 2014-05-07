@@ -19,7 +19,7 @@ App.Global.controller(
                 }
             );
 
-            $scope.loadingStatus = 'Loading...';
+            $scope.loadingStatus = 'ReddWallet';
 
             $scope.displayError = function (title, message) {
                 $scope.loadingStatus = title;
