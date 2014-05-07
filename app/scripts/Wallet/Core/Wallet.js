@@ -56,13 +56,23 @@ App.Wallet.factory('wallet',
 
             WalletModel.prototype = {
 
-                rpcToMessage: function (deferred, err, info) {
+                rpcToMessage: function (deferred, err, info, options) {
                     var message;
                     if (err == null) {
                         message = new App.Global.Message(true, 0, '', {
                             rpcError: err,
                             rpcInfo: info
                         });
+
+                        if (options !== undefined) {
+                            if (Object.prototype.toString.call(options.update) === '[object Array]') {
+                                for (var i = 0; i < options.update.length; i++) {
+                                    var method = options.update[i];
+                                    this['update' + method.substring(0, 1).toUpperCase() + method.substring(1)]();
+                                }
+                            }
+                        }
+
                         deferred.resolve(message);
                     } else {
                         message = new App.Global.Message(false, 3, 'Error', {
@@ -110,7 +120,16 @@ App.Wallet.factory('wallet',
                 },
 
                 newAddress: function (addressLabel) {
+                    var self = this;
+                    var deferred = $q.defer();
 
+                    this.client.exec('getnewaddress', addressLabel, function (err, info) {
+                        self.rpcToMessage(deferred, err, info, {
+                            update: ['info', 'accounts']
+                        });
+                    });
+
+                    return deferred.promise;
                 },
 
                 lockWallet: function () {

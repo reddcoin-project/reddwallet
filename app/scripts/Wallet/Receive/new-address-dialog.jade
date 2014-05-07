@@ -1,0 +1,20 @@
+.modal(tabindex='-1', role='dialog')
+    .modal-dialog
+        form.modal-content
+            .modal-header(ng-show='title')
+                button.close(type='button', ng-click='$hide()') ×
+                h4.modal-title(ng-bind='title')
+            .modal-body
+
+                div(ng-bind-html='content', style="margin-bottom: 10px;")
+
+                .form-group
+                    input.form-control(type="text", ng-model="addressLabel", placeholder="Address Label", focus-me="{{ focusMe }}")
+
+            .modal-footer
+                button.btn.btn-sm.btn-default.pull-left(type='button', ng-click='$hide()') Cancel
+                button.btn.btn-sm.btn-primary(
+                    type='submit',
+                    ng-click='confirm(addressLabel);$hide()',
+                    ng-disabled="addressLabel == ''"
+                ) Create New Address

@@ -1,15 +1,18 @@
 h1.page-header Receive
+    button.btn.btn-sm.btn-default.pull-right(ng-click="newAddress()") New Address
 p
     | These are your Reddcoin addresses for receiving payments.
     | You may want to give a different one to each sender so you can keep track of who is paying you.
 
-table.table
+table.table.table-hover.table-middle
     thead
         tr
-            th(style="width: 25%") Label
-            th(style="width: 55%") Address
+            th(style="width: 35%")
+                input.form-control.col-sm-2(ng-model="receiveFilter.label", placeholder="Label")
+            th(style="width: 50%") Address
             th
-                input.form-control.col-sm-2(ng-model="receiveFilter", placeholder="Filter...")
+                b
+
     tbody
         tr(ng-repeat='account in wallet.accounts | filter:receiveFilter')
             td
@@ -19,4 +22,6 @@ table.table
             td {{ account.address }}
 
             td
-                a(href="", ng-click="copy($index)") Copy
+                .btn-group-sm.pull-right
+                    a.btn.btn-primary(href="", ng-click="edit($index)") Edit
+                    a.btn.btn-success(href="", ng-click="copy($index)") Copy

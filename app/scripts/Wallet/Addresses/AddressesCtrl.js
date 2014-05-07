@@ -1,8 +1,14 @@
 App.Wallet.controller(
     'AddressesCtrl',
     [
-        '$scope', function($scope) {
-            return $scope;
+        '$scope',
+        '$alert',
+        '$modal',
+        'wallet',
+        function($scope, $alert, $modal, wallet) {
+
+            
+
         }
     ]
 );
