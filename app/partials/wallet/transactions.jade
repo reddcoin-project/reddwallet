@@ -1,13 +1,13 @@
 h1.page-header Transactions
 
-table.table.table-condensed.small-font
+table.table.table-condensed.small-font.table-hover
     thead
         tr
             th(style="width: 258px") Date
             th Amount
             th(style="width: 290px") Address
     tbody
-        tr.hover-row(ng-repeat='trans in transactions | filter:receiveFilter', ng-click="viewTransaction($index)")
+        tr(ng-repeat='trans in transactions | filter:receiveFilter', ng-click="viewTransaction($index)")
             td {{ trans.time * 1000 | date:'yyyy-MM-dd HH:mm:ss Z' }}
             td {{ trans.amount }}
             td {{ trans.address }}
