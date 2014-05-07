@@ -36,7 +36,7 @@ form.form-horizontal
                     ng-disabled="disableSend"
                 ) Send
 
-    .alert.alert-info(ng-show="meta.totalAmount > wallet.info.balance")
+    .alert.alert-info(ng-show="meta.totalAmount > wallet.info.balance && wallet.info.balance > 0")
         | The amount entered exceeds your total balance.
 
 
