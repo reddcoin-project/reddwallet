@@ -76,21 +76,30 @@ App.Daemon.Bootstrap = (function () {
                 return this.deferred.promise;
             }
 
-            this.initializeConfiguration();
-            this.parseConfigurationFile();
+            var promise = this.initializeConfiguration();
 
-            this.runOsSpecificTasks();
+            promise.then(
+                function success () {
+                    self.parseConfigurationFile();
 
-            var killPromise = this.killExistingPid();
+                    self.runOsSpecificTasks();
 
-            killPromise.then(
-                function success() {
-                    self.startDaemonLaunch();
+                    var killPromise = self.killExistingPid();
+
+                    killPromise.then(
+                        function success() {
+                            self.startDaemonLaunch();
+                        },
+                        function error() {
+                            self.startDaemonLaunch();
+                        }
+                    );
                 },
-                function error() {
-                    self.startDaemonLaunch();
+                function error (err) {
+                    self.deferred.reject(new App.Global.Message(false, 4, err));
                 }
             );
+
 
             return this.deferred.promise;
         },
@@ -128,29 +137,42 @@ App.Daemon.Bootstrap = (function () {
          * then it will create the folder and configuration file. After that it will set the config by reading the file.
          */
         initializeConfiguration: function() {
+            var deferred = this.$q.defer();
 
-            if (!this.fs.existsSync(this.daemonDirPath)) {
-                this.fs.mkdirSync(this.daemonDirPath);
+            try {
+
+                if (!this.fs.existsSync(this.daemonDirPath)) {
+                    this.fs.mkdirSync(this.daemonDirPath);
+                }
+
+                if (!this.fs.existsSync(this.configPath)) {
+                    var defaultConf = this.fs.readFileSync('daemons/reddcoin.default.conf', {
+                        encoding: 'utf8'
+                    });
+
+                    var self = this;
+                    // Replace the %PASSWORD with a random value..
+                    var crypto = require('crypto');
+                    crypto.randomBytes(32, function(ex, buf) {
+                        if (ex == null) {
+                            defaultConf = defaultConf.replace("%PASSWORD", crypto.pseudoRandomBytes(32).toString('hex'));
+                        } else {
+                            defaultConf = defaultConf.replace("%PASSWORD", buf.toString('hex'));
+                        }
+
+                        self.fs.writeFileSync(self.configPath, defaultConf);
+                        deferred.resolve();
+                    });
+                } else {
+                    // Resole immediately as the files already exist.
+                    deferred.resolve();
+                }
+
+            } catch (ex) {
+                deferred.reject(ex);
             }
 
-            if (!this.fs.existsSync(this.configPath)) {
-                var defaultConf = this.fs.readFileSync('daemons/reddcoin.default.conf', {
-                    encoding: 'utf8'
-                });
-
-                var self = this;
-                // Replace the %PASSWORD with a random value..
-                var crypto = require('crypto');
-                crypto.randomBytes(32, function(ex, buf) {
-                    if (ex == null) {
-                        defaultConf = defaultConf.replace("%PASSWORD", crypto.pseudoRandomBytes(32).toString('hex'));
-                    } else {
-                        defaultConf = defaultConf.replace("%PASSWORD", buf.toString('hex'));
-                    }
-                });
-
-                self.fs.writeFileSync(self.configPath, defaultConf);
-            }
+            return deferred.promise;
         },
 
         parseConfigurationFile: function () {
