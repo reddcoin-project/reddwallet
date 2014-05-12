@@ -15,10 +15,22 @@ App.Wallet.controller(
                 totalAmount: 0
             };
 
+            $scope.accounts = $scope.walletDb.sendingAccounts;
+            $scope.refreshAccounts = function () {
+                var recAccProm = $scope.walletDb.getSendingAccounts();
+                recAccProm.then(function (accounts) {
+                    $scope.accounts = accounts;
+                    return accounts;
+                });
+
+                return recAccProm;
+            };
+            $scope.refreshAccounts();
+
             $scope.reset = function() {
                 $scope.send = {
                     amount: 1,
-                    address: 'Rer7K4AwRhUYshzzPeamRkC9cV7M6BSz3P',
+                    address: '',
                     payerComment: '',
                     payeeComment: '',
                     fee: parseFloat(daemon.getBootstrap().daemonConfig.paytxfee)
@@ -28,27 +40,37 @@ App.Wallet.controller(
 
             $scope.confirmSend = function() {
 
+                var sendClone = _.clone($scope.send);
+
+                if (_.isObject(sendClone.address)) {
+                    sendClone.address = $scope.send.address.address;
+                }
+
                 var confirm = $modal({
                     title: 'Confirm Send',
-                    content: "Please confirm that you want to send the amount of <strong>" + $scope.send.amount + " RDD</strong> " +
-                             "to the address <strong>" + $scope.send.address + "</strong>.",
+                    content: "Please confirm that you want to send the amount of <strong>" + sendClone.amount + " RDD</strong> " +
+                             "to the address <strong>" + sendClone.address + "</strong>.",
                     template: 'scripts/Wallet/Core/confirm-dialog.html',
                     show: false
                 });
 
                 confirm.$scope.confirm = function() {
-                    var promise = walletDb.getRpc().send($scope.send);
+                    var promise = walletDb.getRpc().send(sendClone);
                     promise.then(
-                        function success(message) {
+                        function success (message) {
+                            console.log(message);
+
                             $alert({
-                                "title": "Sent " + $scope.send.amount + " RDD ",
-                                "content": "to " + $scope.send.address,
+                                "title": "Sent " + sendClone.amount + " RDD ",
+                                "content": "to " + sendClone.address,
                                 "type": "success"
                             });
                             $scope.reset();
                             $scope.walletDb.updateOverview();
                         },
-                        function error(message) {
+                        function error (message) {
+                            console.log(message);
+
                             var errorMessage = "Please double check the amount & address";
                             if (message.rpcError.code == -14) {
                                 errorMessage = "Incorrect passphrase."
