@@ -5,9 +5,9 @@ App.Wallet.controller(
         '$scope',
         '$alert',
         '$modal',
-        'DaemonManager',
         'walletDb',
-        function ($q, $scope, $alert, $modal, daemon, walletDb) {
+        'DaemonManager',
+        function ($q, $scope, $alert, $modal, walletDb, daemon) {
 
             $scope.walletDb = walletDb;
             $scope.disableSend = true;
@@ -27,7 +27,7 @@ App.Wallet.controller(
             };
             $scope.refreshAccounts();
 
-            $scope.reset = function() {
+            $scope.reset = function () {
                 $scope.send = {
                     amount: 1,
                     address: '',
@@ -38,7 +38,7 @@ App.Wallet.controller(
                 $scope.updateMetaTotal();
             };
 
-            $scope.confirmSend = function() {
+            $scope.confirmSend = function () {
 
                 var sendClone = _.clone($scope.send);
 
@@ -49,15 +49,15 @@ App.Wallet.controller(
                 var confirm = $modal({
                     title: 'Confirm Send',
                     content: "Please confirm that you want to send the amount of <strong>" + sendClone.amount + " RDD</strong> " +
-                             "to the address <strong>" + sendClone.address + "</strong>.",
+                    "to the address <strong>" + sendClone.address + "</strong>.",
                     template: 'scripts/Wallet/Core/confirm-dialog.html',
                     show: false
                 });
 
-                confirm.$scope.confirm = function() {
+                confirm.$scope.confirm = function () {
                     var promise = walletDb.getRpc().send(sendClone);
                     promise.then(
-                        function success (message) {
+                        function success(message) {
                             $alert({
                                 "title": "Sent " + sendClone.amount + " RDD ",
                                 "content": "to " + sendClone.address,
@@ -66,7 +66,7 @@ App.Wallet.controller(
                             $scope.reset();
                             $scope.walletDb.updateOverview();
                         },
-                        function error (message) {
+                        function error(message) {
                             var errorMessage = message.message;
 
                             $alert({
@@ -81,7 +81,7 @@ App.Wallet.controller(
                 confirm.$promise.then(confirm.show);
             };
 
-            $scope.updateMetaTotal = function() {
+            $scope.updateMetaTotal = function () {
                 var result = parseFloat($scope.send.amount) + parseFloat($scope.send.fee);
                 if (result == null || isNaN(result) || $scope.send.address == '') {
                     result = "";
