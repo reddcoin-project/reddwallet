@@ -55,7 +55,7 @@ App.Wallet.factory('walletRpc',
                         });
 
                     } else {
-                        message = new App.Global.Message(false, 3, 'Error', {
+                        message = new App.Global.Message(false, 3, rpcCodeToMessage(err.code), {
                             rpcError: err,
                             rpcInfo: info
                         });
@@ -145,6 +145,8 @@ App.Wallet.factory('walletRpc',
                             self.client.exec('sendtoaddress', data.address, parseFloat(data.amount), data.payerComment, data.payeeComment, function (err, info) {
                                 self.rpcToMessage(deferred, err, info);
                             });
+                        } else {
+                            self.rpcToMessage(deferred, err, info);
                         }
                     });
 

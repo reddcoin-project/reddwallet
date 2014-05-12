@@ -58,8 +58,6 @@ App.Wallet.controller(
                     var promise = walletDb.getRpc().send(sendClone);
                     promise.then(
                         function success (message) {
-                            console.log(message);
-
                             $alert({
                                 "title": "Sent " + sendClone.amount + " RDD ",
                                 "content": "to " + sendClone.address,
@@ -69,12 +67,7 @@ App.Wallet.controller(
                             $scope.walletDb.updateOverview();
                         },
                         function error (message) {
-                            console.log(message);
-
-                            var errorMessage = "Please double check the amount & address";
-                            if (message.rpcError.code == -14) {
-                                errorMessage = "Incorrect passphrase."
-                            }
+                            var errorMessage = message.message;
 
                             $alert({
                                 "title": "Sending Failed",
