@@ -32,7 +32,7 @@ html(lang='en', ng-app='app')
                         span.icon-bar
                     .navbar-left
                         img.reddcoin-icon(src='reddcoin_logo.png', width='32')
-                    .navbar-brand ReddWallet {{ wallet.info.balance | number:8 }} RDD
+                    .navbar-brand ReddWallet {{ walletOverview.balance | number:8 }} RDD
                 .navbar-collapse.collapse
                     form.navbar-form.navbar-right
                         input.form-control(type='text', placeholder='Transaction...')
@@ -46,10 +46,10 @@ html(lang='en', ng-app='app')
                         ul
                             li
                                 | Blocks
-                                | {{ wallet.info.blocks }}
+                                | {{ walletOverview.blocks }}
                             li
                                 | Connections
-                                | {{ wallet.info.connections }}
+                                | {{ walletOverview.connections }}
 
                 .main(ng-class="{loading: !daemon.running}")
                     .view-animate(ng-view, ng-app)

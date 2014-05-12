@@ -1,4 +1,32 @@
 h1.page-header Addresses
+    button.btn.btn-sm.btn-default.pull-right(ng-click="newAddress()") New Contact
 p
     | These are your Reddcoin addresses for sending payments.
     | Always check the amount and the receiving address before sending coins.
+
+table.table.table-hover.table-condensed.table-middle(ng-table="tableParams", show-filter="true", template-pagination="custom/pager", ng-hide="accounts.length == 0")
+    tr(ng-repeat='account in $data')
+        td(data-title="Label", filter="{ 'name': 'text' }")
+            | {{ account.label }}
+            em(ng-show="account.label==''") Blank
+
+        td(data-title="Address") {{ account.address }}
+
+        td(data-title="Actions")
+            .btn-group-sm.pull-right
+                a.btn.btn-success(href="", ng-click="copy(account)") Copy
+                a.btn.btn-primary(href="", ng-click="editAddress(account)") Modify
+                a.btn.btn-danger(href="", ng-click="deleteAddress(account)") Delete
+
+
+script(type='text/ng-template', id="custom/pager")
+    ul.pager.ng-cloak(ng-show="accounts.length > 5")
+        li(ng-repeat='page in pages', ng-class="{'disabled': !page.active, 'previous': page.type == 'prev', 'next': page.type == 'next'}", ng-show="page.type == 'prev' || page.type == 'next'", ng-switch="page.type")
+            a(ng-switch-when='prev', ng-click='params.page(page.number)', href='') « Previous
+            a(ng-switch-when='next', ng-click='params.page(page.number)', href='') Next »
+        li
+            .btn-group.btn-group-sm
+                button.btn.btn-default(type='button', ng-class="{'active':params.count() == 5}", ng-click='params.count(5)') 5
+                button.btn.btn-default(type='button', ng-class="{'active':params.count() == 10}", ng-click='params.count(10)') 10
+                button.btn.btn-default(type='button', ng-class="{'active':params.count() == 25}", ng-click='params.count(25)') 25
+                button.btn.btn-default(type='button', ng-class="{'active':params.count() == 50}", ng-click='params.count(50)') 50

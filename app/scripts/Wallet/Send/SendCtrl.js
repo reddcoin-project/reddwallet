@@ -6,10 +6,10 @@ App.Wallet.controller(
         '$alert',
         '$modal',
         'DaemonManager',
-        'wallet',
-        function ($q, $scope, $alert, $modal, daemon, wallet) {
+        'walletDb',
+        function ($q, $scope, $alert, $modal, daemon, walletDb) {
 
-            $scope.wallet = wallet;
+            $scope.walletDb = walletDb;
             $scope.disableSend = true;
             $scope.meta = {
                 totalAmount: 0
@@ -26,9 +26,6 @@ App.Wallet.controller(
                 $scope.updateMetaTotal();
             };
 
-            /**
-             * @todo: Actually build in a confirmation box.. maybe validate properly when sent has been hit/disable send
-             */
             $scope.confirmSend = function() {
 
                 var confirm = $modal({
@@ -40,7 +37,7 @@ App.Wallet.controller(
                 });
 
                 confirm.$scope.confirm = function() {
-                    var promise = wallet.send($scope.send);
+                    var promise = walletDb.getRpc().send($scope.send);
                     promise.then(
                         function success(message) {
                             $alert({
@@ -49,6 +46,7 @@ App.Wallet.controller(
                                 "type": "success"
                             });
                             $scope.reset();
+                            $scope.walletDb.updateOverview();
                         },
                         function error(message) {
                             var errorMessage = "Please double check the amount & address";
@@ -77,7 +75,7 @@ App.Wallet.controller(
                     $scope.disableSend = false;
                 }
 
-                $scope.disableSend = result > $scope.wallet.info.balance;
+                $scope.disableSend = result > $scope.walletDb.overviewModel.balance;
 
                 $scope.meta.totalAmount = result;
             };

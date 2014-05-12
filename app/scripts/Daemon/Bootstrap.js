@@ -12,7 +12,7 @@ App.Daemon.Bootstrap = (function () {
 
     function Bootstrap ($q, $timeout, $rootScope) {
 
-        this.debugEnabled = true;
+        this.debugEnabled = false;
         this.killMethod = 'pid'; // either pid or daemon (buggy atm)
 
         this.$q = $q;
@@ -117,8 +117,9 @@ App.Daemon.Bootstrap = (function () {
             this.$timeout(function() {
                 var message = new App.Global.Message(true, 0, 'Daemon Ready');
 
-                self.$rootScope.$broadcast('daemon.bootstrapped', message);
                 self.deferred.resolve(message);
+
+                self.$rootScope.$broadcast('daemon.bootstrapped', message);
 
                 self.debug(message);
             }, 1500);

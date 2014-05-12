@@ -1,18 +1,29 @@
 App.Global.controller(
     'AppCtrl',
     [
-        '$scope', '$location', '$resource', '$rootScope', 'DaemonManager', 'wallet',
-        function($scope, $location, $resource, $rootScope, DaemonManager, wallet) {
+        '$scope', '$interval', '$location', '$resource', '$rootScope', 'walletDb', 'DaemonManager',
+        function($scope, $interval, $location, $resource, $rootScope, walletDb, daemon) {
 
-            $scope.wallet = wallet;
+            $scope.walletDb = walletDb;
+
+            $scope.walletOverview = {};
 
             $scope.daemon = {
                 running: false
             };
 
-            $rootScope.$on('daemon.bootstrapped', function(event, message) {
-                $scope.daemon.running = message.result;
+            daemon.getBootstrap().getPromise().then(function(message) {
+                fetchOverview();
+                $scope.walletDb.syncAccounts();
+                $scope.daemon.running = true;
+                var interval = setInterval(fetchOverview, 15000);
             });
+
+            function fetchOverview() {
+                $scope.walletDb.updateOverview().then(function (message) {
+                    $scope.walletOverview = $scope.walletDb.overviewModel;
+                });
+            }
 
             $scope.$location = $location;
             $scope.$watch('$location.path()', function(path) {

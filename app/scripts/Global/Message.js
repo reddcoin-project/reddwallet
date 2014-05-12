@@ -1,11 +1,10 @@
 App.Global.Message = (function () {
 
     /**
-     * A rigid message object used to pass data around.
      *
      * @param result
-     * @param message
      * @param code
+     * @param message
      * @param extra
      * @constructor
      */
@@ -13,6 +12,14 @@ App.Global.Message = (function () {
         this.result = result;
         this.message = message;
         this.code = code;
+
+        this.rpcInfo = {};
+        this.rpcError = {};
+
+        this.dbError = {};
+        this.dbModel = {};
+
+        this.model = {};
 
         if (extra != undefined) {
             for (var key in extra) {
@@ -24,7 +31,7 @@ App.Global.Message = (function () {
 
     Message.prototype = {
 
-
+        // Stuff
 
     };
 
@@ -43,4 +50,5 @@ App.Global.Message = (function () {
      was failed to be bundled with the wallet.
  3 : There was an error sending the command to the daemon. See the rpc error for more details.
  4 : There was an error initializing the daemon.
+ 5 : NeDB error, see dbError for more details.
 */

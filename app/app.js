@@ -5,6 +5,7 @@ var App = angular.module('app', [
     'ngResource',
     'ngRoute',
     'ngAnimate',
+    'ngTable',
     'mgcrea.ngStrap',
     'nwFileDialog',
     'app.wallet',
@@ -86,4 +87,12 @@ String.prototype.toTitleCase = function() {
             uppers[i].toUpperCase());
 
     return str;
+};
+
+String.prototype.toUpperFirst = function() {
+    return this.substring(0, 1).toUpperCase() + this.substring(1);
+};
+
+String.prototype.toLowerFirst = function() {
+    return this.substring(0, 1).toLowerCase() + this.substring(1);
 };

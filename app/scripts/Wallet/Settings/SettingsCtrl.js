@@ -4,13 +4,13 @@ App.Wallet.controller(
         '$scope',
         '$alert',
         '$modal',
-        'wallet',
+        'walletDb',
         'fileDialog',
-        function ($scope, $alert, $modal, wallet, fileDialog) {
+        function ($scope, $alert, $modal, walletDb, fileDialog) {
 
-            $scope.wallet = wallet;
+            $scope.walletDb = walletDb;
 
-            $scope.isEncrypted = wallet.isEncrypted;
+            $scope.isEncrypted = walletDb.getRpc().isEncrypted;
 
             $scope.changePassphrase = function() {
 
@@ -35,7 +35,7 @@ App.Wallet.controller(
                         return;
                     }
 
-                    var promise = wallet.changePassphrase(oldPassphrase, newPassphrase);
+                    var promise = walletDb.getRpc().changePassphrase(oldPassphrase, newPassphrase);
                     promise.then(
                         function success(message) {
                             $alert({
@@ -84,7 +84,7 @@ App.Wallet.controller(
                         return;
                     }
 
-                    var promise = wallet.encryptWallet(passphrase);
+                    var promise = walletDb.getRpc().encryptWallet(passphrase);
                     promise.then(
                         function success(message) {
                             $alert({
@@ -113,7 +113,7 @@ App.Wallet.controller(
             $scope.backupWallet = function() {
                 fileDialog.saveAs(function(filename) {
 
-                    var promise = wallet.backupWallet(filename);
+                    var promise = walletDb.getRpc().backupWallet(filename);
                     promise.then(
                         function success(message) {
                             $alert({
