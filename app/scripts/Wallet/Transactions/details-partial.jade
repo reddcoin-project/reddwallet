@@ -1,5 +1,34 @@
 table.table.table-condensed
     tbody
-        tr(ng-repeat='(key, value) in trans')
-            td.text-right {{ key }}
-            td.aside-value-container {{ value }}
+
+        tr
+            td.text-right Date
+            td.aside-value-container {{ trans.time }}
+
+        tr
+            td.text-right Fee
+            td.aside-value-container {{ trans.fee }}
+
+        tr
+            td.text-right Amount
+            td.aside-value-container {{ trans.amount }}
+
+        tr
+            td.text-right Confirmations
+            td.aside-value-container {{ trans.confirmations }}
+
+        tr
+            td.text-right Address To
+            td.aside-value-container {{ trans.address }}
+
+        tr
+            td.text-right Block Hash
+            td.aside-value-container
+                a(href="", data-placement="top", data-animation="am-flip-x", data-trigger="click", title="Block Hash", data-content="{{ trans.blockhash }}", bs-popover)
+                    | {{ trans.blockhashTrim }}
+
+        tr
+            td.text-right TxID
+            td.aside-value-container
+                a(href="", data-placement="top", data-animation="am-flip-x", bs-popover="{title: 'Block Hash', content: trans.txid}")
+                    | {{ trans.txidTrim }}

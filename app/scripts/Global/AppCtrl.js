@@ -16,6 +16,7 @@ App.Global.controller(
                 fetchOverview();
                 $scope.walletDb.syncAccounts();
                 $scope.daemon.running = true;
+
                 var interval = setInterval(fetchOverview, 15000);
             });
 

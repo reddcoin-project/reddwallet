@@ -277,6 +277,10 @@ App.Wallet.factory('walletDb',
                     return this.walletRpc;
                 },
 
+                getTransactions: function () {
+                    return this.walletRpc.getTransactions();
+                },
+
                 /**
                  * This will fill the data of a specified model when the promise is resolved, if rejected
                  * it will just return the default modal.
