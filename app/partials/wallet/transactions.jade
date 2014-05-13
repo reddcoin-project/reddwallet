@@ -1,4 +1,4 @@
-h1.page-header Transactions
+h1.page-header Transactions ({{ transactions.length | number }})
 
 p You can view all your transactions here, click on one for more detailed information.
 
@@ -17,10 +17,17 @@ table.table.table-hover.table-condensed.table-middle(ng-table="tableParams", tem
 
 
 script(type='text/ng-template', id="custom/pager")
-    ul.pager.ng-cloak(ng-show="transactions.length > 5")
-        li(ng-repeat='page in pages', ng-class="{'disabled': !page.active, 'previous': page.type == 'prev', 'next': page.type == 'next'}", ng-show="page.type == 'prev' || page.type == 'next'", ng-switch="page.type")
+    ul.pager.ng-cloak
+
+        li(
+        ng-repeat='page in pages',
+        ng-class="{'disabled': !page.active, 'previous': page.type == 'prev', 'next': page.type == 'next'}",
+        ng-show="page.type == 'prev' || page.type == 'next'",
+        ng-switch="page.type"
+        )
             a(ng-switch-when='prev', ng-click='params.page(page.number)', href='') « Previous
             a(ng-switch-when='next', ng-click='params.page(page.number)', href='') Next »
+
         li
             .btn-group.btn-group-sm
                 button.btn.btn-default(type='button', ng-class="{'active':params.count() == 5}", ng-click='params.count(5)') 5

@@ -6,12 +6,8 @@ table.table.table-condensed
             td.aside-value-container {{ trans.time }}
 
         tr
-            td.text-right Fee
-            td.aside-value-container {{ trans.fee }}
-
-        tr
             td.text-right Amount
-            td.aside-value-container {{ trans.amount }}
+            td.aside-value-container {{ trans.amount }} (Fee: {{ trans.fee }})
 
         tr
             td.text-right Confirmations

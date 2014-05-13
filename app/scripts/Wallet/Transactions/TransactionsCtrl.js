@@ -10,30 +10,6 @@ App.Wallet.controller(
 
             $scope.transactions = [];
 
-            $scope.tableParams = new ngTableParams({
-                page: 1,
-                count: 5,
-                sorting: {
-                    time: 'desc'
-                }
-            }, {
-                total: $scope.transactions.length,
-                filterDelay: 250,
-                getData: function ($defer, params) {
-
-                    // use build-in angular filter
-                    var orderedData = params.sorting() ? $filter('orderBy')($scope.transactions, params.orderBy()) : $scope.transactions;
-
-                    $scope.slicedData = orderedData.slice(
-                        (params.page() - 1) * params.count(),
-                        params.page() * params.count()
-                    );
-
-                    params.total($scope.slicedData.length);
-                    $defer.resolve($scope.slicedData);
-                }
-            });
-
             $scope.refreshTransactions = function () {
                 walletDb.getTransactions().then(function(message) {
                     $scope.transactions = message.rpcInfo;
@@ -48,6 +24,29 @@ App.Wallet.controller(
             };
 
             $scope.refreshTransactions();
+
+            $scope.tableParams = new ngTableParams({
+                page: 1,
+                count: 5,
+                sorting: {
+                    time: 'desc'
+                }
+            }, {
+                total: $scope.transactions.length,
+                filterDelay: 250,
+                getData: function ($defer, params) {
+                    var orderedData = params.sorting() ? $filter('orderBy')($scope.transactions, params.orderBy()) : $scope.transactions;
+
+                    $scope.slicedData = orderedData.slice(
+                        (params.page() - 1) * params.count(),
+                        params.page() * params.count()
+                    );
+
+                    params.total(orderedData.length);
+
+                    $defer.resolve($scope.slicedData);
+                }
+            });
 
 
 

@@ -26,6 +26,7 @@ App.Wallet.controller(
                     $scope.slicedData = orderedData.slice((params.page() - 1) * params.count(), params.page() * params.count());
 
                     params.total(orderedData.length);
+
                     $defer.resolve($scope.slicedData);
                 }
             });
@@ -34,6 +35,11 @@ App.Wallet.controller(
                 var recAccProm = $scope.walletDb.getSendingAccounts();
                 recAccProm.then(function (accounts) {
                     $scope.accounts = accounts;
+                    $scope.tableParams.parameters({
+                        page: 1,
+                        count: 5,
+                        filter: { label: '' }
+                    });
                     $scope.tableParams.reload();
                     return accounts;
                 });

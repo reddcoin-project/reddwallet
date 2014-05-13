@@ -26,6 +26,7 @@ App.Wallet.controller(
                     $scope.slicedData = orderedData.slice((params.page() - 1) * params.count(), params.page() * params.count());
 
                     params.total(orderedData.length);
+
                     $defer.resolve($scope.slicedData);
                 }
             });

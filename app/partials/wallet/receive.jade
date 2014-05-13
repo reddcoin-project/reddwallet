@@ -18,7 +18,7 @@ table.table.table-hover.table-condensed.table-middle(ng-table="tableParams", sho
                 a.btn.btn-primary(href="", ng-click="editAddress(account)") Modify
 
 script(type='text/ng-template', id="custom/pager")
-    ul.pager.ng-cloak(ng-show="accounts.length > 5")
+    ul.pager.ng-cloak
         li(ng-repeat='page in pages', ng-class="{'disabled': !page.active, 'previous': page.type == 'prev', 'next': page.type == 'next'}", ng-show="page.type == 'prev' || page.type == 'next'", ng-switch="page.type")
             a(ng-switch-when='prev', ng-click='params.page(page.number)', href='') « Previous
             a(ng-switch-when='next', ng-click='params.page(page.number)', href='') Next »
