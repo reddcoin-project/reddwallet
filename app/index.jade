@@ -25,14 +25,9 @@ html(lang='en', ng-app='app')
         .navbar.navbar-fixed-top.navbar-default(role='navigation', ng-show="daemon.running")
             .container-fluid
                 .navbar-header
-                    button.navbar-toggle(type='button', data-toggle='collapse', data-target='.navbar-collapse')
-                        span.sr-only Toggle navigation
-                        span.icon-bar
-                        span.icon-bar
-                        span.icon-bar
                     .navbar-left
                         img.reddcoin-icon(src='reddcoin_logo.png', width='32')
-                    .navbar-brand ReddWallet {{ walletOverview.balance | number:8 }} RDD
+                    .navbar-brand {{ walletOverview.balance | number:8 }} RDD
                 .navbar-collapse.collapse
                     form.navbar-form.navbar-right
                         input.form-control(type='text', placeholder='Transaction...')
