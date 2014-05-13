@@ -136,6 +136,11 @@ App.Wallet.factory('walletDb',
                                     accPromise.then(
                                         function success (dbAccount) {
                                             if (dbAccount == null || dbAccount._id === undefined) {
+
+                                                if (rpcAcc.address == "") {
+                                                    return null;
+                                                }
+
                                                 // No address exists in the database for this address, add it.
                                                 var accModel = {
                                                     type: 'receive',
