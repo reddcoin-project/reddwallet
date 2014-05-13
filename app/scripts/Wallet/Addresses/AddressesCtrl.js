@@ -16,12 +16,14 @@ App.Wallet.controller(
             $scope.tableParams = new ngTableParams({
                 page: 1,
                 count: 5,
-                filter: { label: '' }
+                filter: { label: '' },
+                sorting: { label: 'asc' }
             }, {
                 total: $scope.accounts.length,
                 filterDelay: 250,
                 getData: function ($defer, params) {
                     var orderedData = params.filter() ? $filter('filter')($scope.accounts, params.filter()) : data;
+                    orderedData = params.sorting() ? $filter('orderBy')(orderedData, params.orderBy()) : orderedData;
 
                     $scope.slicedData = orderedData.slice((params.page() - 1) * params.count(), params.page() * params.count());
 

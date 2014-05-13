@@ -6,14 +6,14 @@ p
 
 table.table.table-hover.table-condensed.table-middle(ng-table="tableParams", show-filter="true", template-pagination="custom/pager", ng-hide="accounts.length == 0")
     tr(ng-repeat='account in $data')
-        td(data-title="'Label'", filter="{ 'name': 'text' }")
+        td(data-title="'Label'", filter="{ 'label': 'text' }", sortable="'label'")
             | {{ account.label }}
             em(ng-show="account.label==''") Blank
 
-        td(data-title="'Address'") {{ account.address }}
+        td {{ account.address }}
 
         td(data-title="'Actions'")
-            .btn-group-sm.pull-right
+            .btn-group-xs.pull-right
                 a.btn.btn-success(href="", ng-click="copy(account)") Copy
                 a.btn.btn-primary(href="", ng-click="editAddress(account)") Modify
                 a.btn.btn-danger(href="", ng-click="deleteAddress(account)") Delete
