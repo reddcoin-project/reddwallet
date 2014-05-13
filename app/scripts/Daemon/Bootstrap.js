@@ -39,17 +39,18 @@ App.Daemon.Bootstrap = (function () {
 
         this.daemonMap = {
             'linux': {
-                'x32': 'daemons/reddcoind-linux32',
-                'x64': 'daemons/reddcoind-linux64',
-                'default': 'daemons/reddcoind-linux32'
+                'x32': 'daemons/reddcoind-linux-32',
+                'x64': 'daemons/reddcoind-linux-64',
+                'default': 'daemons/reddcoind-linux-32'
             },
             'win32': {
-                'x32': 'daemons/reddcoind-win32',
-                'default': 'daemons/reddcoind-win32'
+                'x32': 'daemons/reddcoind-win-32.exe',
+                'x64': 'daemons/reddcoind-win-32.exe',
+                'default': 'daemons/reddcoind-win-32.exe'
             },
             'darwin': {
-                'x32': 'daemons/reddcoind-mac32',
-                'x64': 'daemons/reddcoind-mac32',
+                'x32': 'daemons/reddcoind-mac-32',
+                'x64': 'daemons/reddcoind-mac-32',
                 'default': 'daemons/reddcoind-mac-32'
             }
         };
