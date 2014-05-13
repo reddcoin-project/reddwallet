@@ -157,6 +157,10 @@ function rpcCodeToMessage (code) {
 
     };
 
+    if (codeMap[code.toString()].description == undefined) {
+        return "Unknown code " + code;
+    }
+
     return codeMap[code.toString()].description;
 
 }
