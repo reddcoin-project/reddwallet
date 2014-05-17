@@ -1,0 +1,26 @@
+h1.page-header
+    | #reddcoin
+
+
+form#wrapper
+    .row#upper-panel
+        #chat(scroll-glue, ng-model="glued", wheel-speed="50", refresh-on-change="chatLog")
+            table#irc-messages(ng-hide="irc.chatLog.length == 0")
+                tr.irc-row(ng-repeat="msg in irc.chatLog")
+                    td.irc-from
+                        strong(ng-show="msg.selfMessage") {{ msg.from }}
+                        span(ng-show="!msg.selfMessage") {{ msg.from }}
+                        | {{ " " + msg.time.format('HH:MM') }}
+
+                    td.irc-message(ng-class="{ 'bg-warning': msg.highlight, 'text-muted': msg.muted }")
+                        | {{ msg.message }}
+
+        //.col-sm-3#users
+
+
+    .row#bottom-panel
+        .col-sm-12
+            .input-group
+                input.form-control(type='text', ng-model="message", placeholder='Say something...')
+                span.input-group-btn
+                    button.btn.btn-primary(type='submit', ng-click="sendMessage()", ng-disabled="irc.connected == false") Send

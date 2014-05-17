@@ -23,3 +23,7 @@ function smartTrim(string, maxLength) {
 
     return string.substring(0, midpoint - lStrip) + '...' + string.substring(midpoint + rStrip);
 }
+
+function formatTime(date) {
+
+}

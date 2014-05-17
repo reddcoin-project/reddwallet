@@ -2,6 +2,11 @@ function rpcCodeToMessage (code) {
 
     var codeMap = {
 
+        '0': {
+            label: 'Request Successful',
+            description: 'Request Successful'
+        },
+
         // Standard JSON-RPC 2.0 Errors
 
         '-32600': {
@@ -157,7 +162,7 @@ function rpcCodeToMessage (code) {
 
     };
 
-    if (codeMap[code.toString()].description == undefined) {
+    if (codeMap[code.toString()] == undefined) {
         return "Unknown code " + code;
     }
 

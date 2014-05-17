@@ -8,9 +8,12 @@ var App = angular.module('app', [
     'ngTable',
     'mgcrea.ngStrap',
     'nwFileDialog',
+    'luegg.directives',
+    'perfect_scrollbar',
     'app.wallet',
     'app.global',
     'app.daemon',
+    'app.irc',
     'app.directives',
     'app.filters',
     'app.services',
@@ -22,6 +25,7 @@ App.Wallet = angular.module('app.wallet', []);
 App.Global = angular.module('app.global', []);
 App.Daemon = angular.module('app.daemon', []);
 App.Utils = angular.module('app.utils', []);
+App.Irc = angular.module('app.irc', []);
 
 App.config([
     '$routeProvider', '$locationProvider', function ($routeProvider, $locationProvider, config) {
@@ -33,6 +37,8 @@ App.config([
             .when('/addresses', { controller: 'AddressesCtrl', templateUrl: '/partials/addresses.html' })
             .when('/settings', { controller: 'SettingsCtrl', templateUrl: '/partials/settings.html' })
             .when('/help', { controller: 'HelpCtrl', templateUrl: '/partials/help.html' })
+
+            .when('/irc', { controller: 'MainIrcCtrl', templateUrl: '/partials/irc-main.html' })
 
             .when('/initialize', { controller: 'InitializeCtrl', templateUrl: '/partials/initialize.html' })
             .otherwise({ redirectTo: '/dashboard' });
