@@ -40,7 +40,7 @@ App.Daemon.Bootstrap = (function () {
         this.daemonMap = {
             'linux': {
                 'x32': 'daemons/reddcoind-linux-32',
-                'x64': 'daemons/reddcoind-linux-64',
+                'x64': 'daemons/reddcoind-linux-32',
                 'default': 'daemons/reddcoind-linux-32'
             },
             'win32': {
