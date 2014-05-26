@@ -4,14 +4,28 @@ App.Wallet.controller(
         '$scope',
         '$aside',
         '$filter',
+        '$timeout',
         'walletDb',
         'ngTableParams',
-        function($scope, $aside, $filter, walletDb, ngTableParams) {
+        function($scope, $aside, $filter, $timeout, walletDb, ngTableParams) {
 
-            $scope.transactions = walletDb.transactions;
+            $scope.transactions = [];
 
             $scope.refreshTransactions = function () {
-                walletDb.getTransactions();
+                walletDb.getTransactions().then(function(message) {
+                    $timeout(function() {
+                        $scope.transactions = walletDb.transactions;
+
+                        for (var i = 0; i < $scope.transactions.length; i++) {
+                            $scope.transactions[i].time = parseInt($scope.transactions[i].time);
+                            $scope.transactions[i].amount = parseFloat($scope.transactions[i].amount);
+                        }
+
+                        $scope.tableParams.reload();
+                    });
+
+                    return message;
+                });
             };
 
             $scope.refreshTransactions();
