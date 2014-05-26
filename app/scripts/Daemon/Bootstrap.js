@@ -123,7 +123,7 @@ App.Daemon.Bootstrap = (function () {
                 self.$rootScope.$broadcast('daemon.bootstrapped', message);
 
                 self.debug(message);
-            }, 1500);
+            }, 2000);
 
             // Setup an internal to emit a notification of a 'block' as want the wallet to stay up to date even
             // if no actions are performed. If the wallet is connected to an already started external daemon
@@ -131,7 +131,7 @@ App.Daemon.Bootstrap = (function () {
             // This wallet is not designed to connect to daemons outside of a local network as it may be sluggish.
             setInterval(function() {
                 self.$rootScope.$broadcast('daemon.notifications.block');
-            }, 15 * 1000);
+            }, 15 * 2000);
         },
 
         /**

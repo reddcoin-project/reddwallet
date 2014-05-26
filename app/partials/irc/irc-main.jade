@@ -1,8 +1,22 @@
 h1.page-header
-    | #reddcoin
+    | {{ ircTitle }}
 
 
-form#wrapper
+form.form-horizontal(ng-hide="irc.connected")
+    .form-group
+        label.col-sm-3.control-label Nickname
+        .col-sm-9
+            input.form-control(ng-model="nickname", required)
+    .form-group
+        label.col-sm-3.control-label Password
+        .col-sm-9
+            input.form-control(type='password', ng-model="password", placeholder="Required if nickname is registered")
+    .form-group
+        .col-sm-12
+            .btn-group.pull-right
+                button.btn.btn-primary.btn-sm(ng-click="connect()") Connect
+
+form#wrapper(ng-show="irc.connected")
     .row#upper-panel
         #chat(scroll-glue, ng-model="glued", wheel-speed="50", refresh-on-change="chatLog")
             table#irc-messages(ng-hide="irc.chatLog.length == 0")
@@ -12,7 +26,7 @@ form#wrapper
                         span(ng-show="!msg.selfMessage") {{ msg.from }}
                         | {{ " " + msg.time.format('HH:MM') }}
 
-                    td.irc-message(ng-class="{ 'bg-warning': msg.highlight, 'text-muted': msg.muted }")
+                    td.irc-message(ng-class="{ 'bg-success': msg.highlight, 'text-muted': msg.muted }")
                         | {{ msg.message }}
 
         //.col-sm-3#users
@@ -23,4 +37,4 @@ form#wrapper
             .input-group
                 input.form-control(type='text', ng-model="message", placeholder='Say something...')
                 span.input-group-btn
-                    button.btn.btn-primary(type='submit', ng-click="sendMessage()", ng-disabled="irc.connected == false") Send
+                    button.btn.btn-primary(type='submit', ng-click="sendMessage()", ng-disabled="irc.connected == false || irc.canChat == false") Send

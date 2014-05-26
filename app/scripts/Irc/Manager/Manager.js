@@ -12,6 +12,7 @@ App.Irc.factory('IrcManager',
                 this.$rootScope = $rootScope;
 
                 this.connected = false;
+                this.canChat = false;
 
                 this.irc = require('slate-irc');
                 this.net = require('net');
@@ -20,6 +21,12 @@ App.Irc.factory('IrcManager',
 
                 this.stream = null;
                 this.client = null;
+
+                var time = new Date().getTime().toString();
+                this.retrySuffix = 0;
+                this.nickname = 'Reddlet' + time.substr(time.length - 6, 6);
+                this.username = this.nickname;
+
 
                 this.initialize();
 
@@ -38,10 +45,7 @@ App.Irc.factory('IrcManager',
                 },
 
                 connect: function (nickname, username, password) {
-                    if (this.isConnected()) {
-                        return false;
-                    }
-
+                    this.canChat = false;
                     this.stream = this.net.connect({
                         port: 6667,
                         host: 'irc.freenode.org'
@@ -50,8 +54,8 @@ App.Irc.factory('IrcManager',
                     $timeout(function () {
                         self.chatLog.push({
                             to: nickname,
-                            from: self.mainChannel,
-                            message: "Connecting to #reddcoin...",
+                            from: "",
+                            message: "Connecting...",
                             time: new Date(),
                             highlight: false,
                             selfMessage: false,
@@ -68,7 +72,7 @@ App.Irc.factory('IrcManager',
                     this.nickname = nickname;
                     this.username = username;
 
-                    if (password != undefined) {
+                    if (password != undefined && password.length > 0) {
                         this.client.pass(password);
                     }
 
@@ -108,14 +112,33 @@ App.Irc.factory('IrcManager',
                     var self = this;
                     function handler () {
                         return function (irc) {
+                            irc.on('data', function (data) {
+                                if (data.command == 'ERR_NICKNAMEINUSE') {
+                                    self.retrySuffix ++;
+                                    var newNickname = self.nickname + self.retrySuffix;
+                                    $timeout(function () {
+                                        self.chatLog.push({
+                                            to: self.nickname,
+                                            from: data.prefix,
+                                            message: self.nickname + ": " + data.trailing + " Retrying with " + newNickname,
+                                            time: new Date(),
+                                            highlight: false,
+                                            selfMessage: false,
+                                            muted: false
+                                        });
+                                    });
+                                    self.connect(newNickname, newNickname, '');
+                                }
+                            });
+
                             // Reset the actual nickname we got given...
                             irc.on('welcome', function (nickname) {
                                 self.nickname = nickname;
                                 $timeout(function () {
                                     self.chatLog.push({
                                         to: nickname,
-                                        from: self.mainChannel,
-                                        message: "Connected.",
+                                        from: "",
+                                        message: "Connected, joining " + self.mainChannel + "...",
                                         time: new Date(),
                                         highlight: false,
                                         selfMessage: false,
@@ -125,8 +148,6 @@ App.Irc.factory('IrcManager',
                             });
 
                             irc.on('message', function (message) {
-                                console.log("MESSAGE------------------------------");
-                                console.log(message);
                                 $timeout(function () {
                                     self.chatLog.push({
                                         to: message.to,
@@ -141,6 +162,9 @@ App.Irc.factory('IrcManager',
                             });
 
                             irc.on('join', function (join) {
+                                if (join.nick == self.nickname) {
+                                    self.canChat = true;
+                                }
                                 $timeout(function () {
                                     self.chatLog.push({
                                         to: join.channel,

@@ -32,6 +32,8 @@ App.Wallet.factory('walletDb',
                 this.receivingAccounts = [];
                 this.sendingAccounts = [];
 
+                this.transactions = [];
+
             };
 
             DbModel.prototype = {
@@ -283,7 +285,16 @@ App.Wallet.factory('walletDb',
                 },
 
                 getTransactions: function () {
-                    return this.walletRpc.getTransactions();
+                    var self = this;
+                    var trans = this.walletRpc.getTransactions();
+
+                    trans.then(function(message) {
+                        self.transactions = message.rpcInfo;
+
+                        return message;
+                    });
+
+                    return trans;
                 },
 
                 /**

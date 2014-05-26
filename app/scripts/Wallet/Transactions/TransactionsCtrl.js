@@ -8,19 +8,10 @@ App.Wallet.controller(
         'ngTableParams',
         function($scope, $aside, $filter, walletDb, ngTableParams) {
 
-            $scope.transactions = [];
+            $scope.transactions = walletDb.transactions;
 
             $scope.refreshTransactions = function () {
-                walletDb.getTransactions().then(function(message) {
-                    $scope.transactions = message.rpcInfo;
-
-                    for (var i = 0; i < $scope.transactions.length; i++) {
-                        $scope.transactions[i].time = parseInt($scope.transactions[i].time);
-                        $scope.transactions[i].amount = parseFloat($scope.transactions[i].amount);
-                    }
-
-                    $scope.tableParams.reload();
-                });
+                walletDb.getTransactions();
             };
 
             $scope.refreshTransactions();
@@ -36,21 +27,21 @@ App.Wallet.controller(
                 filterDelay: 250,
                 getData: function ($defer, params) {
                     var orderedData = params.sorting() ? $filter('orderBy')($scope.transactions, params.orderBy()) : $scope.transactions;
+                    params.total(orderedData.length);
+
+                    if (orderedData.length == 0) {
+                        $scope.slicedData = orderedData;
+                        $defer.resolve(orderedData);
+                    }
 
                     $scope.slicedData = orderedData.slice(
                         (params.page() - 1) * params.count(),
                         params.page() * params.count()
                     );
 
-                    params.total(orderedData.length);
-
                     $defer.resolve($scope.slicedData);
                 }
             });
-
-
-
-
 
             $scope.viewTransaction = function(rawTrans) {
 
