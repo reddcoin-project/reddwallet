@@ -24,6 +24,12 @@ App.Irc.controller(
                 }
             };
 
+            $scope.disconnect = function () {
+                if (IrcManager.isConnected()) {
+                    IrcManager.disconnect();
+                }
+            };
+
             $scope.sendMessage = function () {
                 $scope.irc.send($scope.irc.mainChannel, $scope.message);
 

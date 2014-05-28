@@ -7,20 +7,14 @@ App.Irc.factory('IrcManager',
 
             function Manager() {
 
-                this.$q = $q;
-                this.$timeout = $timeout;
-                this.$rootScope = $rootScope;
-
-                this.connected = false;
-                this.canChat = false;
-
                 this.irc = require('slate-irc');
                 this.net = require('net');
                 this.mainChannel = '#reddcoin';
                 this.chatLog = [];
 
-                this.stream = null;
-                this.client = null;
+                this.$q = $q;
+                this.$timeout = $timeout;
+                this.$rootScope = $rootScope;
 
                 var time = new Date().getTime().toString();
                 this.retrySuffix = 0;
@@ -36,12 +30,21 @@ App.Irc.factory('IrcManager',
 
                 initialize: function () {
 
+                    this.connected = false;
+                    this.canChat = false;
 
+                    this.stream = null;
+                    this.client = null;
 
                 },
 
                 isConnected: function () {
                     return this.connected;
+                },
+
+                disconnect: function () {
+                    this.client.quit("User explicitly disconnected.");
+                    this.initialize();
                 },
 
                 connect: function (nickname, username, password) {

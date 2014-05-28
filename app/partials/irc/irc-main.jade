@@ -1,5 +1,7 @@
 h1.page-header
     | {{ ircTitle }}
+    .btn-group.pull-right(ng-show="irc.connected")
+        button.btn.btn-primary.btn-sm(ng-click="disconnect()") Disconnect
 
 
 form.form-horizontal(ng-hide="irc.connected")
