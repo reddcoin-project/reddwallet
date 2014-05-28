@@ -28,6 +28,10 @@ App.Wallet.factory('walletDb',
                     fieldName: 'address',
                     unique: true
                 });
+                this.accounts.ensureIndex({
+                    fieldName: 'name',
+                    unique: true
+                });
 
                 this.receivingAccounts = [];
                 this.sendingAccounts = [];
@@ -289,7 +293,9 @@ App.Wallet.factory('walletDb',
                     var trans = this.walletRpc.getTransactions();
 
                     trans.then(function(message) {
-                        self.transactions = message.rpcInfo;
+                        $timeout(function() {
+                            self.transactions = message.rpcInfo;
+                        });
 
                         return message;
                     });
