@@ -294,7 +294,14 @@ App.Wallet.factory('walletDb',
 
                     trans.then(function(message) {
                         $timeout(function() {
-                            self.transactions = message.rpcInfo;
+                            var trans = message.rpcInfo;
+
+                            for (var i = 0; i < trans.length; i++) {
+                                trans[i].time = parseInt(trans[i].time);
+                                trans[i].amount = parseFloat(trans[i].amount);
+                            }
+
+                            self.transactions = trans;
                         });
 
                         return message;

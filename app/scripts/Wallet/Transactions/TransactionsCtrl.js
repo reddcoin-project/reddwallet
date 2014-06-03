@@ -9,18 +9,12 @@ App.Wallet.controller(
         'ngTableParams',
         function($scope, $aside, $filter, $timeout, walletDb, ngTableParams) {
 
-            $scope.transactions = [];
+            $scope.transactions = $scope.walletDb.transactions;
 
             $scope.refreshTransactions = function () {
                 walletDb.getTransactions().then(function(message) {
                     $timeout(function() {
                         $scope.transactions = walletDb.transactions;
-
-                        for (var i = 0; i < $scope.transactions.length; i++) {
-                            $scope.transactions[i].time = parseInt($scope.transactions[i].time);
-                            $scope.transactions[i].amount = parseFloat($scope.transactions[i].amount);
-                        }
-
                         $scope.tableParams.reload();
                     });
 

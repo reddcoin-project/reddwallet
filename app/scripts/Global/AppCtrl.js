@@ -24,6 +24,7 @@ App.Global.controller(
                 $scope.walletDb.updateOverview().then(function (message) {
                     $scope.walletOverview = $scope.walletDb.overviewModel;
                 });
+                $scope.walletDb.getTransactions();
             }
 
             $scope.$location = $location;
