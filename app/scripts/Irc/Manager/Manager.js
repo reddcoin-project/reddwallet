@@ -9,7 +9,7 @@ App.Irc.factory('IrcManager',
 
                 this.irc = require('slate-irc');
                 this.net = require('net');
-                this.mainChannel = '#hoppi';
+                this.mainChannel = '#reddcoin';
                 this.chatLog = [];
 
                 this.$q = $q;
