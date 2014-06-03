@@ -206,8 +206,13 @@ App.Daemon.Bootstrap = (function () {
             var self = this;
 
             this.daemon.stdout.on('data', function (data) {
-                self.debug("Received daemon data from 'stdout'");
-                self.$rootScope.$emit('daemon.notifications.block');
+                if (data.indexOf != undefined) {
+                    console.log(data);
+                    if (data.indexOf('WALLET') !== -1 || data.indexOf('ALERT') !== -1) {
+                        self.$rootScope.$emit('daemon.notifications.block');
+                        console.log("notifications block");
+                    }
+                }
             });
 
             this.daemon.stderr.on('error', function (data) {

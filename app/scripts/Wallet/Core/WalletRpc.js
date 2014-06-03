@@ -72,7 +72,7 @@ App.Wallet.factory('walletRpc',
                     var self = this;
                     var deferred = $q.defer();
 
-                    this.client.exec('listtransactions', function (err, info) {
+                    this.client.exec('listtransactions', '*', 1000, 0, function (err, info) {
                         self.rpcToMessage(deferred, err, info);
                     });
 
