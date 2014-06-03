@@ -83,8 +83,14 @@ App.Wallet.controller(
 
             $scope.updateMetaTotal = function () {
                 var result = parseFloat($scope.send.amount) + parseFloat($scope.send.fee);
-                if (result == null || isNaN(result) || $scope.send.address == '') {
+                if (result == null || isNaN(result)) {
                     result = "";
+                    $scope.disableSend = true;
+                } else {
+                    $scope.disableSend = false;
+                }
+
+                if ($scope.send.address == '') {
                     $scope.disableSend = true;
                 } else {
                     $scope.disableSend = false;
