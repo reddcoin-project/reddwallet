@@ -28,7 +28,7 @@ form#wrapper(ng-show="irc.connected")
                         span(ng-show="!msg.selfMessage") {{ msg.from }}
                         | {{ " " + msg.time.format('HH:MM') }}
 
-                    td.irc-message(ng-class="{ 'bg-success': msg.highlight, 'text-muted': msg.muted }")
+                    td.irc-message(ng-class="{ 'bg-success': msg.highlight, 'irc-action': msg.action, 'text-muted': msg.muted }")
                         | {{ msg.message }}
 
         //.col-sm-3#users

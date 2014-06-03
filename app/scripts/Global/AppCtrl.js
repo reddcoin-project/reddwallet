@@ -8,6 +8,17 @@ App.Global.controller(
 
             $scope.walletOverview = {};
 
+            $scope.ircMessages = 0;
+
+            $rootScope.$on('irc.message.highlight', function (event) {
+                console.log("event");
+                if ($scope.activeNavId == '/irc') {
+                    return;
+                }
+
+                $scope.ircMessages ++;
+            });
+
             $scope.daemon = {
                 running: false
             };
@@ -29,6 +40,10 @@ App.Global.controller(
 
             $scope.$location = $location;
             $scope.$watch('$location.path()', function(path) {
+                if (path == '/irc') {
+                    $scope.ircMessages = 0;
+                }
+
                 return $scope.activeNavId = path || '/';
             });
 

@@ -1,6 +1,8 @@
 ul.nav.navbar-nav.navbar-right
     li(ng-class="getClass('/irc')")
-        a(ng-href='#/irc') Chat
+        a(ng-href='#/irc')
+            | Chat
+            span(ng-show="ircMessages > 0").irc-message-count {{ ircMessages }}
     li(ng-class="getClass('/settings')")
         a(ng-href='#/settings') Settings
     li(ng-class="getClass('/help')")

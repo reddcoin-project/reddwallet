@@ -9,7 +9,7 @@ App.Irc.factory('IrcManager',
 
                 this.irc = require('slate-irc');
                 this.net = require('net');
-                this.mainChannel = '#reddcoin';
+                this.mainChannel = '#hoppi';
                 this.chatLog = [];
 
                 this.$q = $q;
@@ -20,6 +20,7 @@ App.Irc.factory('IrcManager',
                 this.retrySuffix = 0;
                 this.nickname = 'Reddlet' + time.substr(time.length - 6, 6);
                 this.username = this.nickname;
+                this.password = this.nickname;
 
 
                 this.initialize();
@@ -35,6 +36,8 @@ App.Irc.factory('IrcManager',
 
                     this.stream = null;
                     this.client = null;
+
+                    this.password = "";
 
                 },
 
@@ -74,10 +77,9 @@ App.Irc.factory('IrcManager',
 
                     this.nickname = nickname;
                     this.username = username;
+                    this.password = password;
 
-                    if (password != undefined && password.length > 0) {
-                        this.client.pass(password);
-                    }
+
 
                     this.setupHandler();
 
@@ -95,7 +97,7 @@ App.Irc.factory('IrcManager',
                     if (message.indexOf("/") === 0) {
                         // This is an action don't send it until we know what it is...
                         if (message.indexOf("/me") === 0) {
-
+                            this.client.write(message);
                         }
                     } else {
                         this.client.send(channel, message);
@@ -137,6 +139,13 @@ App.Irc.factory('IrcManager',
                             // Reset the actual nickname we got given...
                             irc.on('welcome', function (nickname) {
                                 self.nickname = nickname;
+
+                                if (self.password != undefined && self.password.length > 0) {
+                                    setTimeout(function() {
+                                        self.client.send('NickServ', 'identify ' + self.password);
+                                    }, 1000);
+                                }
+
                                 $timeout(function () {
                                     self.chatLog.push({
                                         to: nickname,
@@ -152,14 +161,26 @@ App.Irc.factory('IrcManager',
 
                             irc.on('message', function (message) {
                                 $timeout(function () {
+
+                                    var action = message.message.indexOf('\u0001ACTION') > -1;
+                                    if (action) {
+                                        message.message = message.message.substring(7);
+                                    }
+
+                                    var highlight = message.message.indexOf(self.nickname) > -1;
+                                    if (highlight) {
+                                        self.$rootScope.$emit('irc.message.highlight');
+                                    }
+
                                     self.chatLog.push({
                                         to: message.to,
                                         from: message.from,
                                         message: message.message,
                                         time: new Date(),
-                                        highlight: (message.message.indexOf(self.nickname) > -1),
+                                        highlight: highlight,
                                         selfMessage: false,
-                                        muted: false
+                                        muted: false,
+                                        action: action
                                     });
                                 });
                             });
@@ -201,6 +222,25 @@ App.Irc.factory('IrcManager',
                                         to: notice.to,
                                         from: notice.from,
                                         message: notice.message,
+                                        time: new Date(),
+                                        highlight: false,
+                                        selfMessage: false,
+                                        muted: true
+                                    });
+                                });
+                            });
+
+                            irc.on('nick', function (nick) {
+                                $timeout(function () {
+                                    var oldNick = nick.nick;
+                                    if (oldNick == self.nickname) {
+                                        oldNick = "You";
+                                    }
+
+                                   self.chatLog.push({
+                                        to: "",
+                                        from: "",
+                                        message: oldNick + " are now known as " + nick.new,
                                         time: new Date(),
                                         highlight: false,
                                         selfMessage: false,
