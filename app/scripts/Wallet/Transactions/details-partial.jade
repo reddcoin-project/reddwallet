@@ -7,7 +7,11 @@ table.table.table-condensed
 
         tr
             td.text-right Amount
-            td.aside-value-container {{ trans.amount }} (Fee: {{ trans.fee }})
+            td.aside-value-container
+                | {{ trans.amount }}
+                span(ng-show="trans.fee > 0")
+                    small
+                        em {{ trans.fee }})
 
         tr
             td.text-right Confirmations
