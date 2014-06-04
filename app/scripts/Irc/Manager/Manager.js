@@ -95,10 +95,7 @@ App.Irc.factory('IrcManager',
                     }
 
                     if (message.indexOf("/") === 0) {
-                        // This is an action don't send it until we know what it is...
-                        if (message.indexOf("/me") === 0) {
-                            this.client.write(message);
-                        }
+                        this.client.write(message.substring(1));
                     } else {
                         this.client.send(channel, message);
                         this.chatLog.push({
@@ -118,6 +115,7 @@ App.Irc.factory('IrcManager',
                     function handler () {
                         return function (irc) {
                             irc.on('data', function (data) {
+                                console.log(data);
                                 if (data.command == 'ERR_NICKNAMEINUSE') {
                                     self.retrySuffix ++;
                                     var newNickname = self.nickname + self.retrySuffix;
@@ -232,15 +230,15 @@ App.Irc.factory('IrcManager',
 
                             irc.on('nick', function (nick) {
                                 $timeout(function () {
-                                    var oldNick = nick.nick;
+                                    var oldNick = nick.nick + " is";
                                     if (oldNick == self.nickname) {
-                                        oldNick = "You";
+                                        oldNick = "You are";
                                     }
 
                                    self.chatLog.push({
                                         to: "",
                                         from: "",
-                                        message: oldNick + " are now known as " + nick.new,
+                                        message: oldNick + " now known as " + nick.new,
                                         time: new Date(),
                                         highlight: false,
                                         selfMessage: false,
