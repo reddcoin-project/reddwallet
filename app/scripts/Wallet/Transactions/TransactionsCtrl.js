@@ -2,12 +2,13 @@ App.Wallet.controller(
     'TransactionsCtrl',
     [
         '$scope',
+        '$rootScope',
         '$aside',
         '$filter',
         '$timeout',
         'walletDb',
         'ngTableParams',
-        function($scope, $aside, $filter, $timeout, walletDb, ngTableParams) {
+        function($scope, $rootScope, $aside, $filter, $timeout, walletDb, ngTableParams) {
 
             $scope.transactions = $scope.walletDb.transactions;
 
@@ -23,6 +24,8 @@ App.Wallet.controller(
             };
 
             $scope.refreshTransactions();
+
+            $rootScope.$on('daemon.notifications.block', $scope.refreshTransactions);
 
             $scope.tableParams = new ngTableParams({
                 page: 1,
