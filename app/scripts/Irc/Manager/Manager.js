@@ -9,7 +9,7 @@ App.Irc.factory('IrcManager',
 
                 this.irc = require('slate-irc');
                 this.net = require('net');
-                this.mainChannel = '#reddcoin';
+                this.mainChannel = '#hoppi';
                 this.chatLog = [];
 
                 this.$q = $q;
@@ -95,7 +95,25 @@ App.Irc.factory('IrcManager',
                     }
 
                     if (message.indexOf("/") === 0) {
-                        this.client.write(message.substring(1));
+                        message = message.substring(1);
+                        this.client.write(message);
+
+                        var privateMsg = false;
+                        if (message.indexOf("PRIVMSG") == 0) {
+                            message = message.substring(7);
+                            privateMsg = true;
+                        }
+
+                        this.chatLog.push({
+                            to: channel,
+                            from: this.nickname,
+                            message: message,
+                            time: new Date(),
+                            highlight: false,
+                            selfMessage: true,
+                            muted: false,
+                            privateMsg: privateMsg
+                        });
                     } else {
                         this.client.send(channel, message);
                         this.chatLog.push({
@@ -178,7 +196,8 @@ App.Irc.factory('IrcManager',
                                         highlight: highlight,
                                         selfMessage: false,
                                         muted: false,
-                                        action: action
+                                        action: action,
+                                        privateMsg: message.to.toLowerCase() == self.nickname.toLowerCase()
                                     });
                                 });
                             });
