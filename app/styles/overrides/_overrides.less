@@ -589,7 +589,7 @@ a {
 
 @media (min-width: 768px) {
   .main {
-    padding-right: 40px;
+    padding-right: 20px;
     padding-left: 40px;
   }
 }
@@ -840,16 +840,34 @@ a {
 
   #upper-panel {
 
+    #users {
+      float: right;
+      width: 190px;
+      position: absolute;
+      right: 25px;
+      bottom: 71px;
+      top: 124px;
+      overflow-y: scroll;
+
+      #irc-users {
+        width: 100%;
+        text-align: right;
+      }
+
+      .nickname-td {
+        padding-right: 20px;
+      }
+
+    }
 
     #chat {
 
       overflow-y: auto;
       position: absolute;
       left: 150px;
-      right: 40px;
+      right: 225px;
       bottom: 71px;
       top: 124px;
-
 
       #irc-messages {
 

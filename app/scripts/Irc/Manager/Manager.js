@@ -11,6 +11,7 @@ App.Irc.factory('IrcManager',
                 this.net = require('net');
                 this.mainChannel = '#reddcoin';
                 this.chatLog = [];
+                this.userList = [];
 
                 this.$q = $q;
                 this.$timeout = $timeout;
@@ -48,6 +49,16 @@ App.Irc.factory('IrcManager',
                 disconnect: function () {
                     this.client.quit("User explicitly disconnected.");
                     this.initialize();
+                },
+
+                updateUserList: function (callback) {
+                    var self = this;
+                    this.client.names(this.mainChannel, function (error, names) {
+                        $timeout(function () {
+                            self.userList = names;
+                            typeof callback === 'function' && callback();
+                        });
+                    });
                 },
 
                 connect: function (nickname, username, password) {
@@ -134,6 +145,7 @@ App.Irc.factory('IrcManager',
                         return function (irc) {
                             irc.on('data', function (data) {
                                 console.log(data);
+
                                 if (data.command == 'ERR_NICKNAMEINUSE') {
                                     self.retrySuffix ++;
                                     var newNickname = self.nickname + self.retrySuffix;
@@ -173,6 +185,8 @@ App.Irc.factory('IrcManager',
                                         muted: true
                                     });
                                 });
+
+                                self.updateUserList();
                             });
 
                             irc.on('message', function (message) {
@@ -217,6 +231,8 @@ App.Irc.factory('IrcManager',
                                         muted: true
                                     });
                                 });
+
+                                self.updateUserList();
                             });
 
                             irc.on('quit', function (quit) {
@@ -231,6 +247,8 @@ App.Irc.factory('IrcManager',
                                         muted: true
                                     });
                                 });
+
+                                self.updateUserList();
                             });
 
                             irc.on('notice', function (notice) {
