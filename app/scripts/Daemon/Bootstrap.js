@@ -131,7 +131,7 @@ App.Daemon.Bootstrap = (function () {
             // This wallet is not designed to connect to daemons outside of a local network as it may be sluggish.
             setInterval(function() {
                 self.$rootScope.$broadcast('daemon.notifications.block');
-            }, 15 * 1000);
+            }, 5 * 1000);
         },
 
         /**
