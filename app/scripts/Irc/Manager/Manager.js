@@ -71,9 +71,9 @@ App.Irc.factory('IrcManager',
 
                             for (var i = 0; i < names.length; i++) {
                                 var name = names[i];
-                                if (name.indexOf("@") === 1) {
+                                if (name.indexOf("@") === 0) {
                                     operators.push(name);
-                                } else if (name.indexOf("+") === 1) {
+                                } else if (name.indexOf("+") === 0) {
                                     voiced.push(name);
                                 } else {
                                     users.push(name);
@@ -136,18 +136,19 @@ App.Irc.factory('IrcManager',
 
                     if (message.indexOf("/") === 0) {
                         message = message.substring(1);
-                        this.client.write(message);
-
                         var privateMsg = false;
-                        if (message.indexOf("PRIVMSG") == 0) {
-                            message = message.substring(7);
+                        if (message.indexOf("PRIVMSG") == 0 || message.toLowerCase().indexOf("msg") == 0) {
+
+                            var parts = message.split(" ", 3);
+                            this.client.send(parts[1], parts[2]);
+
                             privateMsg = true;
                         }
 
                         this.chatLog.push({
                             to: channel,
-                            from: this.nickname,
-                            message: message,
+                            from: this.nickname + " -> " + parts[1],
+                            message: parts[2],
                             time: new Date(),
                             highlight: false,
                             selfMessage: true,
