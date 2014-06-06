@@ -139,22 +139,29 @@ App.Irc.factory('IrcManager',
                         var privateMsg = false;
                         if (message.indexOf("PRIVMSG") == 0 || message.toLowerCase().indexOf("msg") == 0) {
 
-                            var parts = message.split(" ", 3);
-                            this.client.send(parts[1], parts[2]);
+                            var parts = properSplit(message, " ", 2);
 
+                            if (parts.length == 2) {
+                                // Don't send as no text..
+                                return;
+                            }
+
+                            this.client.send(parts[1], parts[2]);
                             privateMsg = true;
+
+                            this.chatLog.push({
+                                to: channel,
+                                from: this.nickname,
+                                message: " >> " + parts[1] + ": " + parts[2],
+                                time: new Date(),
+                                highlight: false,
+                                selfMessage: true,
+                                muted: false,
+                                privateMsg: privateMsg
+                            });
                         }
 
-                        this.chatLog.push({
-                            to: channel,
-                            from: this.nickname,
-                            message: " >> " + parts[1] + ": " + parts[2],
-                            time: new Date(),
-                            highlight: false,
-                            selfMessage: true,
-                            muted: false,
-                            privateMsg: privateMsg
-                        });
+
                     } else {
                         this.client.send(channel, message);
                         this.chatLog.push({
