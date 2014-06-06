@@ -53,9 +53,38 @@ App.Irc.factory('IrcManager',
 
                 updateUserList: function (callback) {
                     var self = this;
+                    if (this.client == null) {
+                        return;
+                    }
+
                     this.client.names(this.mainChannel, function (error, names) {
                         $timeout(function () {
-                            self.userList = names;
+
+                            // TODO: Slate IRC does not return the user modes currently.
+                            // See:  See https://github.com/slate/slate-irc/issues/15
+                            // For now, all users look equal. Hopefully the GitHub issue will be resolved.
+
+                            // We now need to sort these names into the operators/voiced/normal dictated by @ + and nothing
+                            var operators = [];
+                            var voiced = [];
+                            var users = [];
+
+                            for (var i = 0; i < names.length; i++) {
+                                var name = names[i];
+                                if (name.indexOf("@") === 1) {
+                                    operators.push(name);
+                                } else if (name.indexOf("+") === 1) {
+                                    voiced.push(name);
+                                } else {
+                                    users.push(name);
+                                }
+                            }
+
+                            operators.sort();
+                            voiced.sort();
+                            users.sort();
+
+                            self.userList = operators.concat(voiced.concat(users));
                             typeof callback === 'function' && callback();
                         });
                     });
@@ -144,8 +173,6 @@ App.Irc.factory('IrcManager',
                     function handler () {
                         return function (irc) {
                             irc.on('data', function (data) {
-                                console.log(data);
-
                                 if (data.command == 'ERR_NICKNAMEINUSE') {
                                     self.retrySuffix ++;
                                     var newNickname = self.nickname + self.retrySuffix;

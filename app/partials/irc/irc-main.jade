@@ -33,7 +33,7 @@ form#wrapper(ng-show="irc.connected")
 
         #users
             table#irc-users
-                tr.irc-user-row(ng-repeat="name in irc.userList")
+                tr.irc-user-row(ng-repeat="name in irc.userList track by $index")
                     td.nickname-td {{ name }}
 
     #bottom-panel
