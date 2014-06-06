@@ -7,6 +7,7 @@ App.Global.controller(
             $scope.walletDb = walletDb;
 
             $scope.walletOverview = {};
+            $scope.blocksSynced = false;
 
             $scope.ircMessages = 0;
 
@@ -35,6 +36,16 @@ App.Global.controller(
                 $scope.walletDb.updateOverview().then(function (message) {
                     $scope.walletOverview = $scope.walletDb.overviewModel;
                 });
+
+                $scope.walletDb.walletRpc.getWork().then(
+                    function success (message) {
+                        $scope.blocksSynced = true;
+                    },
+                    function error (message) {
+                        $scope.blocksSynced = false;
+                    }
+                );
+
                 $scope.walletDb.getTransactions();
             }
 

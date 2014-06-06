@@ -175,6 +175,17 @@ App.Wallet.factory('walletRpc',
                     return deferred.promise;
                 },
 
+                getWork: function() {
+                    var self = this;
+                    var deferred = $q.defer();
+
+                    this.client.exec('getwork', function (err, info) {
+                        self.rpcToMessage(deferred, err, info);
+                    });
+
+                    return deferred.promise;
+                },
+
                 getAccounts: function () {
 
                     var self = this;

@@ -40,9 +40,11 @@ html(lang='en', ng-app='app')
                     div.connection-info
                         ul
                             li
+                                span(ng-class="{'blocks-synced': blocksSynced, 'blocks-syncing': !blocksSynced}") ● &nbsp;
                                 | Blocks
                                 | {{ walletOverview.blocks }}
                             li
+                                span(ng-class="{'has-connections': walletOverview.connections > 0, 'no-connections': walletOverview.connections == 0}") ● &nbsp;
                                 | Connections
                                 | {{ walletOverview.connections }}
 
