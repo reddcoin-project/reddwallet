@@ -2,3 +2,15 @@ h1.page-header
     | Dashboard
 
 
+.media.reddit-post(ng-repeat="post in posts")
+    .media-body
+        h4
+            a(href="", ng-click="openPost($index)", target="_blank")
+                span(ng-bind-html="post.data.title | to_trusted")
+        p
+            span.text-muted By &nbsp;
+            | {{ post.data.author }}
+            span.text-muted &nbsp; on {{ post.data.timestamp | date:'d MMM HH:mm:ss Z' }}
+
+        p
+            span(ng-bind-html="post.data.html_content | cut:true:300 | to_trusted")
