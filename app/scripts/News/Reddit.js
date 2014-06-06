@@ -32,6 +32,7 @@ App.Irc.factory('Reddit',
                                 posts.forEach(function (post) {
                                     post.data.timestamp = post.data.created_utc * 1000;
                                     post.data.html_content = _.unescape(post.data.selftext_html);
+                                    post.data.html_content_text = _.unescape(nl2br(post.data.selftext));
                                 });
 
                                 self.posts = posts;
