@@ -148,7 +148,7 @@ App.Irc.factory('IrcManager',
                         this.chatLog.push({
                             to: channel,
                             from: this.nickname,
-                            message: " -> " + parts[1] + ": " + parts[2],
+                            message: " >> " + parts[1] + ": " + parts[2],
                             time: new Date(),
                             highlight: false,
                             selfMessage: true,
