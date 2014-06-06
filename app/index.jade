@@ -29,7 +29,7 @@ html(lang='en', ng-app='app')
                         img.reddcoin-icon(src='reddcoin_logo.png', width='32')
                     .navbar-brand {{ walletOverview.balance | number:8 }} RDD
                 .navbar-collapse.collapse
-                    form.navbar-form.navbar-right
+                    form.navbar-form.navbar-right.search-form
                         input.form-control(type='text', placeholder='Transaction...')
                     div(ng-include="'/partials/topNav.html'")
 
