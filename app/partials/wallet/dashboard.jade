@@ -15,5 +15,5 @@ h1.page-header
             | {{ post.data.author }}
             span.text-muted &nbsp; on {{ post.data.timestamp | date:'d MMM HH:mm:ss Z' }}
 
-        p.reddit-content
+        p.reddit-content(ng-hide="true")
             span.reddit-content(ng-bind-html="post.data.html_content_text | cut:true:200 | to_trusted")
