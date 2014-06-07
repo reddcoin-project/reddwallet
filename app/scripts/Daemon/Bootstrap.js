@@ -14,7 +14,7 @@ App.Daemon.Bootstrap = (function () {
 
     function Bootstrap ($q, $timeout, $interval, $rootScope, walletDb) {
 
-        this.debugEnabled = true;
+        this.debugEnabled = false;
         this.killMethod = 'pid'; // either pid or daemon (buggy atm)
 
         this.$q = $q;
