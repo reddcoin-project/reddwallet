@@ -1,4 +1,7 @@
 ul.nav.navbar-nav.navbar-right
+    li(ng-class="getClass('/news')")
+        a(ng-href='#/news')
+            | News
     li(ng-class="getClass('/irc')")
         a(ng-href='#/irc')
             | Chat
