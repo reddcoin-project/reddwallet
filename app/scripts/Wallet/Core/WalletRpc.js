@@ -17,6 +17,7 @@ App.Wallet.factory('walletRpc',
             WalletModel.prototype = {
 
                 initializeConfig: function (config) {
+                    var self = this;
                     this.client = require('node-reddcoin')({
                         port: config.rpcport,
                         user: config.rpcuser,
