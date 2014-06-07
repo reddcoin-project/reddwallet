@@ -13,11 +13,13 @@ App.Global.NeDB = (function () {
             var NeDB, datapath, e, store;
             try {
                 NeDB = require("nedb");
+
                 datapath = require('nw.gui').App.dataPath + "/nedb";
+
                 store = {
                     collection: function (name) {
                         return new NeDB({
-                            filename: "app/nedb/" + name,
+                            filename: datapath + "/" + name,
                             autoload: true
                         });
                     }
