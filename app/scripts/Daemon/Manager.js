@@ -2,14 +2,16 @@ App.Daemon.factory('DaemonManager',
     [
         '$q',
         '$timeout',
+        '$interval',
         '$rootScope',
-        function($q, $timeout, $rootScope) {
+        'walletDb',
+        function($q, $timeout, $interval, $rootScope, walletDb) {
 
             function Manager() {
 
                 this.running = false;
 
-                this.bootstrap = new App.Daemon.Bootstrap($q, $timeout, $rootScope);
+                this.bootstrap = new App.Daemon.Bootstrap($q, $timeout, $interval, $rootScope, walletDb);
 
                 this.initialize();
 

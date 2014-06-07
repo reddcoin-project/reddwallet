@@ -6,18 +6,22 @@ App.Daemon.Bootstrap = (function () {
      *
      * @param $q
      * @param $timeout
+     * @param $interval
      * @param $rootScope
+     * @param walletDb
      * @constructor
      */
 
-    function Bootstrap ($q, $timeout, $rootScope) {
+    function Bootstrap ($q, $timeout, $interval, $rootScope, walletDb) {
 
         this.debugEnabled = false;
         this.killMethod = 'pid'; // either pid or daemon (buggy atm)
 
         this.$q = $q;
         this.$timeout = $timeout;
+        this.$interval = $interval;
         this.$rootScope = $rootScope;
+        this.walletRpc = walletDb.walletRpc;
 
         this.os = require('os');
         this.fs = require('fs');
@@ -108,30 +112,52 @@ App.Daemon.Bootstrap = (function () {
         startDaemonLaunch: function() {
             var self = this;
 
+            // Also initialize the walletRpc configuration..
+            // This is so we can use an RPC call to wait on the daemon to start..
+            this.walletRpc.initializeConfig(this.daemonConfig);
+
             this.spawnDaemon();
 
             this.saveDaemonPid();
 
             this.setupDaemonListeners();
 
-            // We will do a timeout function to give the daemon change to initialize..
-            this.$timeout(function() {
-                var message = new App.Global.Message(true, 0, 'Daemon Ready');
+            // We will do an interval function to check every second to see if the daemon has loaded.
+            var intervalCode = this.$interval(function() {
+                self.walletRpc.lockWallet().then(
+                    function success (message) {
+                        self.debug("Daemon has started started.");
 
-                self.deferred.resolve(message);
+                        var newMessage = new App.Global.Message(true, 0, 'Daemon Ready');
 
-                self.$rootScope.$broadcast('daemon.bootstrapped', message);
+                        self.deferred.resolve(newMessage);
 
-                self.debug(message);
-            }, 2000);
+                        self.$rootScope.$broadcast('daemon.bootstrapped', newMessage);
 
-            // Setup an internal to emit a notification of a 'block' as want the wallet to stay up to date even
-            // if no actions are performed. If the wallet is connected to an already started external daemon
-            // then we wont receive its alerted notifications.
-            // This wallet is not designed to connect to daemons outside of a local network as it may be sluggish.
-            setInterval(function() {
-                self.$rootScope.$broadcast('daemon.notifications.block');
-            }, 5 * 1000);
+                        self.debug(newMessage);
+
+                        // Setup an internal to emit a notification of a 'block' as want the wallet to stay up to date even
+                        // if no actions are performed. If the wallet is connected to an already started external daemon
+                        // then we wont receive its alerted notifications.
+                        // This wallet is not designed to connect to daemons outside of a local network as it may be sluggish.
+                        var blockInterval = self.$interval(function() {
+                            self.$rootScope.$broadcast('daemon.notifications.block');
+                        }, 5 * 1000);
+
+                        self.$interval.cancel(intervalCode);
+
+                        self.walletRpc.updateWalletLock();
+                    },
+                    function error (message) {
+                        if (message.rpcError.code == 'ECONNREFUSED') {
+                            self.debug("Daemon still not started..");
+                        } else {
+                            self.$interval.cancel(intervalCode);
+                        }
+                    }
+                );
+
+            }, 1000);
         },
 
         /**

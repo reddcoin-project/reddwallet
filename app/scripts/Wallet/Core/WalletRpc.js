@@ -4,8 +4,7 @@ App.Wallet.factory('walletRpc',
         '$modal',
         '$timeout',
         '$rootScope',
-        'DaemonManager',
-        function ($q, $modal, $timeout, $rootScope, DaemonManager) {
+        function ($q, $modal, $timeout, $rootScope) {
 
             var WalletModel = function () {
 
@@ -13,25 +12,18 @@ App.Wallet.factory('walletRpc',
                 this.isEncrypted = false;
 
                 var self = this;
-                DaemonManager.getBootstrap().getPromise().then(function (message) {
-                    if (message.result) {
-                        var config = DaemonManager.getBootstrap().daemonConfig;
-                        self.client = require('node-reddcoin')({
-                            port: config.rpcport,
-                            user: config.rpcuser,
-                            pass: config.rpcpassword,
-                            passphrasecallback: self.handlePassPhraseCallback
-                        });
-
-                        self.updateWalletLock();
-                    }
-
-                    return message;
-                });
-
             };
 
             WalletModel.prototype = {
+
+                initializeConfig: function (config) {
+                    this.client = require('node-reddcoin')({
+                        port: config.rpcport,
+                        user: config.rpcuser,
+                        pass: config.rpcpassword,
+                        passphrasecallback: self.handlePassPhraseCallback
+                    });
+                },
 
                 rpcToMessage: function (deferred, err, info, options) {
                     var message;

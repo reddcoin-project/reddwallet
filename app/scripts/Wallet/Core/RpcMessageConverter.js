@@ -7,6 +7,11 @@ function rpcCodeToMessage (code) {
             description: 'Request Successful'
         },
 
+        'ECONNREFUSED': {
+            label: 'Connection Refused',
+            description: 'Cannot connect to the daemon via RPC.'
+        },
+
         // Standard JSON-RPC 2.0 Errors
 
         '-32600': {
