@@ -196,6 +196,18 @@ App.Irc.factory('IrcManager',
                                         });
                                     });
                                     self.connect(newNickname, newNickname, '');
+                                } else if (data.command == 'RPL_TOPIC') {
+                                    $timeout(function () {
+                                        self.chatLog.push({
+                                            to: self.nickname,
+                                            from: self.mainChannel,
+                                            message: data.trailing,
+                                            time: new Date(),
+                                            highlight: false,
+                                            selfMessage: false,
+                                            muted: false
+                                        });
+                                    });
                                 }
                             });
 
