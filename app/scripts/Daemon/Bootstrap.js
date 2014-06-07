@@ -126,10 +126,6 @@ App.Daemon.Bootstrap = (function () {
             var daemonStartedSuccess = function success (message) {
                 self.debug("Daemon has started started.");
 
-                self.walletRpc.updateWalletLock();
-
-                self.$interval.cancel(intervalCode);
-
                 var newMessage = new App.Global.Message(true, 0, 'Daemon Ready');
 
                 self.deferred.resolve(newMessage);
@@ -146,6 +142,10 @@ App.Daemon.Bootstrap = (function () {
                     self.$rootScope.$broadcast('daemon.notifications.block');
                 }, 5 * 1000);
 
+                self.walletRpc.updateWalletLock();
+
+                self.$interval.cancel(intervalCode);
+
             };
 
             var intervalCode = this.$interval(function() {
@@ -154,8 +154,10 @@ App.Daemon.Bootstrap = (function () {
                     function error (message) {
                         if (message.rpcError.code == 'ECONNREFUSED') {
                             self.debug("Daemon still not started..");
+                            self.debug(message);
                         } else if (message.rpcError.code == -15) {
                             daemonStartedSuccess(message);
+                            self.debug("Error code -15, not encrypted");
                         } else {
                             self.debug(message);
                         }
