@@ -3,16 +3,19 @@ h1.page-header
 
 .row
     .col-md-12
-        form.form-horizontal
-            .form-group
-                label.col-sm-3.col-md-2.control-label.lead Confirmed
-                .col-sm-9.col-md-10
-                    p.lead.form-control-static {{ walletOverview.balance | number:8 }} RDD
-            .form-group
-                label.col-sm-3.col-md-2.control-label.lead Unconfirmed
-                .col-sm-9.col-md-10
-                    p.lead.form-control-static {{ walletOverview.unconfirmedbalance | number:8 }} RDD
-            .form-group
-                label.col-sm-3.col-md-2.control-label.lead Total
-                .col-sm-9.col-md-10
-                    p.lead.form-control-static {{ walletOverview.unconfirmedbalance + walletOverview.balance | number:8 }} RDD
+        table.table.totals-table
+            tbody
+                tr
+                    td Confirmed
+                    td {{ walletOverview.balance | number:8 }}
+                    td RDD
+                tr
+                    td Unconfirmed
+                    td {{ walletOverview.unconfirmedbalance | number:8 }}
+                    td RDD
+                tr
+                    td Total
+                    td {{ walletOverview.balance + walletOverview.unconfirmedbalance | number:8 }}
+                    td RDD
+
+
