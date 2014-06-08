@@ -4,8 +4,10 @@ App.Wallet.controller(
         '$scope',
         '$timeout',
         '$alert',
-        function ($scope, $timeout, $alert) {
+        'walletDb',
+        function ($scope, $timeout, $alert, walletDb) {
 
+            $scope.walletOverview = $scope.walletDb.overviewModel;
 
         }
     ]
