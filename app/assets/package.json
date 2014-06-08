@@ -32,7 +32,7 @@
     "dependencies": {
         "net": "latest",
         "nedb": "~0.9.4",
-        "node-reddcoin": "~0.3.9",
+        "node-reddcoin": "~0.3.10",
         "async": "~0.8.0",
         "slate-irc": "latest",
         "request": "latest"
