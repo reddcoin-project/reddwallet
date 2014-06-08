@@ -14,13 +14,9 @@ App.Wallet.controller(
             $scope.transactions = $scope.walletDb.transactions;
 
             $scope.refreshTransactions = function () {
-                walletDb.getTransactions().then(function(message) {
-                    $timeout(function() {
-                        $scope.transactions = walletDb.transactions;
-                        $scope.tableParams.reload();
-                    });
-
-                    return message;
+                $timeout(function() {
+                    $scope.transactions = walletDb.transactions;
+                    $scope.tableParams.reload();
                 });
             };
 
