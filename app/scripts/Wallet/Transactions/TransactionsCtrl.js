@@ -6,9 +6,10 @@ App.Wallet.controller(
         '$aside',
         '$filter',
         '$timeout',
+        '$alert',
         'walletDb',
         'ngTableParams',
-        function($scope, $rootScope, $aside, $filter, $timeout, walletDb, ngTableParams) {
+        function($scope, $rootScope, $aside, $filter, $timeout, $alert, walletDb, ngTableParams) {
 
             $scope.transactions = $scope.walletDb.transactions;
 
@@ -64,6 +65,26 @@ App.Wallet.controller(
                     template: 'scripts/Wallet/Transactions/view-transaction.html',
                     contentTemplate: 'scripts/Wallet/Transactions/details-partial.html'
                 });
+
+                console.log(aside);
+
+                aside.$scope.copy = function (toCopy) {
+                    // Load native UI library
+                    var gui = require('nw.gui');
+
+                    // We can not create a clipboard, we have to receive the system clipboard
+                    var clipboard = gui.Clipboard.get();
+
+                    // Set the address..
+                    clipboard.set(toCopy);
+
+                    $alert({
+                        "title": "Copied ",
+                        "content": toCopy,
+                        "type": "info",
+                        duration: 1.5
+                    });
+                };
 
                 aside.$scope.trans = trans;
                 aside.$promise.then(aside.show);

@@ -22,17 +22,20 @@ table.table.table-condensed
             td.aside-value-container {{ trans.confirmations }}
 
         tr
-            td.text-right Address To
+            td.text-right
+                a(href="", ng-click="copy(trans.address)") Address To
             td.aside-value-container {{ trans.address }}
 
         tr
-            td.text-right Block Hash
+            td.text-right
+                a(href="", ng-click="copy(trans.blockhash)") Block Hash
             td.aside-value-container
                 a(href="", data-placement="top", data-animation="am-flip-x", data-trigger="click", title="Block Hash", data-content="{{ trans.blockhash }}", bs-popover)
                     | {{ trans.blockhashTrim }}
 
         tr
-            td.text-right TxID
+            td.text-right
+                a(href="", ng-click="copy(trans.txid)") TxID
             td.aside-value-container
                 a(href="", data-placement="top", data-animation="am-flip-x", bs-popover="{title: 'Block Hash', content: trans.txid}")
                     | {{ trans.txidTrim }}
