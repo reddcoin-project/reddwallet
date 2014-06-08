@@ -53,9 +53,17 @@ App.Wallet.factory('walletDb',
 
                     promise.then(function (message) {
                         self.$timeout(function () {
-                            self.oveviewModel = message.model;
+                            self.overviewModel = message.model;
                         });
                     });
+
+                    // Also get the unconfirmed balance..
+                    /*var unconfirmed = this.walletRpc.getUnconfirmedBalance();
+                    unconfirmed.then(function (message) {
+
+                        self.overviewModel.unconfirmed = message.rpcInfo;
+
+                    });*/
 
                     return promise;
                 },
