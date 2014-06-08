@@ -66,8 +66,6 @@ App.Wallet.controller(
                     contentTemplate: 'scripts/Wallet/Transactions/details-partial.html'
                 });
 
-                console.log(aside);
-
                 aside.$scope.copy = function (toCopy) {
                     // Load native UI library
                     var gui = require('nw.gui');

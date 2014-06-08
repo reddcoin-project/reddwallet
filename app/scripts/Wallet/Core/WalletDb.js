@@ -290,24 +290,51 @@ App.Wallet.factory('walletDb',
 
                 getTransactions: function () {
                     var self = this;
-                    var trans = this.walletRpc.getTransactions();
+                    var deferred = $q.defer();
 
-                    trans.then(function(message) {
-                        $timeout(function() {
-                            var trans = message.rpcInfo;
+                    var dbPromise = self.getAccountsByCriteria({ 'type': 'receive' });
+                    dbPromise.then(function(dbAccounts) {
 
-                            for (var i = 0; i < trans.length; i++) {
-                                trans[i].time = parseInt(trans[i].time);
-                                trans[i].amount = parseFloat(trans[i].amount);
+                        var accountsHashMap = {};
+
+                        for (var i = 0; i < dbAccounts.length; i++) {
+                            accountsHashMap[dbAccounts[i].name] = dbAccounts[i];
+                        }
+
+                        var trans = self.walletRpc.getTransactions();
+
+                        trans.then(
+                            function success (message) {
+                                $timeout(function() {
+                                    var trans = message.rpcInfo;
+
+                                    for (i = 0; i < trans.length; i++) {
+                                        var tran = trans[i];
+                                        tran.time = parseInt(tran.time);
+                                        tran.amount = parseFloat(tran.amount);
+
+                                        if (accountsHashMap[tran.account] != undefined) {
+                                            tran.accountLabel = accountsHashMap[tran.account].label;
+                                        }
+
+                                    }
+
+                                    self.transactions = trans;
+                                    message.rpcInfo = trans;
+
+                                    deferred.resolve(message);
+                                });
+
+                                return message;
+                            },
+                            function error (message) {
+                                deferred.reject(message);
                             }
+                        );
 
-                            self.transactions = trans;
-                        });
-
-                        return message;
                     });
 
-                    return trans;
+                    return deferred.promise;
                 },
 
                 /**
