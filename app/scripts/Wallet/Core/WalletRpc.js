@@ -168,17 +168,6 @@ App.Wallet.factory('walletRpc',
                     return deferred.promise;
                 },
 
-                getUnconfirmedBalance: function () {
-                    var self = this;
-                    var deferred = $q.defer();
-
-                    this.client.exec('getunconfirmedbalance', function (err, info) {
-                        self.rpcToMessage(deferred, err, info);
-                    });
-
-                    return deferred.promise;
-                },
-
                 getWork: function() {
                     var self = this;
                     var deferred = $q.defer();

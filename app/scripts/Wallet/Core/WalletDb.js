@@ -57,14 +57,6 @@ App.Wallet.factory('walletDb',
                         });
                     });
 
-                    // Also get the unconfirmed balance..
-                    /*var unconfirmed = this.walletRpc.getUnconfirmedBalance();
-                    unconfirmed.then(function (message) {
-
-                        self.overviewModel.unconfirmed = message.rpcInfo;
-
-                    });*/
-
                     return promise;
                 },
 
