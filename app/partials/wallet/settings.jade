@@ -7,7 +7,7 @@ h1.page-header
             | Your wallet is not encrypted! It is reccommended to encrypt it to reduce the risk of your Reddcoin being stolen.
 
 .row
-    .col-sm-12
+    .col-sm-6
 
         .panel.panel-warning(ng-hide="isEncrypted")
             .panel-heading Encrypt Wallet
@@ -21,8 +21,19 @@ h1.page-header
                 a.btn.btn-sm.btn-info.pull-right(ng-click="changePassphrase()") Change
                 | Change your passphrase
 
+    .col-sm-6
+
         .panel.panel-default
             .panel-heading Backup Wallet
             .panel-body.text-middle
                 a.btn.btn-sm.btn-info.pull-right(ng-click="backupWallet()") Backup Wallet
                 | It is reccommeded you do this often incase of data loss.
+
+.row(ng-hide="true")
+    .col-sm-6
+
+        .panel.panel-default
+            .panel-heading Command Line
+            .panel-body.text-middle
+                a.btn.btn-sm.btn-info.pull-right(ng-click="openTerminal()") Open Terminal
+                | Run any RPC commands from this terminal.
