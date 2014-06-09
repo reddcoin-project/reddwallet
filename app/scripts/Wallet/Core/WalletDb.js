@@ -127,53 +127,79 @@ App.Wallet.factory('walletDb',
                 /**
                  * If this application is being loaded from a separate program then it will add all the addresses and their
                  * account labels to the database. If the address already exists within the database it won't do anything.
+                 *
+                 * If there is an account in the db but not in the RPC then will also be removed.
+                 *
+                 * Will need to refactor this eventually..
                  */
                 syncAccounts: function(callback) {
                     var self = this;
-                    var deferred = self.$q.defer();
                     var accountsPromise = self.getRpc().getAccounts();
 
-                    var addresses = [];
-
                     accountsPromise.then(
-                        function success(accounts) {
-                            for (var i = 0; i < accounts.length; i++) {
-                                var rpcAcc = accounts[i];
-                                var accPromise = self.getAccountByCriteria({address: rpcAcc.address});
-                                (function (rpcAcc) {
-                                    accPromise.then(
-                                        function success (dbAccount) {
-                                            if (dbAccount == null || dbAccount._id === undefined) {
+                        function success(rpcAccounts) {
 
-                                                if (rpcAcc.address == "") {
-                                                    return null;
+                            var dbPromise = self.getAccountsByCriteria({type: 'receive'});
+
+                            dbPromise.then(
+                                function success (dbAccounts) {
+
+                                    // Turn DB accounts into a hashmap based on the address..
+                                    var dbAccountsHashMap = {};
+                                    for (var j = 0; j < dbAccounts.length; j++) {
+                                        dbAccountsHashMap[dbAccounts[j].address] = dbAccounts[j];
+                                    }
+
+                                    // Turn RPC accounts into a hashmap based on the address..
+                                    var rpcAccountsHashMap = {};
+                                    for (var i = 0; i < rpcAccounts.length; i++) {
+                                        rpcAccountsHashMap[rpcAccounts[i].address] = rpcAccounts[i];
+                                    }
+
+                                    for (var key in rpcAccountsHashMap) {
+                                        var rpcAccount = rpcAccountsHashMap[key];
+
+                                        if (dbAccountsHashMap[rpcAccount.address] == undefined) {
+                                            // No address exists in the database for this address, add it.
+                                            var accModel = {
+                                                type: 'receive',
+                                                name: rpcAccount.account, // This is the actual name of the account...
+                                                label: rpcAccount.account,
+                                                address: rpcAccount.address,
+                                                notes: ''
+                                            };
+
+                                            self.accounts.insert(accModel, function (err, newDbAccount) {
+                                                if (err == null) {
+                                                    // Success
+                                                } else {
+                                                    // Failure
                                                 }
-
-                                                addresses.push(rpcAcc.address);
-
-                                                // No address exists in the database for this address, add it.
-                                                var accModel = {
-                                                    type: 'receive',
-                                                    name: rpcAcc.account, // This is the actual name of the account...
-                                                    label: rpcAcc.account,
-                                                    address: rpcAcc.address,
-                                                    notes: ''
-                                                };
-
-                                                self.accounts.insert(accModel, function (err, newDbAccount) {
-                                                    if (err == null) {
-
-                                                    } else {
-                                                        // Address failure insert...
-                                                    }
-                                                });
-                                            }
-                                        },
-                                        function error (error) {
+                                            });
                                         }
-                                    );
-                                }(rpcAcc));
-                            }
+                                    }
+
+                                    // We will reverse loop so I can remove any accounts that don't belong in the wallet...
+                                    // Since every DB account address should already exist within the RPC call, any
+                                    // undefined ones shouldn't be there..
+                                    for (var key in dbAccountsHashMap) {
+                                        var dbAccount = dbAccountsHashMap[key];
+                                        if (rpcAccountsHashMap[dbAccount.address] == undefined) {
+                                            self.accounts.remove({address: dbAccount.address}, function (err, numRemoved) {
+                                                if (err == null) {
+                                                    // Success
+                                                } else {
+                                                    // Failure
+                                                }
+                                            });
+                                        }
+                                    }
+
+                                },
+                                function error (error) {
+                                }
+                            );
+
                         },
                         function error(accounts) {
 
