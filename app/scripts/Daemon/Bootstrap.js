@@ -44,7 +44,7 @@ App.Daemon.Bootstrap = (function () {
         this.daemonMap = {
             'linux': {
                 'x32': 'daemons/reddcoind-linux-32',
-                'x64': 'daemons/reddcoind-linux-32',
+                'x64': 'daemons/reddcoind',
                 'default': 'daemons/reddcoind-linux-32'
             },
             'win32': {
@@ -378,7 +378,7 @@ App.Daemon.Bootstrap = (function () {
                     try {
                         process.kill(pid, 'SIGTERM');
                         this.$timeout(function() {
-                            this.debug("Resolved");
+                            self.debug("Resolved");
                             deferred.resolve(true);
                         }, 500);
                     } catch (ex) {
