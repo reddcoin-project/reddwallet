@@ -1,12 +1,20 @@
-h1.page-header
-    | News
-    .pull-right
-        small
-            button.btn.btn-default.btn-xs(ng-click="refreshNews()") Refresh
+.row
+    .col-sm-12
+        ul.nav.nav-pills
+            li(ng-class="{active: activePage == 'news'}")
+                a(href="", ng-click="changePage('news')") News
 
+            li(ng-class="{active: activePage == 'announcement'}")
+                a(href="", ng-click="changePage('announcement')") Annoucement
+
+            li(ng-class="{active: activePage == 'reddcoin'}")
+                a(href="", ng-click="changePage('reddcoin')") #reddcoin
+
+            li.pull-right
+                a(href="", ng-click="refreshNews()") Refresh
 
 .news-container
-    .media.reddit-post(ng-repeat="post in posts")
+    .media.reddit-post(ng-repeat="post in postData.items")
         .media-body
             h4
                 a(href="", ng-click="openPost($index)", target="_blank")
@@ -14,7 +22,7 @@ h1.page-header
             p
                 span.text-muted By &nbsp;
                 | {{ post.data.author }}
-                span.text-muted &nbsp; on {{ post.data.timestamp | date:'d MMM HH:mm:ss Z' }}
+                span.text-muted &nbsp; on {{ post.data.timestamp | date:'EEE, d MMM yyyy HH:mm:ss Z' }}
 
             p.reddit-content(ng-hide="true")
                 span.reddit-content(ng-bind-html="post.data.html_content_text | cut:true:200 | to_trusted")

@@ -1,8 +1,8 @@
 App.Global.controller(
     'AppCtrl',
     [
-        '$scope', '$interval', '$location', '$resource', '$rootScope', 'walletDb', 'DaemonManager',
-        function($scope, $interval, $location, $resource, $rootScope, walletDb, daemon) {
+        '$scope', '$interval', '$location', '$resource', '$rootScope', 'walletDb', 'DaemonManager', 'News',
+        function($scope, $interval, $location, $resource, $rootScope, walletDb, daemon, News) {
 
             $scope.walletDb = walletDb;
 
