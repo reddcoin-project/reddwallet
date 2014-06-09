@@ -133,6 +133,8 @@ App.Wallet.factory('walletDb',
                     var deferred = self.$q.defer();
                     var accountsPromise = self.getRpc().getAccounts();
 
+                    var addresses = [];
+
                     accountsPromise.then(
                         function success(accounts) {
                             for (var i = 0; i < accounts.length; i++) {
@@ -146,6 +148,8 @@ App.Wallet.factory('walletDb',
                                                 if (rpcAcc.address == "") {
                                                     return null;
                                                 }
+
+                                                addresses.push(rpcAcc.address);
 
                                                 // No address exists in the database for this address, add it.
                                                 var accModel = {
