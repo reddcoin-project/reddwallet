@@ -86,7 +86,7 @@ App.Wallet.controller(
             $scope.changePage('news');
 
             $scope.openPost = function ($index) {
-                var post = $scope.posts[$index];
+                var post = $scope.postData.items[$index];
 
                 require('nw.gui').Shell.openExternal(post.data.url);
             }
