@@ -137,8 +137,10 @@ App.Wallet.factory('walletDb',
                     var accountsPromise = self.getRpc().getAccounts();
 
                     accountsPromise.then(
-                        function success(rpcAccounts) {
+                        function success(message) {
 
+                            var timesCompleted = 0;
+                            var rpcAccounts = message.rpcInfo;
                             var dbPromise = self.getAccountsByCriteria({type: 'receive'});
 
                             dbPromise.then(
@@ -156,10 +158,30 @@ App.Wallet.factory('walletDb',
                                         rpcAccountsHashMap[rpcAccounts[i].address] = rpcAccounts[i];
                                     }
 
+                                    var deleteInvalidAccounts = function () {
+                                        // We will reverse loop so I can remove any accounts that don't belong in the wallet...
+                                        // Since every DB account address should already exist within the RPC call, any
+                                        // undefined ones shouldn't be there..
+                                        for (var key in dbAccountsHashMap) {
+                                            var dbAccount = dbAccountsHashMap[key];
+                                            if (rpcAccountsHashMap[dbAccount.address] == undefined || dbAccount.address == '') {
+                                                self.accounts.remove({address: dbAccount.address}, function (err, numRemoved) {
+                                                    if (err == null) {
+                                                        // Success
+                                                    } else {
+                                                        // Failure
+                                                    }
+                                                });
+                                            }
+                                        }
+                                    };
+
                                     for (var key in rpcAccountsHashMap) {
+
                                         var rpcAccount = rpcAccountsHashMap[key];
 
                                         if (dbAccountsHashMap[rpcAccount.address] == undefined) {
+
                                             // No address exists in the database for this address, add it.
                                             var accModel = {
                                                 type: 'receive',
@@ -170,29 +192,27 @@ App.Wallet.factory('walletDb',
                                             };
 
                                             self.accounts.insert(accModel, function (err, newDbAccount) {
-                                                if (err == null) {
-                                                    // Success
-                                                } else {
-                                                    // Failure
-                                                }
-                                            });
-                                        }
-                                    }
+                                                timesCompleted++;
 
-                                    // We will reverse loop so I can remove any accounts that don't belong in the wallet...
-                                    // Since every DB account address should already exist within the RPC call, any
-                                    // undefined ones shouldn't be there..
-                                    for (var key in dbAccountsHashMap) {
-                                        var dbAccount = dbAccountsHashMap[key];
-                                        if (rpcAccountsHashMap[dbAccount.address] == undefined) {
-                                            self.accounts.remove({address: dbAccount.address}, function (err, numRemoved) {
                                                 if (err == null) {
                                                     // Success
                                                 } else {
                                                     // Failure
                                                 }
+
+                                                if (Object.keys(rpcAccountsHashMap).length == timesCompleted) {
+                                                    deleteInvalidAccounts();
+                                                }
+
                                             });
+                                        } else {
+                                            timesCompleted++;
+
+                                            if (Object.keys(rpcAccountsHashMap).length == timesCompleted) {
+                                                deleteInvalidAccounts();
+                                            }
                                         }
+
                                     }
 
                                 },

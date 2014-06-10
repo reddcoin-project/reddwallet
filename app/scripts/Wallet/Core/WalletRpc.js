@@ -180,59 +180,12 @@ App.Wallet.factory('walletRpc',
                 },
 
                 getAccounts: function () {
-
                     var self = this;
                     var deferred = $q.defer();
                     var async = require('async');
 
-                    this.client.exec('listaccounts', function (err, accountList) {
-                        if (err == null) {
-
-                            var accounts = [];
-
-                            for (var key in accountList) {
-                                if (!accountList.hasOwnProperty(key)) continue;
-
-                                (function (key) {
-                                    async.series(
-                                        {
-                                            one: function (callback) {
-
-                                                var newAccount = {
-                                                    account: key,
-                                                    balance: accountList[key],
-                                                    address: ''
-                                                };
-
-                                                accounts.push(newAccount);
-
-                                                self.client.exec('getaddressesbyaccount', newAccount.account, function (err, address) {
-                                                    if (err != null) {
-                                                        console.log(err);
-                                                        callback(false);
-                                                    } else {
-                                                        if (address.length > 0) {
-                                                            newAccount.address = address[0];
-                                                            callback(true);
-                                                        } else {
-                                                            callback(false);
-                                                        }
-                                                    }
-                                                });
-
-                                            }
-                                        },
-                                        function (err, results) {
-                                            if (err.one != null) {
-                                                deferred.reject([]);
-                                            } else {
-                                                deferred.resolve(accounts);
-                                            }
-                                        }
-                                    )
-                                }(key));
-                            }
-                        }
+                    this.client.exec('listreceivedbyaddress', 1, true, function (err, info) {
+                        self.rpcToMessage(deferred, err, info);
                     });
 
                     return deferred.promise;
