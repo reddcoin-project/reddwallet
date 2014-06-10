@@ -1,4 +1,7 @@
 ul.nav.navbar-nav.navbar-right
+    li(ng-class="getClass('/announcement')")
+        a(ng-href='#/announcement')
+            | Announcement
     li(ng-class="getClass('/news')")
         a(ng-href='#/news')
             | News

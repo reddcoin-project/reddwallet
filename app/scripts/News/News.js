@@ -220,7 +220,7 @@ App.Irc.factory('News',
                             });
                         }
 
-                        if (posts == 20) {
+                        if (posts == 15) {
                             $timeout(function() {
                                 self.reddcoinDeferred.resolve(self.reddcoinPosts);
                             });

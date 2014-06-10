@@ -1,12 +1,8 @@
 .row
     .col-sm-12
         ul.nav.nav-pills
-            li(ng-class="{active: activePage == 'news'}")
-                a(href="", ng-click="changePage('news')") News
-
-            li(ng-class="{active: activePage == 'reddcoin'}")
-                a(href="", ng-click="changePage('reddcoin')") #reddcoin
-
+            li.active
+                a(href="") Announcement
             li.pull-right
                 a(href="", ng-click="refreshNews()") Refresh
 

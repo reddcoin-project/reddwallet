@@ -13,7 +13,6 @@ App.Wallet.controller(
 
             $scope.content = {
                 'news': [],
-                'announcement': [],
                 'reddcoin': []
             };
 
@@ -38,18 +37,6 @@ App.Wallet.controller(
                     } else {
                         redditDeferred.then(function(news) {
                             $scope.content.news = news;
-                            $scope.reload();
-                        });
-                    }
-
-                    var announcementDeferred = News.getAnnouncements();
-
-                    if (announcementDeferred.then == undefined) {
-                        $scope.content.announcement = announcementDeferred;
-                        $scope.reload();
-                    } else {
-                        announcementDeferred.then(function(announcements) {
-                            $scope.content.announcement = announcements;
                             $scope.reload();
                         });
                     }

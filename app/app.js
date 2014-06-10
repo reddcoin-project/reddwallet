@@ -32,6 +32,7 @@ App.config([
         $routeProvider
             .when('/dashboard', { controller: 'DashboardCtrl', templateUrl: '/partials/dashboard.html'})
             .when('/news', { controller: 'NewsCtrl', templateUrl: '/partials/news.html'})
+            .when('/announcement', { controller: 'AnnouncementCtrl', templateUrl: '/partials/announcement.html'})
             .when('/send', { controller: 'SendCtrl', templateUrl: '/partials/send.html' })
             .when('/receive', { controller: 'ReceiveCtrl', templateUrl: '/partials/receive.html' })
             .when('/transactions', { controller: 'TransactionsCtrl', templateUrl: '/partials/transactions.html' })
