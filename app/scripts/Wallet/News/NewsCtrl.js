@@ -29,6 +29,12 @@ App.Wallet.controller(
 
             $scope.refreshNews = function () {
                 $timeout(function() {
+
+                    if ($scope.hasRun) {
+                        News.loadRedditPosts();
+                        News.loadReddcoinPosts();
+                    }
+
                     var redditDeferred = News.getRedditPosts();
 
                     if (redditDeferred.then == undefined) {

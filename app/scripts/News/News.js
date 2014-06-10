@@ -41,6 +41,7 @@ App.Irc.factory('News',
 
                 loadRedditPosts: function () {
                     var self = this;
+                    this.redditDeferred = $q.defer();
 
                     this.request(
                         {
@@ -76,6 +77,7 @@ App.Irc.factory('News',
 
                 loadAnnouncements: function () {
                     var self = this;
+                    this.announcementsDeferred = $q.defer();
 
                     try {
                         var FeedParser = require('feedparser');
@@ -156,6 +158,7 @@ App.Irc.factory('News',
 
                 loadReddcoinPosts: function () {
                     var self = this;
+                    this.reddcoinDeferred = $q.defer();
 
                     try {
                         var FeedParser = require('feedparser');

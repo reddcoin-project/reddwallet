@@ -12,6 +12,10 @@ App.Wallet.controller(
             $scope.postData = [];
             $scope.refreshNews = function () {
                 $timeout(function() {
+                    if (!$scope.hasRun) {
+                        News.loadAnnouncements();
+                    }
+
                     var announcementDeferred = News.getAnnouncements();
 
                     if (announcementDeferred.then == undefined) {
