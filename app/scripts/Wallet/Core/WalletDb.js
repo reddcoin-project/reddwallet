@@ -361,7 +361,7 @@ App.Wallet.factory('walletDb',
                                     for (i = 0; i < trans.length; i++) {
                                         var tran = trans[i];
                                         tran.time = parseInt(tran.time);
-                                        tran.amount = parseFloat(tran.amount);
+                                        tran.amount = tran.amount;
 
                                         if (accountsHashMap[tran.account] != undefined) {
                                             tran.accountLabel = accountsHashMap[tran.account].label;
