@@ -12,7 +12,7 @@ table.table.table-condensed
         tr
             td.text-right Amount
             td.aside-value-container
-                | {{ trans.amount }}
+                | {{ trans.amount | number:8  }}
                 span(ng-show="trans.fee > 0")
                     small
                         em {{ trans.fee }})
