@@ -133,14 +133,8 @@ App.Wallet.factory('walletRpc',
                     var self = this;
                     var deferred = $q.defer();
 
-                    this.client.exec('settxfee', data.fee, function (err, info) {
-                        if (info || info == 'true') {
-                            self.client.exec('sendtoaddress', data.address, parseFloat(data.amount), data.payerComment, data.payeeComment, function (err, info) {
-                                self.rpcToMessage(deferred, err, info);
-                            });
-                        } else {
-                            self.rpcToMessage(deferred, err, info);
-                        }
+                    self.client.exec('sendtoaddress', data.address, parseFloat(data.amount), data.payerComment, data.payeeComment, function (err, info) {
+                        self.rpcToMessage(deferred, err, info);
                     });
 
                     return deferred.promise;

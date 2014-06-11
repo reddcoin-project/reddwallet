@@ -32,8 +32,7 @@ App.Wallet.controller(
                     amount: 1,
                     address: '',
                     payerComment: '',
-                    payeeComment: '',
-                    fee: parseFloat(daemon.getBootstrap().daemonConfig.paytxfee)
+                    payeeComment: ''
                 };
                 $scope.updateMetaTotal();
             };
@@ -82,7 +81,7 @@ App.Wallet.controller(
             };
 
             $scope.updateMetaTotal = function () {
-                var result = parseFloat($scope.send.amount) + parseFloat($scope.send.fee);
+                var result = parseFloat($scope.send.amount);
                 if (result == null || isNaN(result)) {
                     result = "";
                     $scope.disableSend = true;
