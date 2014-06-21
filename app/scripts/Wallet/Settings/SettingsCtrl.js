@@ -28,7 +28,7 @@ App.Wallet.controller(
 
                     if (newPassphrase == '' || newPassphrase == null) {
                         $alert({
-                            title: "Encryption Failed",
+                            title: "Change Failed",
                             content: "You cannot have a blank passphrase",
                             type: "warning"
                         });
