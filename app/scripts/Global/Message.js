@@ -13,9 +13,11 @@ App.Global.Message = (function () {
         this.message = message;
         this.code = code;
 
+        // When its an RPC message
         this.rpcInfo = {};
         this.rpcError = {};
 
+        // When its an DB message
         this.dbError = {};
         this.dbModel = {};
 
