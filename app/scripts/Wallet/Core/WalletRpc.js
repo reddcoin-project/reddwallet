@@ -162,6 +162,17 @@ App.Wallet.factory('walletRpc',
                     return deferred.promise;
                 },
 
+                getValidAddress: function (address) {
+                    var self = this;
+                    var deferred = $q.defer();
+
+                    this.client.exec('validateaddress', address, function (err, info) {
+                        self.rpcToMessage(deferred, err, info);
+                    });
+
+                    return deferred.promise;
+                },
+
                 getWork: function() {
                     var self = this;
                     var deferred = $q.defer();

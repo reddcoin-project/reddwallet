@@ -60,33 +60,45 @@ App.Wallet.controller(
                     show: false
                 });
 
+                var invalidAddressHandler = function (message) {
+                    $alert({
+                        "title": "New Contact",
+                        "content": "Invalid Address",
+                        "type": "warning"
+                    });
+                };
+
                 newAddress.$scope.focusMe = true;
                 newAddress.$scope.label = '';
                 newAddress.$scope.address = '';
                 newAddress.$scope.confirm = function (label, address) {
-                    var promise = walletDb.newContact(label, address);
-                    promise.then(
-                        function success(message) {
-                            $scope.refreshAccounts();
-                            $alert({
-                                "title": "New Contact",
-                                "content": "Created",
-                                "type": "success"
-                            });
 
-                            return message;
+                    var validAddress = walletDb.walletRpc.getValidAddress(address);
+
+                    validAddress.then(
+                        function valid(message) {
+
+                            if (!message.rpcInfo.isvalid) {
+                                invalidAddressHandler(message);
+                                return;
+                            }
+
+                            var promise = walletDb.newContact(label, address);
+                            promise.then(
+                                function success(message) {
+                                    $scope.refreshAccounts();
+                                    $alert({
+                                        "title": "New Contact",
+                                        "content": "Created",
+                                        "type": "success"
+                                    });
+
+                                    return message;
+                                },
+                                invalidAddressHandler
+                            );
                         },
-                        function error(message) {
-                            var errorMessage = message.rpcError.code == -14 ? "Incorrect passphrase." : "Failed";
-
-                            $alert({
-                                "title": "New Contact",
-                                "content": errorMessage,
-                                "type": "warning"
-                            });
-
-                            return message;
-                        }
+                        invalidAddressHandler
                     );
                 };
 
