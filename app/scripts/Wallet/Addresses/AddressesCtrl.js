@@ -146,7 +146,7 @@ App.Wallet.controller(
                 };
 
                 editAddress.$promise.then(editAddress.show);
-            },
+            };
 
             $scope.editAddress = function (account) {
                 var self = this;
