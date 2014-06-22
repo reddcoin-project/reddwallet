@@ -319,7 +319,7 @@ App.Daemon.Bootstrap = (function () {
          */
         runOsSpecificTasks: function() {
             if (!this.isWindows()) {
-                this.childProcess.exec('chmod 777 ' + this.daemonFilePath);
+                this.childProcess.exec('chmod +x' + this.daemonFilePath);
             }
         },
 
