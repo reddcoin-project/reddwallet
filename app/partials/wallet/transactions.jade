@@ -11,10 +11,10 @@ table.table.table-hover.table-condensed.table-middle(ng-table="tableParams", tem
 
         td(data-title="'Time'", sortable="'time'") {{ trans.time * 1000 | date:'yyyy-MM-dd HH:mm:ss Z' }}
         td(data-title="'Account'", sortable="'accountLabel'") {{ trans.accountLabel }}
-        td(data-title="'Amount'")
+        td(data-title="'Amount'", sortable="'amount'")
             span(ng-show="trans.amount >= 0") +
             | {{ trans.amount }}
-        td(data-title="'Address'") {{ trans.address }}
+        td(data-title="'Address'", sortable="'address'") {{ trans.address }}
 
 
 script(type='text/ng-template', id="custom/pager")
