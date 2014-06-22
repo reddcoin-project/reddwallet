@@ -4,9 +4,11 @@ App.Wallet.controller(
         '$scope',
         '$alert',
         '$modal',
+        '$timeout',
         'walletDb',
         'fileDialog',
-        function ($scope, $alert, $modal, walletDb, fileDialog) {
+        'DaemonManager',
+        function ($scope, $alert, $modal, $timeout, walletDb, fileDialog, DaemonManager) {
 
             $scope.walletDb = walletDb;
 
@@ -89,12 +91,25 @@ App.Wallet.controller(
                         function success(message) {
                             $alert({
                                 title: "Wallet Encryption",
-                                content: "Success! You will need to restart.",
+                                content: "Complete, now restarting daemon",
                                 type: "success",
                                 duration: 7
                             });
-                            var gui = require('nw.gui').App.Window.get();
-                            gui.reload(3);
+                            $timeout(function() {
+                                DaemonManager.killDaemon();
+                                DaemonManager.initialize();
+                                DaemonManager.getBootstrap().getPromise().then(function success() {
+                                    walletDb.getRpc().updateWalletLock().then(
+                                        function success() {
+                                            $scope.isEncrypted = walletDb.getRpc().isEncrypted;
+                                        },
+                                        function error() {
+                                            $scope.isEncrypted = walletDb.getRpc().isEncrypted;
+                                        }
+                                    );
+                                });
+                                DaemonManager.getBootstrap().startLocal();
+                            });
                         },
                         function error(message) {
                             $alert({

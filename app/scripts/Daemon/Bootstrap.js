@@ -109,6 +109,10 @@ App.Daemon.Bootstrap = (function () {
             return this.deferred.promise;
         },
 
+        killDaemon: function () {
+            this.daemon.kill('SIGTERM');
+        },
+
         startDaemonLaunch: function() {
             var self = this;
 

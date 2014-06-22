@@ -8,19 +8,17 @@ App.Daemon.factory('DaemonManager',
         function($q, $timeout, $interval, $rootScope, walletDb) {
 
             function Manager() {
-
-                this.running = false;
-
-                this.bootstrap = new App.Daemon.Bootstrap($q, $timeout, $interval, $rootScope, walletDb);
-
                 this.initialize();
-
             }
 
             Manager.prototype = {
 
                 initialize: function() {
                     var self = this;
+
+                    this.running = false;
+
+                    this.bootstrap = new App.Daemon.Bootstrap($q, $timeout, $interval, $rootScope, walletDb);
 
                     /**
                      * This promise callback will set the running bool once the bootstrap has completed.
@@ -33,6 +31,10 @@ App.Daemon.factory('DaemonManager',
                         return message;
                     });
 
+                },
+
+                killDaemon: function () {
+                    this.bootstrap.killDaemon();
                 },
 
                 getBootstrap: function() {

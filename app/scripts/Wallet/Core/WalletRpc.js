@@ -187,7 +187,9 @@ App.Wallet.factory('walletRpc',
 
                 updateWalletLock: function () {
                     var self = this;
-                    this.lockWallet().then(
+                    var promise = this.lockWallet();
+
+                    promise.then(
                         function success (message) {
                             self.isEncrypted = true;
                         },
@@ -195,6 +197,8 @@ App.Wallet.factory('walletRpc',
                             self.isEncrypted = false;
                         }
                     );
+
+                    return promise;
                 },
 
                 handlePassPhraseCallback: function (command, args, callback) {
