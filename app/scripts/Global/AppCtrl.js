@@ -35,6 +35,11 @@ App.Global.controller(
                 $scope.explorerSearch = "";
             };
 
+            $scope.openHelp = function () {
+                var url = "http://www.reddit.com/r/reddCoin/wiki/index";
+                require('nw.gui').Shell.openExternal(url);
+            };
+
             daemon.getBootstrap().getPromise().then(function(message) {
                 fetchOverview();
                 $scope.walletDb.syncAccounts();
