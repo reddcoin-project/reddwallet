@@ -1,8 +1,11 @@
 .row
     .col-sm-12
         ul.nav.nav-pills
-            li(ng-class="{active: activePage == 'news'}")
-                a(href="", ng-click="changePage('news')") Reddit
+            li(ng-class="{active: activePage == 'reddit-top'}")
+                a(href="", ng-click="changePage('reddit-top')") Reddit (Top)
+
+            li(ng-class="{active: activePage == 'reddit-new'}")
+                a(href="", ng-click="changePage('reddit-new')") Reddit (New)
 
             li(ng-class="{active: activePage == 'reddcoin'}")
                 a(href="", ng-click="changePage('reddcoin')") Twitter

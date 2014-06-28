@@ -9,9 +9,18 @@ App.Irc.factory('News',
 
                 this.request = require('request');
 
-                this.redditDeferred = $q.defer();
+                this.redditDeferred = {
+                    'top': $q.defer(),
+                    'new': $q.defer()
+                };
+
                 this.redditPosts = {
-                    items: []
+                    'top': {
+                        items: []
+                    },
+                    'new': {
+                        items: []
+                    }
                 };
 
                 this.announcementsDeferred = $q.defer();
@@ -35,17 +44,20 @@ App.Irc.factory('News',
                     this.loadReddcoinPosts();
                 },
 
-                getRedditPosts: function () {
-                    return this.redditDeferred.promise;
+                getRedditPosts: function (type) {
+                    return this.redditDeferred[type].promise;
                 },
 
-                loadRedditPosts: function () {
+                loadRedditPosts: function (type) {
                     var self = this;
-                    this.redditDeferred = $q.defer();
+                    this.redditDeferred[type] = $q.defer();
+
+                    var urlType = type;
+                    urlType = (urlType == 'top') ? 'hot' : urlType;
 
                     this.request(
                         {
-                            uri: 'http://www.reddit.com/r/reddcoin/new.json?sort=new',
+                            uri: 'http://www.reddit.com/r/reddcoin/' + urlType + '.json',
                             json: true
                         },
                         function (error, response, body) {
@@ -59,16 +71,16 @@ App.Irc.factory('News',
                                 });
 
                                 $timeout(function() {
-                                    self.redditPosts.items = posts;
-                                    self.redditDeferred.resolve(self.redditPosts);
+                                    self.redditPosts[type].items = posts;
+                                    self.redditDeferred[type].resolve(self.redditPosts[type]);
                                 });
                             } else {
-                                self.redditDeferred.reject(error, response);
+                                self.redditDeferred[type].reject(error, response);
                             }
                         }
                     );
 
-                    return self.redditDeferred.promise;
+                    return self.redditDeferred[type].promise;
                 },
 
                 getAnnouncements: function () {

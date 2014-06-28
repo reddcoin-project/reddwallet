@@ -9,10 +9,11 @@ App.Wallet.controller(
 
             $scope.hasRun = false;
 
-            $scope.activePage = 'news';
+            $scope.activePage = 'reddit-top';
 
             $scope.content = {
-                'news': [],
+                'reddit-top': [],
+                'reddit-new': [],
                 'reddcoin': []
             };
 
@@ -31,18 +32,33 @@ App.Wallet.controller(
                 $timeout(function() {
 
                     if ($scope.hasRun) {
-                        News.loadRedditPosts();
+                        News.loadRedditPosts('top');
+                        News.loadRedditPosts('new');
                         News.loadReddcoinPosts();
                     }
 
-                    var redditDeferred = News.getRedditPosts();
+                    var redditDeferred = {
+                        'top': News.getRedditPosts('top'),
+                        'new': News.getRedditPosts('new')
+                    };
 
-                    if (redditDeferred.then == undefined) {
-                        $scope.content.news = redditDeferred;
+
+                    if (redditDeferred['top'].then == undefined) {
+                        $scope.content['reddit-top'] = redditDeferred['top'];
                         $scope.reload();
                     } else {
-                        redditDeferred.then(function(news) {
-                            $scope.content.news = news;
+                        redditDeferred['top'].then(function(news) {
+                            $scope.content['reddit-top'] = news;
+                            $scope.reload();
+                        });
+                    }
+
+                    if (redditDeferred['new'].then == undefined) {
+                        $scope.content['reddit-new'] = redditDeferred['new'];
+                        $scope.reload();
+                    } else {
+                        redditDeferred['new'].then(function(news) {
+                            $scope.content['reddit-new'] = news;
                             $scope.reload();
                         });
                     }
@@ -76,7 +92,7 @@ App.Wallet.controller(
             };
 
             $scope.refreshNews();
-            $scope.changePage('news');
+            $scope.changePage('reddit-top');
 
             $scope.openPost = function ($index) {
                 var post = $scope.postData.items[$index];
