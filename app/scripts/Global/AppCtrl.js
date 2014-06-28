@@ -10,6 +10,7 @@ App.Global.controller(
             $scope.blocksSynced = false;
 
             $scope.ircMessages = 0;
+            $scope.explorerSearch = '';
 
             $rootScope.$on('irc.message.highlight', function (event) {
                 console.log("event");
@@ -22,6 +23,16 @@ App.Global.controller(
 
             $scope.daemon = {
                 running: false
+            };
+
+            $scope.searchExplorer = function () {
+                if ($scope.explorerSearch == "") {
+                    return;
+                }
+
+                var url = "http://bitinfocharts.com/reddcoin/search/" + $scope.explorerSearch;
+                require('nw.gui').Shell.openExternal(url);
+                $scope.explorerSearch = "";
             };
 
             daemon.getBootstrap().getPromise().then(function(message) {
