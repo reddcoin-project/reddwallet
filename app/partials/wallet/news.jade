@@ -14,7 +14,10 @@
                 a(href="", ng-click="refreshNews()") Refresh
 
 .news-container
-    .media.reddit-post(ng-repeat="post in postData.items")
+    .media-reddit-post(ng-hide="loaded[activePage]")
+        .media-body
+            h4 Loading...
+    .media.reddit-post(ng-repeat="post in postData.items", ng-show="loaded[activePage]")
         .media-body
             h4
                 a(href="", ng-click="openPost($index)", target="_blank")

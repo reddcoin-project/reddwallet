@@ -8,21 +8,23 @@ App.Wallet.controller(
         function ($scope, $timeout, $alert, News) {
 
             $scope.hasRun = false;
-
+            $scope.loaded = false;
             $scope.postData = [];
             $scope.refreshNews = function () {
                 $timeout(function() {
-                    if (!$scope.hasRun) {
-                        News.loadAnnouncements();
-                    }
+                    $scope.loaded = false;
+
+                    News.loadAnnouncements();
 
                     var announcementDeferred = News.getAnnouncements();
 
                     if (announcementDeferred.then == undefined) {
                         $scope.postData = announcementDeferred;
+                        $scope.loaded = true;
                     } else {
                         announcementDeferred.then(function(announcements) {
                             $scope.postData = announcements;
+                            $scope.loaded = true;
                         });
                     }
                 });

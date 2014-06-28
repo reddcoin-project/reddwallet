@@ -28,9 +28,17 @@ App.Wallet.controller(
                 $scope.postData = $scope.content[$scope.activePage];
             };
 
+            $scope.resetLoadingScreens = function () {
+                $scope.loaded = {
+                    'reddit-top': false,
+                    'reddit-new': false,
+                    'reddcoin': false
+                };
+            };
+
             $scope.refreshNews = function () {
                 $timeout(function() {
-
+                    $scope.resetLoadingScreens();
                     if ($scope.hasRun) {
                         News.loadRedditPosts('top');
                         News.loadRedditPosts('new');
@@ -45,20 +53,24 @@ App.Wallet.controller(
 
                     if (redditDeferred['top'].then == undefined) {
                         $scope.content['reddit-top'] = redditDeferred['top'];
+                        $scope.loaded['reddit-top'] = true;
                         $scope.reload();
                     } else {
                         redditDeferred['top'].then(function(news) {
                             $scope.content['reddit-top'] = news;
+                            $scope.loaded['reddit-top'] = true;
                             $scope.reload();
                         });
                     }
 
                     if (redditDeferred['new'].then == undefined) {
                         $scope.content['reddit-new'] = redditDeferred['new'];
+                        $scope.loaded['reddit-new'] = true;
                         $scope.reload();
                     } else {
                         redditDeferred['new'].then(function(news) {
                             $scope.content['reddit-new'] = news;
+                            $scope.loaded['reddit-new'] = true;
                             $scope.reload();
                         });
                     }
@@ -67,10 +79,12 @@ App.Wallet.controller(
 
                     if (reddcoinDeferred.then == undefined) {
                         $scope.content.reddcoin = reddcoinDeferred;
+                        $scope.loaded['reddcoin'] = true;
                         $scope.reload();
                     } else {
                         reddcoinDeferred.then(function(reddcoinPosts) {
                             $scope.content.reddcoin = reddcoinPosts;
+                            $scope.loaded['reddcoin'] = true;
                             $scope.reload();
                         });
                     }
