@@ -30,6 +30,7 @@ App.Irc = angular.module('app.irc', []);
 App.config([
     '$routeProvider', '$locationProvider', function ($routeProvider, $locationProvider, config) {
         $routeProvider
+            .when('/initialize', { controller: 'InitializeCtrl', templateUrl: '/partials/initialize.html' })
             .when('/dashboard', { controller: 'DashboardCtrl', templateUrl: '/partials/dashboard.html'})
             .when('/news', { controller: 'NewsCtrl', templateUrl: '/partials/news.html'})
             .when('/announcement', { controller: 'AnnouncementCtrl', templateUrl: '/partials/announcement.html'})
@@ -42,7 +43,6 @@ App.config([
 
             .when('/irc', { controller: 'MainIrcCtrl', templateUrl: '/partials/irc-main.html' })
 
-            .when('/initialize', { controller: 'InitializeCtrl', templateUrl: '/partials/initialize.html' })
             .otherwise({ redirectTo: '/dashboard' });
 
         return $locationProvider.html5Mode(false);

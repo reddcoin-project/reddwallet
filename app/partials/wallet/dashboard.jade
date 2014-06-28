@@ -2,7 +2,20 @@ h1.page-header
     | Dashboard
 
 .row
-    .col-md-12
+    .col-md-6
+        table.table.prices-table
+            tbody
+                tr
+                    td BTC/USD
+                    td {{ marketData.btc }}
+                tr
+                    td RDD/BTC
+                    td {{ marketData.rddBtc }}
+                tr
+                    td RDD/LTC
+                    td {{ marketData.rddLtc }}
+
+    .col-md-6
         table.table.totals-table
             tbody
                 tr
