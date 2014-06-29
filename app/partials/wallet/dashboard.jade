@@ -14,6 +14,9 @@ h1.page-header
                 tr
                     td RDD/LTC
                     td {{ marketData.rddLtc }}
+                tr
+                    td Est. USD
+                    td {{ marketData.rddBtc * marketData.btc * walletOverview.balance | number:2 }}
 
     .col-md-6
         table.table.totals-table
