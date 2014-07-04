@@ -155,7 +155,7 @@ App.Irc.factory('News',
 
                             self.announcements.items.push({
                                 data: {
-                                    title: parts[1],
+                                    title: item.description,
                                     author: '@' + parts[0],
                                     timestamp: item['rss:pubdate']['#'],
                                     url: item.permalink,
@@ -243,7 +243,7 @@ App.Irc.factory('News',
 
                             self.reddcoinPosts.items.push({
                                 data: {
-                                    title: parts[1],
+                                    title: item.description,
                                     author: '@' + parts[0],
                                     timestamp: item['rss:pubdate']['#'],
                                     url: item.permalink,
