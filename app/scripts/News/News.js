@@ -64,7 +64,10 @@ App.Irc.factory('News',
                             if (!error && response.statusCode == 200) {
                                 var posts = body.data.children;
 
+
+
                                 posts.forEach(function (post) {
+                                    post.data.url = "http://www.reddit.com" + post.data.permalink;
                                     post.data.timestamp = post.data.created_utc * 1000;
                                     post.data.html_content = _.unescape(post.data.selftext_html);
                                     post.data.html_content_text = _.unescape(nl2br(post.data.selftext));
@@ -143,10 +146,17 @@ App.Irc.factory('News',
                         }
 
                         while (item = stream.read()) {
+                            // Splitting into N parts then popping the first one onto a list and joining the rest onto the same list
+                            // http://stackoverflow.com/questions/2878703/split-string-once-in-javascript
+
+                            var delimiter = ': ';
+                            var components = item.title.split(delimiter);
+                            var parts = [ components.shift(), components.join(delimiter) ]
+
                             self.announcements.items.push({
                                 data: {
-                                    title: item.title,
-                                    author: '@reddcoin',
+                                    title: parts[1],
+                                    author: '@' + parts[0],
                                     timestamp: item['rss:pubdate']['#'],
                                     url: item.permalink,
                                     html_content_text: item.summary
@@ -224,10 +234,17 @@ App.Irc.factory('News',
                         }
 
                         while (item = stream.read()) {
+                            // Splitting into N parts then popping the first one onto a list and joining the rest onto the same list
+                            // http://stackoverflow.com/questions/2878703/split-string-once-in-javascript
+
+                            var delimiter = ': ';
+                            var components = item.title.split(delimiter);
+                            var parts = [ components.shift(), components.join(delimiter) ]
+
                             self.reddcoinPosts.items.push({
                                 data: {
-                                    title: item.title,
-                                    author: '#reddcoin',
+                                    title: parts[1],
+                                    author: '@' + parts[0],
                                     timestamp: item['rss:pubdate']['#'],
                                     url: item.permalink,
                                     html_content_text: item.summary
