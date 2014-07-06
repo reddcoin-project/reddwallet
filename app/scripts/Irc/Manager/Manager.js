@@ -70,13 +70,14 @@ App.Irc.factory('IrcManager',
                             var users = [];
 
                             for (var i = 0; i < names.length; i++) {
-                                var name = names[i];
-                                if (name.indexOf("@") === 0) {
-                                    operators.push(name);
-                                } else if (name.indexOf("+") === 0) {
-                                    voiced.push(name);
+                                var user = names[i];
+
+                                if (user.mode == "@") {
+                                    operators.push(user.mode + user.name);
+                                } else if (user.mode == "+") {
+                                    voiced.push(user.mode + user.name);
                                 } else {
-                                    users.push(name);
+                                    users.push(user.mode + user.name);
                                 }
                             }
 
