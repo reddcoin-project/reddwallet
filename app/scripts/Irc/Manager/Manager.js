@@ -42,7 +42,28 @@ App.Irc.factory('IrcManager',
 
                 },
 
+                checkConnected: function () {
+                    try {
+                        this.client.names(this.mainChannel, function (error, names) {
+                             if (error != null) {
+                                 this.connected = false;
+                             } else {
+                                 this.connected = true;
+                             }
+                        });
+                        this.connected = true;
+                    } catch (error) {
+                        this.connected = false;
+                    }
+                },
+
                 isConnected: function () {
+                    //this.checkConnected();
+
+                    if (!this.connected) {
+                        this.connect();
+                    }
+
                     return this.connected;
                 },
 
@@ -131,6 +152,8 @@ App.Irc.factory('IrcManager',
                 },
 
                 send: function (channel, message) {
+
+                    // We need to check if we are still connected..
                     if (!this.isConnected() || message.length == 0) {
                         return false;
                     }
@@ -159,6 +182,20 @@ App.Irc.factory('IrcManager',
                                 selfMessage: true,
                                 muted: false,
                                 privateMsg: privateMsg
+                            });
+                        } else if (message.toLowerCase().indexOf("me") == 0) {
+                            var actionMessage = message.substring(3);
+                            this.client.action(channel, actionMessage);
+                            this.chatLog.push({
+                                to: channel,
+                                from: this.nickname,
+                                message: actionMessage,
+                                time: new Date(),
+                                highlight: false,
+                                action: true,
+                                selfMessage: true,
+                                muted: false,
+                                privateMsg: false
                             });
                         }
 
@@ -261,6 +298,15 @@ App.Irc.factory('IrcManager',
                                         action: action,
                                         privateMsg: message.to.toLowerCase() == self.nickname.toLowerCase()
                                     });
+
+                                    // Chat log maximum is 1000 lines.
+                                    if (self.chatLog.length > 1000) {
+                                        var diff = self.chatLog.length - 1000;
+                                        for (var i = 0; i < diff; i++) {
+                                            self.chatLog.shift();
+                                        }
+                                    }
+
                                 });
                             });
 
