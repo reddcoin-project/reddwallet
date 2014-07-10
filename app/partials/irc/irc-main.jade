@@ -3,20 +3,54 @@ h1.page-header
     .btn-group.pull-right(ng-show="irc.connected")
         button.btn.btn-primary.btn-sm(ng-click="disconnect()") Disconnect
 
+.row(ng-hide="irc.connected")
+    form.form-horizontal.col-sm-12
 
-form.form-horizontal(ng-hide="irc.connected")
-    .form-group
-        label.col-sm-3.control-label Nickname
-        .col-sm-9
-            input.form-control(ng-model="nickname", required)
-    .form-group
-        label.col-sm-3.control-label Password
-        .col-sm-9
-            input.form-control(type='password', ng-model="password", placeholder="Required if nickname is registered")
-    .form-group
-        .col-sm-12
-            .btn-group.pull-right
-                button.btn.btn-primary.btn-sm(ng-click="connect()") Connect
+        .row
+            .basic-settings.col-sm-12
+                .form-group
+                    label.col-sm-2.control-label Nickname
+                    .col-sm-10
+                        input.form-control(ng-model="connectionDetails.nickname", required)
+                .form-group
+                    label.col-sm-2.control-label Password
+                    .col-sm-10
+                        input.form-control(type='connectionDetails.password', ng-model="password", placeholder="")
+
+        .row
+            .advanced-settings.col-sm-12
+                hr
+                h3
+                    a(ng-click="toggleAdvanced()", href="") Advanced Settings
+                br
+                .inputs(ng-show="showAdvanced")
+                    .form-group
+                        label.col-sm-2.control-label Username
+                        .col-sm-10
+                            input.form-control(ng-model="connectionDetails.username")
+                    .form-group
+                        label.col-sm-2.control-label Server
+                        .col-sm-10
+                            input.form-control(ng-model="connectionDetails.serverHost")
+                    .form-group
+                        label.col-sm-2.control-label Server Password
+                        .col-sm-10
+                            input.form-control(type='password', ng-model="connectionDetails.serverPassword")
+                    .form-group
+                        label.col-sm-2.control-label Port
+                        .col-sm-10
+                            input.form-control(ng-model="connectionDetails.serverPort")
+                    .form-group
+                        label.col-sm-2.control-label Default Channel
+                        .col-sm-10
+                            input.form-control(ng-model="connectionDetails.defaultChannel")
+
+        .row
+            .col-sm-12
+                hr
+                button.btn.btn-info.btn-sm(ng-click="saveConnectionDetails()") Save Connection Details
+                button.btn.btn-primary.btn-sm.pull-right(ng-click="connect()") Connect
+
 
 form#wrapper(ng-show="irc.connected")
     #upper-panel

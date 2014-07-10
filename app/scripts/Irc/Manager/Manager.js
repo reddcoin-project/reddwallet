@@ -3,7 +3,8 @@ App.Irc.factory('IrcManager',
         '$q',
         '$timeout',
         '$rootScope',
-        function($q, $timeout, $rootScope) {
+        'walletDb',
+        function($q, $timeout, $rootScope, walletDb) {
 
             function Manager() {
 
@@ -43,12 +44,13 @@ App.Irc.factory('IrcManager',
                 },
 
                 checkConnected: function () {
+                    var self = this;
                     try {
                         this.client.names(this.mainChannel, function (error, names) {
                              if (error != null) {
-                                 this.connected = false;
+                                 self.connected = false;
                              } else {
-                                 this.connected = true;
+                                 self.connected = true;
                              }
                         });
                         this.connected = true;
@@ -59,11 +61,6 @@ App.Irc.factory('IrcManager',
 
                 isConnected: function () {
                     //this.checkConnected();
-
-                    if (!this.connected) {
-                        this.connect();
-                    }
-
                     return this.connected;
                 },
 
@@ -81,11 +78,6 @@ App.Irc.factory('IrcManager',
                     this.client.names(this.mainChannel, function (error, names) {
                         $timeout(function () {
 
-                            // TODO: Slate IRC does not return the user modes currently.
-                            // See:  See https://github.com/slate/slate-irc/issues/15
-                            // For now, all users look equal. Hopefully the GitHub issue will be resolved.
-
-                            // We now need to sort these names into the operators/voiced/normal dictated by @ + and nothing
                             var operators = [];
                             var voiced = [];
                             var users = [];
@@ -112,16 +104,16 @@ App.Irc.factory('IrcManager',
                     });
                 },
 
-                connect: function (nickname, username, password) {
+                connect: function (connectionDetails) {
                     this.canChat = false;
                     this.stream = this.net.connect({
-                        port: 6667,
-                        host: 'irc.freenode.org'
+                        port: connectionDetails.serverPort,
+                        host: connectionDetails.serverHost
                     });
 
                     $timeout(function () {
                         self.chatLog.push({
-                            to: nickname,
+                            to: connectionDetails.nickname,
                             from: "",
                             message: "Connecting...",
                             time: new Date(),
@@ -133,15 +125,14 @@ App.Irc.factory('IrcManager',
 
                     this.client = this.irc(this.stream);
 
-                    this.client.nick(nickname);
-                    this.client.user(username, username);
+                    this.client.nick(connectionDetails.nickname);
+                    this.client.user(connectionDetails.username, connectionDetails.username);
+                    this.client.pass(connectionDetails.serverPassword);
                     this.client.join(this.mainChannel);
 
-                    this.nickname = nickname;
-                    this.username = username;
-                    this.password = password;
-
-
+                    this.nickname = connectionDetails.nickname;
+                    this.username = connectionDetails.username;
+                    this.password = connectionDetails.password;
 
                     this.setupHandler();
 
@@ -299,9 +290,9 @@ App.Irc.factory('IrcManager',
                                         privateMsg: message.to.toLowerCase() == self.nickname.toLowerCase()
                                     });
 
-                                    // Chat log maximum is 1000 lines.
-                                    if (self.chatLog.length > 1000) {
-                                        var diff = self.chatLog.length - 1000;
+                                    // Chat log maximum is 500 lines.
+                                    if (self.chatLog.length > 500) {
+                                        var diff = self.chatLog.length - 500;
                                         for (var i = 0; i < diff; i++) {
                                             self.chatLog.shift();
                                         }

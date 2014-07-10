@@ -6,21 +6,63 @@ App.Irc.controller(
         '$modal',
         '$timeout',
         'IrcManager',
-        function ($scope, $alert, $modal, $timeout, IrcManager) {
+        'settingsDb',
+        function ($scope, $alert, $modal, $timeout, IrcManager, settingsDb) {
 
             $scope.glued = true;
             $scope.message = '';
 
             $scope.ircTitle = "Chat";
 
-            $scope.nickname = IrcManager.nickname;
-            $scope.password = '';
+            $scope.connectionDetails = {
+                nickname: IrcManager.nickname,
+                username: IrcManager.nickname,
+                password: '',
+                serverHost: 'irc.freenode.net',
+                serverPassword: '',
+                serverPort: 6667,
+                defaultChannel: '#reddcoin'
+            };
+
+            var details = settingsDb.getValue('irc.connectionDetails');
+            details.then(function success (setting) {
+                $timeout(function () {
+                    $scope.connectionDetails = setting.value;
+                });
+            });
+
+            $scope.showAdvanced = false;
 
             $scope.irc = IrcManager;
 
+            $scope.toggleAdvanced = function () {
+                $scope.showAdvanced = !$scope.showAdvanced;
+            };
+
+            $scope.saveConnectionDetails = function () {
+                var result =  settingsDb.setValue('irc.connectionDetails', $scope.connectionDetails);
+                result.then(
+                    function success (setting) {
+                        $alert({
+                            "title": "IRC",
+                            "content": "Connection Settings Saved",
+                            "type": "success"
+                        });
+                    },
+                    function error (error) {
+                        console.log(error);
+                        $alert({
+                            "title": "IRC",
+                            "content": "Could not save connection settings",
+                            "type": "danger"
+                        });
+                    }
+                );
+            };
+
             $scope.connect = function () {
                 if (!IrcManager.isConnected()) {
-                    IrcManager.connect($scope.nickname, $scope.nickname, $scope.password);
+                    IrcManager.connect($scope.connectionDetails);
                 }
             };
 
