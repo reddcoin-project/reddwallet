@@ -12,8 +12,11 @@ App.Global.controller(
             $scope.ircMessages = 0;
             $scope.explorerSearch = '';
 
+            $scope.status = {
+                noErrors: "Daemon working as intended. "
+            };
+
             $rootScope.$on('irc.message.highlight', function (event) {
-                console.log("event");
                 if ($scope.activeNavId == '/irc') {
                     return;
                 }
@@ -51,6 +54,9 @@ App.Global.controller(
             function fetchOverview() {
                 $scope.walletDb.updateOverview().then(function (message) {
                     $scope.walletOverview = $scope.walletDb.overviewModel;
+                    $scope.errors = {
+                        message: $scope.walletOverview.errors
+                    };
                 });
 
                 $scope.walletDb.walletRpc.getWork().then(
