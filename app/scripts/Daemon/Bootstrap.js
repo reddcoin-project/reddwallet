@@ -279,6 +279,8 @@ App.Daemon.Bootstrap = (function () {
          * Spawns the daemon.
          */
         spawnDaemon: function() {
+            var self = this;
+
             this.daemon = this.childProcess.spawn(this.daemonFilePath, [
                 '-conf=' + this.configPath,
                 '-datadir=' + this.daemonDirPath,
@@ -287,6 +289,21 @@ App.Daemon.Bootstrap = (function () {
                 '-walletnotify=echo "WALLET:%s"'
                 //'-blocknotify=echo "BLOCK:%s"'
             ]);
+
+            this.daemon.stderr.on('data', function (data) {
+
+                self.deferred.reject(new App.Global.Message(
+                    false, 2, "We cannot start the daemon, please check no other wallets are running."
+                ));
+
+                if (/^execvp\(\)/.test(data)) {
+                    console.log('Failed to start child process.');
+                }
+            });
+
+            this.daemon.stdout.on('data', function (data) {
+                console.log(data);
+            });
         },
 
         /**
