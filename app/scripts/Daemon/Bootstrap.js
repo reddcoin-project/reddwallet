@@ -302,7 +302,7 @@ App.Daemon.Bootstrap = (function () {
             });
 
             this.daemon.stdout.on('data', function (data) {
-                console.log(data);
+                //console.log(data);
             });
         },
 
