@@ -48,19 +48,18 @@ html(lang='en', ng-app='app')
                                     span.glyphicon.glyphicon-stats.text-warning
                                     | &nbsp {{ walletOverview.connections }}
                             li
-                                .synced(ng-show="blocksSynced")
-                                    span.glyphicon.glyphicon-refresh.text-success
-                                    | &nbsp {{ walletOverview.blocks }}
-                                .syncing(ng-show="!blocksSynced")
-                                    span.glyphicon.glyphicon-refresh.text-warning
-                                    | &nbsp {{ walletOverview.blocks }}
+                                span.glyphicon.glyphicon-refresh.text-success(ng-show="currentBlocks >= (blockHeight - 10)")
+                                span.glyphicon.glyphicon-refresh.text-warning(ng-show="currentBlocks < (blockHeight - 10)")
+                                | &nbsp {{ walletOverview.blocks }} &nbsp
+                                //span(ng-bind-html="(currentBlocks / blockHeight) * 100 | number:0")
+                                //| %
                             li
-                                .has-error(ng-show="errors.message.length > 0")
-                                    label(data-placement="top", data-type="danger", data-animation="am-fade-and-scale", bs-tooltip="errors.message")
+                                .has-error(ng-show="errors.message.length > 0", data-placement="top", data-type="danger", data-animation="am-fade-and-scale", bs-tooltip="errors.message")
+                                    label
                                         span.glyphicon.glyphicon-exclamation-sign.text-warning
                                         | &nbsp Daemon Error
-                                .no-error(ng-hide="errors.message.length > 0")
-                                    label(data-placement="top", data-type="success", data-animation="am-fade-and-scale", bs-tooltip="status.noErrors")
+                                .no-error(ng-hide="errors.message.length > 0", data-placement="top", data-type="success", data-animation="am-fade-and-scale", bs-tooltip="status.noErrors")
+                                    label
                                        span.glyphicon.glyphicon-ok-sign.text-info
                                        | &nbsp Daemon OK
 

@@ -46,6 +46,10 @@ App.Irc.controller(
                 $scope.showAdvanced = !$scope.showAdvanced;
             };
 
+            $scope.switchChannel = function (channel) {
+                $scope.irc.currentChannel = channel.name;
+            };
+
             $scope.saveConnectionDetails = function () {
                 var result =  settingsDb.setValue('irc.connectionDetails', $scope.connectionDetails);
                 result.then(
@@ -80,7 +84,7 @@ App.Irc.controller(
             };
 
             $scope.sendMessage = function () {
-                $scope.irc.send($scope.irc.mainChannel, $scope.message);
+                $scope.irc.send($scope.irc.currentChannel, $scope.message);
 
                 $scope.message = '';
             }

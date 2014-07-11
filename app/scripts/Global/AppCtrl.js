@@ -7,7 +7,8 @@ App.Global.controller(
             $scope.walletDb = walletDb;
 
             $scope.walletOverview = {};
-            $scope.blocksSynced = false;
+            $scope.currentBlocks = 0;
+            $scope.blockHeight = 0;
 
             $scope.ircMessages = 0;
             $scope.explorerSearch = '';
@@ -54,19 +55,27 @@ App.Global.controller(
             function fetchOverview() {
                 $scope.walletDb.updateOverview().then(function (message) {
                     $scope.walletOverview = $scope.walletDb.overviewModel;
+                    $scope.currentBlocks = $scope.walletOverview.blocks;
                     $scope.errors = {
                         message: $scope.walletOverview.errors
                     };
                 });
 
-                $scope.walletDb.walletRpc.getWork().then(
+                var firstBlockTime = new Date("2014-02-05 00:00:00").getTime() / 1000; // Milliseconds, stupid JS
+                var currentTime = new Date().getTime() / 1000;
+                var blocks = Math.round((currentTime - firstBlockTime) / 60);
+
+                $scope.blockHeight = blocks;
+                //console.log(blocks);
+
+                /*$scope.walletDb.getRpc().getTxOutSetInfo().then(
                     function success (message) {
-                        $scope.blocksSynced = true;
+                        $scope.blockHeight = message.rpcInfo.height;
                     },
                     function error (message) {
-                        $scope.blocksSynced = false;
+                        //$scope.blockHeight = message.rpcInfo.height;
                     }
-                );
+                );*/
 
                 $scope.walletDb.getTransactions();
             }

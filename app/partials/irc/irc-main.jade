@@ -1,13 +1,20 @@
-h1.page-header
-    | Chat
-    .btn-group.pull-right(ng-show="irc.connected")
-        button.btn.btn-primary.btn-sm(ng-click="disconnect()") Disconnect
+.row(ng-show="irc.connected")
+    .col-sm-12
+        ul.nav.nav-pills
+            li(ng-repeat="channel in irc.channelList", ng-class="{active: channel.name == irc.currentChannel}")
+                a(href="", ng-click="switchChannel(channel)") {{ channel.name }}
+            li.pull-right
+                button.btn.btn-primary.btn-sm(ng-click="disconnect()") Disconnect
 
 .row(ng-hide="irc.connected")
     form.form-horizontal.col-sm-12
 
         .row
             .basic-settings.col-sm-12
+                h3
+                    | Settings
+                    button.btn.btn-default.btn-sm.pull-right(ng-click="toggleAdvanced()") Show Advanced
+                hr
                 .form-group
                     label.col-sm-2.control-label Nickname
                     .col-sm-10
@@ -19,10 +26,6 @@ h1.page-header
 
         .row
             .advanced-settings.col-sm-12
-                hr
-                h3
-                    a(ng-click="toggleAdvanced()", href="") Advanced Settings
-                br
                 .inputs(ng-show="showAdvanced")
                     .form-group
                         label.col-sm-2.control-label Username
@@ -51,12 +54,11 @@ h1.page-header
                 button.btn.btn-info.btn-sm(ng-click="saveConnectionDetails()") Save Connection Details
                 button.btn.btn-primary.btn-sm.pull-right(ng-click="connect()") Connect
 
-
 form#wrapper(ng-show="irc.connected")
     #upper-panel
         #chat(scroll-glue, ng-model="glued", wheel-speed="50", refresh-on-change="chatLog")
             table#irc-messages(ng-hide="irc.chatLog.length == 0")
-                tr.irc-row(ng-repeat="msg in irc.chatLog", bindonce, ng-class="{'bg-info': msg.highlight, 'bg-success': msg.privateMsg }")
+                tr.irc-row(ng-repeat="msg in irc.channelList[irc.currentChannel].log", bindonce, ng-class="{'bg-info': msg.highlight}")
                     td.irc-from
                         strong(ng-show="msg.selfMessage") {{ msg.from }}
                         span(ng-show="!msg.selfMessage") {{ msg.from }}
@@ -65,13 +67,13 @@ form#wrapper(ng-show="irc.connected")
                     td.irc-message(ng-class="{'irc-action': msg.action, 'text-muted': msg.muted }")
                         div(parse-url="", ng-model="msg.message")
 
-        #users
+        #users(ng-hide="irc.channelList[irc.currentChannel].privateUser")
             table#irc-users
-                tr.irc-user-row(ng-repeat="name in irc.userList track by $index")
+                tr.irc-user-row(ng-repeat="name in irc.channelList[irc.currentChannel].users track by $index")
                     td.nickname-td {{ name }}
 
     #bottom-panel
         .input-group
             input.form-control(type='text', ng-model="message", placeholder='Say something...')
             span.input-group-btn
-                button.btn.btn-primary(type='submit', ng-keydown="scrollHistory(event)", ng-click="sendMessage()", ng-disabled="irc.connected == false || irc.canChat == false") Send
+                button.btn.btn-primary(type='submit', ng-keydown="scrollHistory(event)", ng-click="sendMessage()", ng-disabled="irc.channelList[irc.currentChannel].connected == false") Send
