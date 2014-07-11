@@ -1,5 +1,5 @@
 h1.page-header
-    | {{ ircTitle }}
+    | Chat
     .btn-group.pull-right(ng-show="irc.connected")
         button.btn.btn-primary.btn-sm(ng-click="disconnect()") Disconnect
 
@@ -56,14 +56,14 @@ form#wrapper(ng-show="irc.connected")
     #upper-panel
         #chat(scroll-glue, ng-model="glued", wheel-speed="50", refresh-on-change="chatLog")
             table#irc-messages(ng-hide="irc.chatLog.length == 0")
-                tr.irc-row(ng-repeat="msg in irc.chatLog", ng-class="{'bg-info': msg.highlight, 'bg-success': msg.privateMsg }")
+                tr.irc-row(ng-repeat="msg in irc.chatLog", bindonce, ng-class="{'bg-info': msg.highlight, 'bg-success': msg.privateMsg }")
                     td.irc-from
                         strong(ng-show="msg.selfMessage") {{ msg.from }}
                         span(ng-show="!msg.selfMessage") {{ msg.from }}
                         | {{ " " + msg.time.format('HH:MM') }}
 
                     td.irc-message(ng-class="{'irc-action': msg.action, 'text-muted': msg.muted }")
-                        | {{ msg.message }}
+                        div(parse-url="", ng-model="msg.message")
 
         #users
             table#irc-users
@@ -74,4 +74,4 @@ form#wrapper(ng-show="irc.connected")
         .input-group
             input.form-control(type='text', ng-model="message", placeholder='Say something...')
             span.input-group-btn
-                button.btn.btn-primary(type='submit', ng-click="sendMessage()", ng-disabled="irc.connected == false || irc.canChat == false") Send
+                button.btn.btn-primary(type='submit', ng-keydown="scrollHistory(event)", ng-click="sendMessage()", ng-disabled="irc.connected == false || irc.canChat == false") Send

@@ -8,6 +8,8 @@ angular.module('app.filters', []).filter('interpolate', [
     }
 ]);
 
+
+
 function smartTrim(string, maxLength) {
 
     if (!string) return string;
@@ -47,6 +49,72 @@ function properSplit(str, separator, limit) {
 angular.module('app.filters').filter('to_trusted', ['$sce', function($sce){
     return function(text) {
         return $sce.trustAsHtml(text);
+    };
+}]);
+
+angular.module('app.filters').filter('link2fn', ['$sce', function($sce){
+    return function(text) {
+        var openingTagMatches = text.match(/<a href=".*">/);
+        if (openingTagMatches.length > 0) {
+
+            var url = openingTagMatches[0].substring(7); // Cut off front
+            url = url.substring(1, url.length - 1); // Cut off back
+
+            // Build new one (url already has the quotes (") within the match
+            var newTag = '<a ng-click="openUrl(' + url.trim() + ')">';
+
+            text = text.replace(/<a href=".*">/, newTag);
+        }
+
+        return $sce.trustAsHtml(text);
+    };
+}]);
+
+angular.module('ngSanitize').filter('linky2', ['$sanitize', function($sanitize) {
+    var LINKY_URL_REGEXP =
+            /((ftp|https?):\/\/|(mailto:)?[A-Za-z0-9._%+-]+@)\S*[^\s.;,(){}<>]/,
+        MAILTO_REGEXP = /^mailto:/;
+
+    return function(text, target) {
+        if (!text) return text;
+        var match;
+        var raw = text;
+        var html = [];
+        var url;
+        var i;
+        while ((match = raw.match(LINKY_URL_REGEXP))) {
+            // We can not end in these as they are sometimes found at the end of the sentence
+            url = match[0];
+            // if we did not match ftp/http/mailto then assume mailto
+            if (match[2] == match[3]) url = 'mailto:' + url;
+            i = match.index;
+            addText(raw.substr(0, i));
+            addLink(url, match[0].replace(MAILTO_REGEXP, ''));
+            raw = raw.substring(i + match[0].length);
+        }
+        addText(raw);
+        return $sanitize(html.join(''));
+
+        function addText(text) {
+            if (!text) {
+                return;
+            }
+            html.push(text);
+        }
+
+        function addLink(url, text) {
+            html.push('<a ');
+            if (angular.isDefined(target)) {
+                html.push('target="');
+                html.push(target);
+                html.push('" ');
+            }
+            html.push('ng-click="openUrl("' + url + '")" ');
+            html.push('href="');
+            html.push('">');
+            addText(text);
+            html.push('</a>');
+        }
     };
 }]);
 

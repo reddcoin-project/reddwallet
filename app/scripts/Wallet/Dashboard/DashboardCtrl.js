@@ -11,6 +11,8 @@ App.Wallet.controller(
 
             $scope.walletOverview = $scope.walletDb.overviewModel;
 
+            $scope.testData = 'test ad ad awdaw d awd awd awdw http://www.google.com';
+
             $scope.marketData = {
                 btc:    "Loading...",
                 rddBtc: "Loading...",

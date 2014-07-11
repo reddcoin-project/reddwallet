@@ -10,9 +10,12 @@ App.Irc.controller(
         function ($scope, $alert, $modal, $timeout, IrcManager, settingsDb) {
 
             $scope.glued = true;
-            $scope.message = '';
 
-            $scope.ircTitle = "Chat";
+            $scope.message = '';
+            $scope.messageHistory = {
+                list: [],
+                pointer: 0
+            };
 
             $scope.connectionDetails = {
                 nickname: IrcManager.nickname,
@@ -34,6 +37,10 @@ App.Irc.controller(
             $scope.showAdvanced = false;
 
             $scope.irc = IrcManager;
+
+            $scope.scrollHistory = function (event) {
+                console.log(event);
+            };
 
             $scope.toggleAdvanced = function () {
                 $scope.showAdvanced = !$scope.showAdvanced;
