@@ -37,6 +37,7 @@ App.Irc.factory('IrcManager',
 
                     var serverChannel = new App.Irc.Channel();
                     serverChannel.name = "Server";
+                    serverChannel.connected = true;
                     this.channelList = {
                         server: serverChannel
                     };
@@ -106,7 +107,6 @@ App.Irc.factory('IrcManager',
                     this.password = connectionDetails.password;
 
                     this.joinChannel(connectionDetails.defaultChannel);
-                    this.joinChannel("#reddcoin");
 
                     this.setupHandler();
 
@@ -119,6 +119,15 @@ App.Irc.factory('IrcManager',
                 joinChannel: function (channel) {
                     this.client.join(channel);
                     this.switchChannel(channel);
+                },
+
+                partChannel: function (channel) {
+                    var self = this;
+                    if (this.channelExists(channel)) {
+                        $timeout(function() {
+                            self.client.part(channel);
+                        });
+                    }
                 },
 
                 switchChannel: function (channel) {
@@ -154,14 +163,17 @@ App.Irc.factory('IrcManager',
                 },
 
                 channelExists: function (channelName) {
+                    channelName = channelName.toLowerCase();
                     return this.channelList[channelName] != undefined;
                 },
 
                 getChannel: function (channelName) {
+                    channelName = channelName.toLowerCase();
                     return this.channelList[channelName];
                 },
 
                 initChannel: function (channelName) {
+                    channelName = channelName.toLowerCase();
                     var channel = new App.Irc.Channel();
                     channel.name = channelName;
                     this.channelList[channelName] = channel;
@@ -193,41 +205,57 @@ App.Irc.factory('IrcManager',
                 send: function (channel, message) {
                     if (!this.isConnected() || message.length == 0) return;
 
-                    var options = {};
+                    var parts;
+                    var msgOptions = {};
                     var channelTarget = this.currentChannel;
                     var messageToSend = message;
 
                     if (message.indexOf("/") === 0) {
                         message = message.substring(1);
                         if (message.indexOf("PRIVMSG") == 0 || message.toLowerCase().indexOf("msg") == 0) {
-                            var parts = properSplit(message, " ", 2);
+                            parts = properSplit(message, " ", 2);
                             if (parts.length == 2)  return;
 
                             channelTarget = parts[1];
                             messageToSend = parts[2];
+                        } else if (message.toLowerCase().indexOf("join") == 0) {
+                            parts = properSplit(message, " ", 2);
+                            if (parts.length !== 2) return;
+
+                            this.joinChannel(parts[1]);
+
+                            return;
+                        } else if (message.toLowerCase().indexOf("part") == 0) {
+                            parts = properSplit(message, " ", 2);
+                            if (parts.length !== 2) return;
+
+                            this.partChannel(parts[1]);
+
+                            return;
                         } else if (message.toLowerCase().indexOf("me") == 0) {
                             messageToSend = message.substring(3);
-                            options.action = true;
+                            msgOptions.action = true;
                         }
                     }
 
                     if (!this.channelExists(channelTarget)) {
-                        var newChannel = this.initChannel(channelTarget);
-                        if (channel.indexOf('#') === -1) {
+                        var newChannel = this.initChannel(channelTarget.toLowerCase());
+                        if (channel.substring(0, 1) !== '#') {
                             newChannel.privateUser = true;
                             newChannel.connected = true;
-                            options.privateMsg = true;
-                            options.sent = true;
+
+                            msgOptions.privateMsg = true;
+                            msgOptions.sent = true;
                         }
                     }
 
-                    if (options.action) {
+                    if (msgOptions.action) {
                         this.client.action(channelTarget, messageToSend);
                     } else {
                         this.client.send(channelTarget, messageToSend);
                     }
 
-                    this.pushMessageToChannel(channelTarget, this.newSelfMessage(channelTarget, messageToSend, options));
+                    this.pushMessageToChannel(channelTarget, this.newSelfMessage(channelTarget, messageToSend, msgOptions));
                 },
 
                 setupHandler: function () {
@@ -265,17 +293,24 @@ App.Irc.factory('IrcManager',
 
                             irc.on('message', function (message) {
 
-                                if (!self.channelExists(message.from)) {
-                                    var newChannel = self.initChannel(message.from);
-                                    if (message.from.indexOf('#') === -1) {
-                                        newChannel.privateUser = true;
-                                        newChannel.connected = true;
-                                    }
-                                }
-
                                 var logMessage = self.newMessage(message.to, message.from, message.message);
 
-                                if (newChannel.privateUser) {
+                                var channel = null;
+                                if (!self.channelExists(message.to)) {
+                                    if (message.message.substring(0, 1) !== '#') {
+                                        // User channel initialize the channel to be the other user
+                                        channel = self.initChannel(message.from);
+                                        channel.privateUser = true;
+                                        channel.connected = true;
+                                    } else {
+                                        // It is a proper channel initialize it..
+                                        channel = self.initChannel(message.to);
+                                    }
+                                } else {
+                                    channel = self.getChannel(message.to);
+                                };
+
+                                if (channel.privateUser) {
                                     logMessage.privateMsg = true;
                                 }
 
@@ -298,9 +333,9 @@ App.Irc.factory('IrcManager',
                                     if (!self.channelExists(joinChannel)) {
                                         self.initChannel(joinChannel);
                                     }
-
-                                    self.getChannel(joinChannel).connected = true;
                                 }
+
+                                self.getChannel(joinChannel).connected = true;
 
                                 var logMessage = self.newMessage(joinChannel, joinChannel, join.nick + " has joined " + joinChannel, {
                                     from: join.nick,
@@ -318,21 +353,34 @@ App.Irc.factory('IrcManager',
                                         continue;
                                     }
 
-                                    self.updateUserList(channel);
+                                    logMessage = self.newMessage(channel, part.nick, part.nick + " has quit. ", {
+                                        muted: true
+                                    });
 
-                                    logMessage = self.newMessage(channel, part.nick, part.nick + " has quit. ");
                                     self.pushMessageToChannel(logMessage.to, logMessage);
+                                    self.updateUserList(channel);
                                 }
                             });
 
                             irc.on('part', function (part) {
                                 for (var i = 0; i < part.channels.length; i++) {
                                     var partedChannel = part.channels[i];
-                                    self.updateUserList(partedChannel);
+
+                                    if (part.nick.toLowerCase() == self.nickname.toLowerCase()) {
+                                        $timeout(function() {
+                                            delete self.channelList[partedChannel];
+                                        });
+
+                                        continue;
+                                    }
 
                                     var partMessage = part.message.length == 0 ? part.nick + " has left " + partedChannel : part.message;
-                                    logMessage = self.newMessage(partedChannel, part.nick, partMessage);
+                                    logMessage = self.newMessage(partedChannel, part.nick, partMessage, {
+                                        muted: true
+                                    });
+
                                     self.pushMessageToChannel(logMessage.to, logMessage);
+                                    self.updateUserList(partedChannel);
                                 }
                             });
 
@@ -346,21 +394,25 @@ App.Irc.factory('IrcManager',
                             });
 
                             irc.on('nick', function (nick) {
-                                $timeout(function () {
-                                    console.log(nick);
-                                    /*var oldNick = nick.nick + " is";
+                                for (var key in self.channelList) {
+                                    if (!self.channelList.hasOwnProperty(key)) {
+                                        continue;
+                                    }
+
+                                    var channel = self.channelList[key];
+
+                                    var oldNick = nick.nick + " is";
                                     if (oldNick == self.nickname) {
                                         oldNick = "You are";
                                     }
 
-                                    var logMessage = self.newMessage(joinChannel, join.nick + " has joined " + joinChannel, {
-                                        from: join.nick,
+                                    var logMessage = self.newMessage(channel.name, nick.new, oldNick + " now known as " + nick.new, {
                                         muted: true
                                     });
 
-                                    this.pushMessageToChannel(logMessage.to, logMessage);
-                                    self.updateUserList(self.currentChannel);*/
-                                });
+                                    self.pushMessageToChannel(channel.name, logMessage);
+                                    self.updateUserList(channel.name);
+                                }
                             });
                         }
                     }

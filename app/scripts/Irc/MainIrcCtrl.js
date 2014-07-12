@@ -50,6 +50,10 @@ App.Irc.controller(
                 $scope.irc.currentChannel = channel.name;
             };
 
+            $scope.partChannel = function () {
+                $scope.irc.partChannel($scope.irc.currentChannel);
+            };
+
             $scope.saveConnectionDetails = function () {
                 var result =  settingsDb.setValue('irc.connectionDetails', $scope.connectionDetails);
                 result.then(

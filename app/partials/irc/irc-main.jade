@@ -4,7 +4,13 @@
             li(ng-repeat="channel in irc.channelList", ng-class="{active: channel.name == irc.currentChannel}")
                 a(href="", ng-click="switchChannel(channel)") {{ channel.name }}
             li.pull-right
-                button.btn.btn-primary.btn-sm(ng-click="disconnect()") Disconnect
+                .btn-group.btn-group-sm
+                    button.btn.btn-default(
+                        ng-click="partChannel()",
+                        ng-disabled="irc.channelList[irc.currentChannel].name == 'server'",
+                        ng-show="irc.channelList[irc.currentChannel].connected")
+                        | Close {{ irc.currentChannel }}
+                    button.btn.btn-default(ng-click="disconnect()") Disconnect
 
 .row(ng-hide="irc.connected")
     form.form-horizontal.col-sm-12
