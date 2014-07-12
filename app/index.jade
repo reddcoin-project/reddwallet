@@ -48,11 +48,9 @@ html(lang='en', ng-app='app')
                                     span.glyphicon.glyphicon-stats.text-warning
                                     | &nbsp {{ walletOverview.connections }}
                             li
-                                span.glyphicon.glyphicon-refresh.text-success(ng-show="currentBlocks >= (blockHeight - 10)")
-                                span.glyphicon.glyphicon-refresh.text-warning(ng-show="currentBlocks < (blockHeight - 10)")
+                                span.glyphicon.glyphicon-refresh.text-success(ng-show="blocksSynced")
+                                span.glyphicon.glyphicon-refresh.text-warning(ng-show="!blocksSynced")
                                 | &nbsp {{ walletOverview.blocks }} &nbsp
-                                //span(ng-bind-html="(currentBlocks / blockHeight) * 100 | number:0")
-                                //| %
                             li
                                 .has-error(ng-show="errors.message.length > 0", data-placement="top", data-type="danger", data-animation="am-fade-and-scale", bs-tooltip="errors.message")
                                     label
