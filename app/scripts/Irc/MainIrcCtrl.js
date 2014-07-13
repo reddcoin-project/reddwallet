@@ -34,6 +34,12 @@ App.Irc.controller(
                 });
             });
 
+            var window = require('nw.gui').Window.get();
+            window.on('new-win-policy', function (frame, url, policy) {
+                require('nw.gui').Shell.openExternal(url);
+                policy.ignore();
+            });
+
             $scope.showAdvanced = false;
 
             $scope.irc = IrcManager;

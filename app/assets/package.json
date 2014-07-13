@@ -36,6 +36,7 @@
         "async": "~0.8.0",
         "slate-irc": "latest",
         "request": "latest",
-        "feedparser": "latest"
+        "feedparser": "latest",
+        "sanitizer": "0.0.1"
     }
 }

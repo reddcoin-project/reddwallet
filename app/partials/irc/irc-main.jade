@@ -71,7 +71,7 @@ form#wrapper(ng-show="irc.connected")
                         | {{ " " + msg.time.format('HH:MM') }}
 
                     td.irc-message(ng-class="{'irc-action': msg.action, 'text-muted': msg.muted }")
-                        div(parse-url="", ng-model="msg.message")
+                        div(ng-bind-html="msg.message | linky:'_blank'")
 
         #users(ng-hide="irc.channelList[irc.currentChannel].privateUser")
             table#irc-users
