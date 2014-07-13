@@ -10,11 +10,13 @@ App.Irc.factory('IrcManager',
 
                 this.irc = require('slate-irc');
                 this.net = require('net');
-                this.currentChannel = 'server';
+
+                this.currentChannel = '';
 
                 this.$q = $q;
                 this.$timeout = $timeout;
                 this.$rootScope = $rootScope;
+                this.channelList = {};
 
                 var time = new Date().getTime().toString();
                 this.retrySuffix = 0;
@@ -34,13 +36,8 @@ App.Irc.factory('IrcManager',
                     this.stream = null;
                     this.client = null;
                     this.password = "";
+                    this.channelList = {};
 
-                    var serverChannel = new App.Irc.Channel();
-                    serverChannel.name = "Server";
-                    serverChannel.connected = true;
-                    this.channelList = {
-                        server: serverChannel
-                    };
                 },
 
                 isConnected: function () {
@@ -92,12 +89,28 @@ App.Irc.factory('IrcManager',
                 },
 
                 connect: function (connectionDetails) {
+                    var self = this;
+                    this.connectionDetails = connectionDetails;
+
                     this.stream = this.net.connect({
                         port: connectionDetails.serverPort,
                         host: connectionDetails.serverHost
                     });
 
+                    var serverChannel = new App.Irc.Channel();
+                    serverChannel.name = connectionDetails.serverHost;
+                    serverChannel.connected = true;
+                    serverChannel.server = true;
+
+                    $timeout(function() {
+                        self.channelList[serverChannel.name] = serverChannel;
+                        self.switchChannel(serverChannel.name);
+                    });
+
                     this.client = this.irc(this.stream);
+
+                    this.setupHandler();
+
                     this.client.nick(connectionDetails.nickname);
                     this.client.user(connectionDetails.username, connectionDetails.username);
                     this.client.pass(connectionDetails.serverPassword);
@@ -108,9 +121,6 @@ App.Irc.factory('IrcManager',
 
                     this.joinChannel(connectionDetails.defaultChannel);
 
-                    this.setupHandler();
-
-                    var self = this;
                     this.$timeout(function() {
                         self.connected = true;
                     });
@@ -118,10 +128,14 @@ App.Irc.factory('IrcManager',
 
                 joinChannel: function (channel) {
                     this.client.join(channel);
-                    this.switchChannel(channel);
                 },
 
                 partChannel: function (channel) {
+                    if (channel == this.connectionDetails.serverHost) {
+                        this.disconnect();
+                        return;
+                    }
+
                     var self = this;
                     if (this.channelExists(channel)) {
                         $timeout(function() {
@@ -269,11 +283,11 @@ App.Irc.factory('IrcManager',
                                     self.retrySuffix ++;
                                     var newNickname = self.nickname + self.retrySuffix;
                                     self.connect(newNickname, newNickname, '');
-                                    logMessage = self.newMessage("server", data.from, data.trailing);
-                                    self.pushMessageToChannel("server", logMessage);
+                                    logMessage = self.newMessage(self.connectionDetails.serverHost, data.from, data.trailing);
+                                    self.pushMessageToChannel(self.connectionDetails.serverHost, logMessage);
                                 } else if (data.command == 'RPL_TOPIC') {
-                                    logMessage = self.newMessage("server", data.from, data.message);
-                                    self.pushMessageToChannel("server", logMessage);
+                                    logMessage = self.newMessage(self.connectionDetails.serverHost, data.from, data.message);
+                                    self.pushMessageToChannel(self.connectionDetails.serverHost, logMessage);
                                 }
                             });
 
@@ -287,7 +301,7 @@ App.Irc.factory('IrcManager',
                                     }, 1000);
                                 }
 
-                                var logMessage = self.newMessage("server", "", "Welcome " + nickname);
+                                var logMessage = self.newMessage(self.connectionDetails.serverHost, "", "Welcome " + nickname);
                                 self.pushMessageToChannel(logMessage.to, logMessage);
                             });
 
@@ -342,6 +356,11 @@ App.Irc.factory('IrcManager',
                                     muted: true
                                 });
 
+                                if (joinChannel.substring(0, 1) == '#') {
+                                    // Actual channel
+                                    self.switchChannel(joinChannel);
+                                }
+
                                 self.pushMessageToChannel(logMessage.to, logMessage);
                                 self.updateUserList(joinChannel);
                             });
@@ -349,7 +368,7 @@ App.Irc.factory('IrcManager',
                             irc.on('quit', function (quit) {
                                 for (var i = 0; i < self.channelList.length; i++) {
                                     var channel = self.channelList[i];
-                                    if (channel.name == 'server') {
+                                    if (channel.name == self.connectionDetails.serverHost) {
                                         continue;
                                     }
 
@@ -386,10 +405,11 @@ App.Irc.factory('IrcManager',
 
                             irc.on('notice', function (notice) {
                                 if (notice.to == "*") {
-                                    notice.to = "server";
+                                    notice.to = self.connectionDetails.serverHost;
                                 }
 
                                 logMessage = self.newMessage(notice.to, notice.from, notice.message);
+
                                 self.pushMessageToChannel(logMessage.to, logMessage);
                             });
 

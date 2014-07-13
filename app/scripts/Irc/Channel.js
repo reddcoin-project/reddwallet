@@ -5,6 +5,8 @@ App.Irc.Channel = (function () {
         this.name = '';
         this.log = [];
         this.users = [];
+
+        this.server = false;
         this.connected = false;
 
         this.privateUser = false;

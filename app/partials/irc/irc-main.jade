@@ -4,13 +4,11 @@
             li(ng-repeat="channel in irc.channelList", ng-class="{active: channel.name == irc.currentChannel}")
                 a(href="", ng-click="switchChannel(channel)") {{ channel.name }}
             li.pull-right
-                .btn-group.btn-group-sm
+                .btn-group.btn-group.btn-group-sm
                     button.btn.btn-default(
                         ng-click="partChannel()",
-                        ng-disabled="irc.channelList[irc.currentChannel].name == 'server'",
                         ng-show="irc.channelList[irc.currentChannel].connected")
                         | Close {{ irc.currentChannel }}
-                    button.btn.btn-default(ng-click="disconnect()") Disconnect
 
 .row(ng-hide="irc.connected")
     form.form-horizontal.col-sm-12
@@ -62,8 +60,8 @@
 
 form#wrapper(ng-show="irc.connected")
     #upper-panel
-        #chat(scroll-glue, ng-model="glued", wheel-speed="50", refresh-on-change="chatLog")
-            table#irc-messages(ng-hide="irc.chatLog.length == 0")
+        #chat(scroll-glue, ng-model="glued", wheel-speed="50", refresh-on-change="irc.channelList[irc.currentChannel].log")
+            table#irc-messages
                 tr.irc-row(ng-repeat="msg in irc.channelList[irc.currentChannel].log", bindonce, ng-class="{'bg-info': msg.highlight}")
                     td.irc-from
                         strong(ng-show="msg.selfMessage") {{ msg.from }}
