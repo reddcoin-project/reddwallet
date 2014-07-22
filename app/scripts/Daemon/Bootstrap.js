@@ -281,14 +281,21 @@ App.Daemon.Bootstrap = (function () {
         spawnDaemon: function() {
             var self = this;
 
-            this.daemon = this.childProcess.spawn(this.daemonFilePath, [
-                '-conf=' + this.configPath,
-                '-datadir=' + this.daemonDirPath,
-                '-pid=' + this.pidPath,
-                '-alertnotify=echo "ALERT:%s"',
-                '-walletnotify=echo "WALLET:%s"'
-                //'-blocknotify=echo "BLOCK:%s"'
-            ]);
+            try {
+
+                this.daemon = this.childProcess.spawn(this.daemonFilePath, [
+                    '-conf=' + this.configPath,
+                    '-datadir=' + this.daemonDirPath,
+                    '-pid=' + this.pidPath,
+                    '-alertnotify=echo "ALERT:%s"',
+                    '-walletnotify=echo "WALLET:%s"'
+                    //'-blocknotify=echo "BLOCK:%s"'
+                ]);
+            } catch (ex) {
+                self.deferred.reject(new App.Global.Message(
+                    false, 2, "We cannot start the daemon, please check no other wallets are running."
+                ));
+            }
 
             this.daemon.stderr.on('data', function (data) {
 
@@ -336,7 +343,8 @@ App.Daemon.Bootstrap = (function () {
          */
         runOsSpecificTasks: function() {
             if (!this.isWindows()) {
-                this.childProcess.exec('chmod +x' + this.daemonFilePath);
+                var fs = require('fs');
+                fs.chmodSync(this.daemonFilePath, '+x');
             }
         },
 
