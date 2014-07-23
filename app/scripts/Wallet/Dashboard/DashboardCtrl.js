@@ -9,44 +9,54 @@ App.Wallet.controller(
         'ExchangeManager',
         function ($scope, $rootScope, $timeout, $alert, walletDb, ExchangeManager) {
 
+            $scope.cryptsy =  ExchangeManager.getExchange('cryptsy');
+            $scope.coinbase =  ExchangeManager.getExchange('coinbase');
+
             $scope.walletOverview = $scope.walletDb.overviewModel;
-
-            $scope.testData = 'test ad ad awdaw d awd awd awdw http://www.google.com';
-
             $scope.marketData = {
                 btc:    "Loading...",
                 rddBtc: "Loading...",
                 rddLtc: "Loading..."
             };
 
-            var coinbase =  ExchangeManager.getExchange('coinbase');
+            $scope.loadMarketData = function () {
+                try {
 
-            if (coinbase.currencyRates['btc_to_usd'] != undefined) {
-                $scope.marketData.btc = coinbase.currencyRates['btc_to_usd'];
-            } else {
-                coinbase.loadCurrencyRates();
-            }
+                    if ($scope.coinbase.currencyRates['btc_to_usd'] != undefined) {
+                        $scope.marketData.btc = $scope.coinbase.currencyRates['btc_to_usd'];
+                    } else {
+                        $scope.coinbase.loadCurrencyRates();
+                    }
 
-            $rootScope.$on('exchanges.coinbase.currencyRates', function (event, rates) {
-                $scope.marketData.btc = rates['btc_to_usd'];
-            });
+                    $rootScope.$on('exchanges.coinbase.currencyRates', function (event, rates) {
+                        $scope.marketData.btc = rates['btc_to_usd'];
+                    });
 
-            var cryptsy =  ExchangeManager.getExchange('cryptsy');
+                    if (Object.keys($scope.cryptsy.marketData).length > 0) {
+                            $scope.marketData.rddBtc = $scope.cryptsy.marketData['RDD:169'].lasttradeprice;
+                            $scope.marketData.rddLtc = $scope.cryptsy.marketData['RDD:212'].lasttradeprice;
+                    } else {
+                        $scope.cryptsy.loadDefaultMarkets();
+                    }
 
-            if (Object.keys(cryptsy.marketData).length > 0) {
-                $scope.marketData.rddBtc = cryptsy.marketData['RDD:169'].lasttradeprice;
-                $scope.marketData.rddLtc = cryptsy.marketData['RDD:212'].lasttradeprice;
-            } else {
-                cryptsy.loadDefaultMarkets();
-            }
+                } catch (error) {
+                    console.log(error);
+                }
+            };
 
             $rootScope.$on('exchanges.cryptsy.marketData', function (event, data) {
-                if (data.marketId == 169) {
-                    $scope.marketData.rddBtc = cryptsy.marketData['RDD:169'].lasttradeprice;
-                } else if (data.marketId == 212) {
-                    $scope.marketData.rddLtc = cryptsy.marketData['RDD:212'].lasttradeprice;
+                try {
+                    if (data.marketId == 169) {
+                        $scope.marketData.rddBtc = $scope.cryptsy.marketData['RDD:169'].lasttradeprice;
+                    } else if (data.marketId == 212) {
+                        $scope.marketData.rddLtc = $scope.cryptsy.marketData['RDD:212'].lasttradeprice;
+                    }
+                } catch (error) {
+                    console.log(error);
                 }
             });
+
+            $scope.loadMarketData();
 
         }
     ]
