@@ -82,11 +82,24 @@ App.Wallet.controller(
                         $scope.loaded['reddcoin'] = true;
                         $scope.reload();
                     } else {
-                        reddcoinDeferred.then(function(reddcoinPosts) {
-                            $scope.content.reddcoin = reddcoinPosts;
-                            $scope.loaded['reddcoin'] = true;
-                            $scope.reload();
-                        });
+                        reddcoinDeferred.then(
+                            function success(reddcoinPosts) {
+                                $scope.content.reddcoin = reddcoinPosts;
+                                $scope.loaded['reddcoin'] = true;
+                                $scope.reload();
+                            },
+                            function error() {
+                                $scope.loaded['reddcoin'] = true;
+                                $scope.content.reddcoin = { items: [
+                                    {
+                                        data: {
+                                            title: "An error occurred whilst loading the announcements."
+                                        }
+                                    }
+                                ]};
+                                $scope.reload();
+                            }
+                        );
                     }
                 });
 

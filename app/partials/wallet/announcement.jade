@@ -7,15 +7,18 @@
                 a(href="", ng-click="refreshNews()") Refresh
 
 .news-container
-    .media-reddit-post(ng-hide="loaded")
+    .media-reddit-post(ng-hide="loaded")+
         .media-body
             h4 Loading...
     .media.reddit-post(ng-repeat="post in postData.items", ng-show="loaded")
         .media-body
             h4
-                a(href="", ng-click="openPost($index)", target="_blank")
-                    span(ng-bind-html="post.data.title | to_trusted")
-            p
+                a(href="", ng-click="openPost($index)", target="_blank", ng-show="post.data.url != undefined")
+                    span(ng-bind-html="post.data.title")
+
+                span(ng-show="post.data.url == undefined", ng-bind-html="post.data.title")
+
+            p(ng-show="post.data.author != undefined")
                 span.text-muted By &nbsp;
                 | {{ post.data.author }}
                 span.text-muted &nbsp; on {{ post.data.timestamp | date:'EEE, d MMM yyyy HH:mm:ss Z' }}

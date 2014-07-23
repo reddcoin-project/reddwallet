@@ -22,10 +22,22 @@ App.Wallet.controller(
                         $scope.postData = announcementDeferred;
                         $scope.loaded = true;
                     } else {
-                        announcementDeferred.then(function(announcements) {
-                            $scope.postData = announcements;
-                            $scope.loaded = true;
-                        });
+                        announcementDeferred.then(
+                            function success(announcements) {
+                                $scope.postData = announcements;
+                                $scope.loaded = true;
+                            },
+                            function error() {
+                                $scope.loaded = true;
+                                $scope.postData = { items: [
+                                    {
+                                        data: {
+                                            title: "An error occurred whilst loading the announcements."
+                                        }
+                                    }
+                                ]};
+                            }
+                        );
                     }
                 });
 
@@ -48,6 +60,10 @@ App.Wallet.controller(
 
             $scope.openPost = function ($index) {
                 var post = $scope.postData.items[$index];
+
+                if (post.data.url == undefined || post.data.url == null) {
+                    return; // Do nothing
+                }
 
                 require('nw.gui').Shell.openExternal(post.data.url);
             }
