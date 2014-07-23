@@ -93,7 +93,7 @@ App.Wallet.controller(
                                 $scope.content.reddcoin = { items: [
                                     {
                                         data: {
-                                            title: "An error occurred whilst loading the announcements."
+                                            title: "An error occurred whilst loading the news."
                                         }
                                     }
                                 ]};
