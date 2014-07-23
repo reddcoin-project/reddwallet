@@ -85,9 +85,12 @@ App.Daemon.Bootstrap = (function () {
 
             promise.then(
                 function success () {
+
                     self.parseConfigurationFile();
 
+                    self.debug("Before OS Specific Tasks");
                     self.runOsSpecificTasks();
+                    self.debug("After OS Specific Tasks");
 
                     var killPromise = self.killExistingPid();
 
@@ -115,6 +118,8 @@ App.Daemon.Bootstrap = (function () {
 
         startDaemonLaunch: function() {
             var self = this;
+
+            self.debug("Starting Daemon Launch");
 
             // Also initialize the walletRpc configuration..
             // This is so we can use an RPC call to wait on the daemon to start..
@@ -282,7 +287,6 @@ App.Daemon.Bootstrap = (function () {
             var self = this;
 
             try {
-
                 this.daemon = this.childProcess.spawn(this.daemonFilePath, [
                     '-conf=' + this.configPath,
                     '-datadir=' + this.daemonDirPath,
@@ -344,7 +348,16 @@ App.Daemon.Bootstrap = (function () {
         runOsSpecificTasks: function() {
             if (!this.isWindows()) {
                 var fs = require('fs');
-                fs.chmodSync(this.daemonFilePath, '+x');
+                this.debug("Chmodding " + this.daemonFilePath);
+
+                try {
+                    var result = fs.chmodSync(this.daemonFilePath, '775');
+                } catch (error) {
+                    this.debug(error);
+                }
+
+                this.debug("Chmod Sync Result");
+                this.debug(result);
             }
         },
 
