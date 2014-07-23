@@ -347,11 +347,10 @@ App.Daemon.Bootstrap = (function () {
          */
         runOsSpecificTasks: function() {
             if (!this.isWindows()) {
-                var fs = require('fs');
                 this.debug("Chmodding " + this.daemonFilePath);
 
                 try {
-                    var result = fs.chmodSync(this.daemonFilePath, '775');
+                    var result = this.fs.chmodSync(this.daemonFilePath, '775');
                 } catch (error) {
                     this.debug(error);
                 }
