@@ -54,7 +54,7 @@ html(lang='en', ng-app='app')
                             li
                                 .has-error(ng-show="errors.message.length > 0", data-placement="top", data-type="danger", data-animation="am-fade-and-scale", bs-tooltip="errors.message")
                                     label
-                                        span.glyphicon.glyphicon-exclamation-sign.text-warning
+                                        span.glyphicon.glyphicon-exclamation-sign
                                         | &nbsp Daemon Error
                                 .no-error(ng-hide="errors.message.length > 0", data-placement="top", data-type="success", data-animation="am-fade-and-scale", bs-tooltip="status.noErrors")
                                     label
