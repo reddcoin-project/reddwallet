@@ -18,7 +18,7 @@
         "//": "ReddWallet",
         "title": "ReddWallet",
         "icon": "reddcoin-favi.png",
-        "toolbar": false,
+        "toolbar": true,
         "frame": true,
         "position": "center",
         "width": 1000,
@@ -31,12 +31,12 @@
     },
     "dependencies": {
         "net": "latest",
-        "nedb": "~0.9.4",
+        "nedb": "~0.10.*",
         "node-reddcoin": "~0.3.10",
-        "async": "~0.8.0",
+        "async": "~0.9.*",
         "node-irc": "latest",
         "request": "latest",
-        "feedparser": "latest",
+        "feedparser": "0.16.5",
         "sanitizer": "0.0.1"
     }
 }
