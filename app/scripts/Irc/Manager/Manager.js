@@ -8,8 +8,10 @@ App.Irc.factory('IrcManager',
 
             function Manager() {
 
-                this.irc = require('slate-irc');
+                this.irc = require('irc');
                 this.net = require('net');
+
+                this.debugEnabled = true;
 
                 this.currentChannel = '';
 
@@ -31,106 +33,85 @@ App.Irc.factory('IrcManager',
             Manager.prototype = {
 
                 initialize: function () {
-
                     this.connected = false;
-                    this.stream = null;
                     this.client = null;
                     this.password = "";
                     this.channelList = {};
+                },
 
+                connect: function (connectionDetails) {
+                    this.connectionDetails = connectionDetails;
+
+                    this.nickname = connectionDetails.nickname;
+                    this.username = connectionDetails.username;
+                    this.password = connectionDetails.password;
+
+                    this.client = new this.irc.Client(connectionDetails.serverHost, connectionDetails.nickname, {
+                        userName:  connectionDetails.username,
+                        realName: connectionDetails.username,
+                        port: connectionDetails.serverPort,
+                        password: connectionDetails.serverPassword,
+                        debug: false,
+                        showErrors: false,
+                        autoRejoin: true,
+                        autoConnection: true,
+                        channels: [],
+                        secure: false,
+                        selfSigned: false,
+                        certExpired: false,
+                        floodProtection: false,
+                        floodProtectionDelay: 1000,
+                        sasl: false,
+                        stripColors: false,
+                        channelPrefixes: "&#",
+                        messageSplit: 512
+                    });
+
+                    this.initializeServerChannel(connectionDetails.serverHost);
+
+                    this.setupListeners();
+                },
+
+                disconnect: function () {
+                    this.client.disconnect("User explicitly disconnected.");
+                    this.initialize();
                 },
 
                 isConnected: function () {
                     return this.connected;
                 },
 
-                disconnect: function () {
-                    this.client.quit("User explicitly disconnected.");
-                    this.initialize();
-                },
-
-                updateUserList: function (channel, callback) {
+                initializeServerChannel: function (hostname) {
                     var self = this;
-                    if (this.client == null) {
-                        return;
-                    }
 
-                    this.client.names(channel, function (error, names) {
-                        $timeout(function () {
+                    self.serverChannel = new App.Irc.Channel();
+                    self.serverChannel.name = hostname;
+                    self.serverChannel.connected = true;
+                    self.serverChannel.server = true;
+                    self.serverChannel.privateUser = true;
 
-                            var operators = [];
-                            var voiced = [];
-                            var users = [];
-
-                            for (var i = 0; i < names.length; i++) {
-                                var user = names[i];
-
-                                if (user.mode == "@") {
-                                    operators.push(user.mode + user.name);
-                                } else if (user.mode == "+") {
-                                    voiced.push(user.mode + user.name);
-                                } else {
-                                    users.push(user.mode + user.name);
-                                }
-                            }
-
-                            operators.sort();
-                            voiced.sort();
-                            users.sort();
-
-                            if (!self.channelExists(channel)) {
-                                self.initChannel(channel);
-                            }
-
-                            self.getChannel(channel).users = operators.concat(voiced.concat(users));
-                            typeof callback === 'function' && callback();
-                        });
-                    });
-                },
-
-                connect: function (connectionDetails) {
-                    var self = this;
-                    this.connectionDetails = connectionDetails;
-
-                    this.stream = this.net.connect({
-                        port: connectionDetails.serverPort,
-                        host: connectionDetails.serverHost
-                    });
-
-                    var serverChannel = new App.Irc.Channel();
-                    serverChannel.name = connectionDetails.serverHost;
-                    serverChannel.connected = true;
-                    serverChannel.server = true;
 
                     $timeout(function() {
-                        self.channelList[serverChannel.name] = serverChannel;
-                        self.switchChannel(serverChannel.name);
-                    });
-
-                    this.client = this.irc(this.stream);
-
-                    this.setupHandler();
-
-                    this.client.nick(connectionDetails.nickname);
-                    this.client.user(connectionDetails.username, connectionDetails.username);
-                    this.client.pass(connectionDetails.serverPassword);
-
-                    this.nickname = connectionDetails.nickname;
-                    this.username = connectionDetails.username;
-                    this.password = connectionDetails.password;
-
-                    this.joinChannel(connectionDetails.defaultChannel);
-
-                    this.$timeout(function() {
+                        self.channelList[self.serverChannel.name] = self.serverChannel;
+                        self.switchChannel(self.serverChannel.name);
                         self.connected = true;
                     });
                 },
 
-                joinChannel: function (channel) {
-                    this.client.join(channel);
+                updateUserList: function (channel) {
+                    if (this.client == null || !this.channelExists(channel)) {
+                        return;
+                    }
+
+                    //this.debug("Sending channel user update command...");
+                    //this.client.list(channel);
                 },
 
-                partChannel: function (channel) {
+                joinChannel: function (channel, callback) {
+                    this.client.join(channel, callback);
+                },
+
+                partChannel: function (channel, callback) {
                     if (channel == this.connectionDetails.serverHost) {
                         this.disconnect();
                         return;
@@ -139,7 +120,7 @@ App.Irc.factory('IrcManager',
                     var self = this;
                     if (this.channelExists(channel)) {
                         $timeout(function() {
-                            self.client.part(channel);
+                            self.client.part(channel, callback);
                         });
                     }
                 },
@@ -249,6 +230,12 @@ App.Irc.factory('IrcManager',
                         } else if (message.toLowerCase().indexOf("me") == 0) {
                             messageToSend = message.substring(3);
                             msgOptions.action = true;
+                        } else if (message.toLowerCase().indexOf("trout") == 0) {
+                            parts = properSplit(message, " ", 2);
+                            if (parts.length !== 2) return;
+
+                            messageToSend = "slaps " + parts[1] + " round the face with a large trout.";
+                            msgOptions.action = true;
                         }
                     }
 
@@ -266,10 +253,180 @@ App.Irc.factory('IrcManager',
                     if (msgOptions.action) {
                         this.client.action(channelTarget, messageToSend);
                     } else {
-                        this.client.send(channelTarget, messageToSend);
+                        this.client.say(channelTarget, messageToSend);
                     }
 
                     this.pushMessageToChannel(channelTarget, this.newSelfMessage(channelTarget, messageToSend, msgOptions));
+                },
+
+                setupListeners: function () {
+                    var self = this;
+
+                    this.client.addListener('registered', function (message) {
+                        self.debug("Connected, now joining default channel.");
+
+                        if (self.password != undefined && self.password.length > 0) {
+                            setTimeout(function() {
+                                self.client.send('NickServ', 'identify ' + self.password);
+                            }, 1000);
+                        }
+
+                        var logMessage = self.newMessage(self.connectionDetails.serverHost, "", "Welcome " + self.nickname);
+                        self.pushMessageToChannel(logMessage.to, logMessage);
+
+                        self.joinChannel(self.connectionDetails.defaultChannel);
+                    });
+
+                    this.client.addListener('motd', function (motd) {
+                        var logMessage = self.newMessage(self.serverChannel.name, '', motd);
+                        self.pushMessageToChannel(logMessage.to, logMessage);
+                    });
+
+                    this.client.addListener('notice', function (nick, to, text, message) {
+                        if (to == "*") {
+                            to = self.serverChannel.name;
+                        }
+
+                        var logMessage = self.newMessage(to, nick, text);
+                        self.pushMessageToChannel(logMessage.to, logMessage);
+                    });
+
+                    this.client.addListener('topic', function (channel, topic, nick, message) {
+                        var logMessage = self.newSelfMessage(channel, topic);
+                        self.pushMessageToChannel(logMessage.to, logMessage);
+                    });
+
+                    this.client.addListener('join', function (channel, nick, message) {
+                        if (nick == self.nickname) {
+                            if (!self.channelExists(channel)) {
+                                self.initChannel(channel);
+                            }
+                        } else {
+                            $timeout(function() {
+                                self.getChannel(channel).addUser(nick);
+                            });
+                        }
+
+                        self.getChannel(channel).connected = true;
+
+                        var logMessage = self.newMessage(channel, channel, nick + " has joined " + channel, {
+                            from: channel,
+                            muted: true
+                        });
+
+                        if (channel.substring(0, 1) == '#') {
+                            self.switchChannel(channel);
+                        }
+
+                        self.pushMessageToChannel(logMessage.to, logMessage);
+                    });
+
+                    this.client.addListener('part', function (channel, nick, reason, message) {
+                        if (!self.channelExists(channel)) {
+                            return;
+                        }
+
+                        if (nick.toLowerCase() == self.nickname.toLowerCase()) {
+                            $timeout(function() {
+                                delete self.channelList[channel];
+                            });
+                        } else {
+                            $timeout(function() {
+                                self.getChannel(channel).removeUser(nick);
+                            });
+                        }
+
+                        if (reason == null || reason.length == undefined) {
+                            reason = "None";
+                        }
+
+                        var partMessage =  nick + " has left " + channel + " (Reason: " + reason + ")";
+
+                        var logMessage = self.newMessage(channel, channel, partMessage, {
+                            muted: true
+                        });
+
+                        self.pushMessageToChannel(logMessage.to, logMessage);
+                    });
+
+                    this.client.addListener('quit', function (nick, reason, channels, message) {
+                        for (var key in self.channelList) {
+                            var channel = self.channelList[key];
+
+                            $timeout(function() {
+                                channel.removeUser(nick);
+                            });
+
+                            if (channel.name == self.connectionDetails.serverHost) {
+                                continue;
+                            }
+
+                            var logMessage = self.newMessage(channel.name, nick, nick + " has quit (Reason: " + reason + ")", {
+                                muted: true
+                            });
+
+                            self.pushMessageToChannel(logMessage.to, logMessage);
+                        }
+                    });
+
+                    this.client.addListener('message', function (nick, to, text, message) {
+                        var logMessage = self.newMessage(to, nick, text);
+                        var channel = null;
+
+                        if (!self.channelExists(logMessage.to)) {
+                            if (message.message.substring(0, 1) !== '#') {
+                                // User channel initialize the channel to be the other user
+                                channel = self.initChannel(logMessage.from);
+                                channel.privateUser = true;
+                                channel.connected = true;
+                            } else {
+                                // It is a proper channel initialize it..
+                                channel = self.initChannel(logMessage.to);
+                            }
+                        } else {
+                            channel = self.getChannel(logMessage.to);
+                        }
+
+                        if (channel.privateUser) {
+                            logMessage.privateMsg = true;
+                        }
+
+                        if (logMessage.message.indexOf('\u0001ACTION') > -1) {
+                            logMessage.action = true;
+                            logMessage.message = logMessage.message.substring(7);
+                        }
+
+                        if (logMessage.message.indexOf(self.nickname) > -1) {
+                            self.$rootScope.$emit('irc.message.highlight', logMessage);
+                            logMessage.highlight = true;
+                        }
+
+                        self.pushMessageToChannel(logMessage.to, logMessage);
+
+                    });
+
+                    this.client.addListener('names', function (channel, nicks) {
+                        var combined = [];
+                        for (var nick in nicks) {
+                            if (!nicks.hasOwnProperty(nick)) continue;
+                            var mode = nicks[nick];
+                            combined.push(mode+nick);
+                        }
+
+                        $timeout(function() {
+                            self.getChannel(channel).users = combined.sort();
+                        });
+                    });
+
+                    this.client.addListener('raw', function (message) {
+                        self.debug("## RAW MESSAGE ---------------------------------");
+                        self.debug(message);
+                    });
+
+                    this.client.addListener('error', function (message) {
+                        self.debug("!! ERROR ---------------------------------");
+                        self.debug(message);
+                    });
                 },
 
                 setupHandler: function () {
@@ -322,7 +479,7 @@ App.Irc.factory('IrcManager',
                                     }
                                 } else {
                                     channel = self.getChannel(message.to);
-                                };
+                                }
 
                                 if (channel.privateUser) {
                                     logMessage.privateMsg = true;
@@ -366,8 +523,10 @@ App.Irc.factory('IrcManager',
                             });
 
                             irc.on('quit', function (quit) {
-                                for (var i = 0; i < self.channelList.length; i++) {
-                                    var channel = self.channelList[i];
+                                console.log(self.channelList);
+                                for (var key in self.channelList) {
+                                    var channel = self.channelList[key];
+
                                     if (channel.name == self.connectionDetails.serverHost) {
                                         continue;
                                     }
@@ -438,6 +597,12 @@ App.Irc.factory('IrcManager',
                     }
 
                     this.client.use(handler());
+                },
+
+                debug: function (message) {
+                    if (this.debugEnabled) {
+                        console.log(message);
+                    }
                 }
 
             };

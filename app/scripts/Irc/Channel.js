@@ -14,9 +14,43 @@ App.Irc.Channel = (function () {
         this.limitLog = true;
         this.limitAmount = 250;
 
-    };
+    }
 
     Model.prototype = {
+
+        addUser: function (user) {
+            this.users.push(user);
+            this.users = this.users.sort();
+        },
+
+        removeUser: function (nick) {
+            for (var i = 0; i < this.users.length; i++) {
+                var user = this.users[i];
+
+                if (this.stripMode(user, true) == this.stripMode(nick, true)) {
+                    delete this.users[i];
+
+                    break;
+                }
+            }
+        },
+
+        stripMode: function (nick, toLower) {
+
+            if (nick == undefined || nick.indexOf == undefined) {
+                return '';
+            }
+
+            if (nick.indexOf("@") === 1 || nick.indexOf("+") === 1) {
+                nick = nick.substring(0, 1);
+            }
+
+            if (toLower != undefined && toLower == true) {
+                nick = nick.toLowerCase();
+            }
+
+            return nick;
+        },
 
         addMessage: function (message) {
             message.channel = this; // Assign ourselves to the channel

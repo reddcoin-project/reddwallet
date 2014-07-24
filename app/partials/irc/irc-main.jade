@@ -60,7 +60,7 @@
 
 form#wrapper(ng-show="irc.connected")
     #upper-panel
-        #chat(scroll-glue, ng-model="glued", wheel-speed="50", refresh-on-change="irc.channelList[irc.currentChannel].log")
+        #chat(scroll-glue, ng-model="glued", wheel-speed="50", refresh-on-change="irc.channelList[irc.currentChannel].log", ng-class="{'full-right': irc.channelList[irc.currentChannel].privateUser}")
             table#irc-messages
                 tr.irc-row(ng-repeat="msg in irc.channelList[irc.currentChannel].log", bindonce, ng-class="{'bg-info': msg.highlight}")
                     td.irc-from
