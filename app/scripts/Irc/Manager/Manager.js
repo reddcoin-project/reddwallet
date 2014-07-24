@@ -11,7 +11,7 @@ App.Irc.factory('IrcManager',
                 this.irc = require('irc');
                 this.net = require('net');
 
-                this.debugEnabled = true;
+                this.debugEnabled = false;
 
                 this.currentChannel = '';
 
