@@ -34,7 +34,7 @@
         "nedb": "~0.10.*",
         "node-reddcoin": "~0.3.10",
         "async": "~0.9.*",
-        "node-irc": "latest",
+        "irc": "latest",
         "request": "latest",
         "feedparser": "0.16.5",
         "sanitizer": "0.0.1"
