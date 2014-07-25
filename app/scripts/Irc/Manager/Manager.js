@@ -451,41 +451,6 @@ App.Irc.factory('IrcManager',
                     });
                 },
 
-                setupHandler: function () {
-                    var self = this;
-                    function handler () {
-                        return function (irc) {
-                            var logMessage;
-
-
-
-                            irc.on('nick', function (nick) {
-                                for (var key in self.channelList) {
-                                    if (!self.channelList.hasOwnProperty(key)) {
-                                        continue;
-                                    }
-
-                                    var channel = self.channelList[key];
-
-                                    var oldNick = nick.nick + " is";
-                                    if (oldNick == self.nickname) {
-                                        oldNick = "You are";
-                                    }
-
-                                    var logMessage = self.newMessage(channel.name, nick.new, oldNick + " now known as " + nick.new, {
-                                        muted: true
-                                    });
-
-                                    self.pushMessageToChannel(channel.name, logMessage);
-                                    self.updateUserList(channel.name);
-                                }
-                            });
-                        }
-                    }
-
-                    this.client.use(handler());
-                },
-
                 debug: function (message) {
                     if (this.debugEnabled) {
                         console.log(message);
