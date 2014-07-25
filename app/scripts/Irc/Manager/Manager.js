@@ -86,6 +86,7 @@ App.Irc.factory('IrcManager',
 
                     self.serverChannel = new App.Irc.Channel();
                     self.serverChannel.name = hostname;
+                    self.serverChannel.prettyName = hostname;
                     self.serverChannel.connected = true;
                     self.serverChannel.server = true;
                     self.serverChannel.privateUser = true;
@@ -96,15 +97,6 @@ App.Irc.factory('IrcManager',
                         self.switchChannel(self.serverChannel.name);
                         self.connected = true;
                     });
-                },
-
-                updateUserList: function (channel) {
-                    if (this.client == null || !this.channelExists(channel)) {
-                        return;
-                    }
-
-                    //this.debug("Sending channel user update command...");
-                    //this.client.list(channel);
                 },
 
                 joinChannel: function (channel, callback) {
@@ -119,9 +111,24 @@ App.Irc.factory('IrcManager',
 
                     var self = this;
                     if (this.channelExists(channel)) {
-                        $timeout(function() {
-                            self.client.part(channel, callback);
-                        });
+
+                        var channelObj = this.getChannel(channel);
+
+                        if (channelObj.privateUser) {
+                            $timeout(function() {
+                                delete this.channelList[channelObj.name];
+                                // Switch to a new channel (so no blank screen)
+                                for (var key in self.channelList) {
+                                    var channel = self.channelList[key];
+                                    self.switchChannel(channel.name);
+                                    break;
+                                }
+                            });
+                        } else {
+                            $timeout(function() {
+                                self.client.part(channel, callback);
+                            });
+                        }
                     }
                 },
 
@@ -168,10 +175,23 @@ App.Irc.factory('IrcManager',
                 },
 
                 initChannel: function (channelName) {
+                    var prettyName = channelName;
+
                     channelName = channelName.toLowerCase();
                     var channel = new App.Irc.Channel();
+
                     channel.name = channelName;
+                    channel.prettyName = prettyName;
+
                     this.channelList[channelName] = channel;
+
+                    return channel;
+                },
+
+                initUserPmChannel: function (channelName) {
+                    var channel = this.initChannel(channelName);
+                    channel.privateUser = true;
+                    channel.connected = true;
 
                     return channel;
                 },
@@ -195,6 +215,10 @@ App.Irc.factory('IrcManager',
 
                 newSelfMessage: function (channel, message, options) {
                     return this.newMessage(channel, this.nickname, message, options);
+                },
+
+                isUserPm: function (channel) {
+                    return !(channel.substring(0, 1) === '#')
                 },
 
                 send: function (channel, message) {
@@ -240,8 +264,8 @@ App.Irc.factory('IrcManager',
                     }
 
                     if (!this.channelExists(channelTarget)) {
-                        var newChannel = this.initChannel(channelTarget.toLowerCase());
-                        if (channel.substring(0, 1) !== '#') {
+                        var newChannel = this.initChannel(channelTarget);
+                        if (this.isUserPm(channelTarget)) {
                             newChannel.privateUser = true;
                             newChannel.connected = true;
 
@@ -330,6 +354,7 @@ App.Irc.factory('IrcManager',
                                 for (var key in self.channelList) {
                                     var channel = self.channelList[key];
                                     self.switchChannel(channel.name);
+                                    break;
                                 }
                             });
 
@@ -397,17 +422,17 @@ App.Irc.factory('IrcManager',
                         var channel = null;
 
                         var channelName = to;
-                        if (logMessage.to.substring(0, 1) !== '#') {
+                        var isUserPm = self.isUserPm(channelName);
+
+                        if (isUserPm) {
                             // User, so the channel name needs to be changed to the "from" as its 1 on 1
                             channelName = logMessage.from;
                         }
 
                         if (!self.channelExists(channelName)) {
-                            if (logMessage.to.substring(0, 1) !== '#') {
+                            if (isUserPm) {
                                 // User channel initialize the channel to be the other user
-                                channel = self.initChannel(channelName);
-                                channel.privateUser = true;
-                                channel.connected = true;
+                                channel = self.initUserPmChannel(channelName);
                             } else {
                                 // It is a proper channel initialize it..
                                 channel = self.initChannel(channelName);
@@ -416,8 +441,9 @@ App.Irc.factory('IrcManager',
                             channel = self.getChannel(channelName);
                         }
 
-                        if (channel.privateUser) {
+                        if (isUserPm) {
                             logMessage.privateMsg = true;
+                            logMessage.sent = false;
                         }
 
                         if (logMessage.message.indexOf('\u0001ACTION') > -1) {

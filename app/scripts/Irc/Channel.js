@@ -3,6 +3,8 @@ App.Irc.Channel = (function () {
     function Model () {
 
         this.name = '';
+        this.prettyName = '';
+
         this.log = [];
         this.users = [];
 
@@ -66,6 +68,10 @@ App.Irc.Channel = (function () {
 
         addMessage: function (message) {
             message.channel = this; // Assign ourselves to the channel
+
+            if (this.privateUser) {
+                message.privateMsg = true;
+            }
 
             this.log.push(message);
 
