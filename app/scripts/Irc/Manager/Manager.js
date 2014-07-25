@@ -322,14 +322,17 @@ App.Irc.factory('IrcManager',
                     });
 
                     this.client.addListener('part', function (channel, nick, reason, message) {
-                        if (!self.channelExists(channel)) {
-                            return;
-                        }
-
                         if (nick.toLowerCase() == self.nickname.toLowerCase()) {
                             $timeout(function() {
                                 delete self.channelList[channel];
+                                // Switch to a new channel (so no blank screen)
+                                for (var key in self.channelList) {
+                                    var channel = self.channelList[key];
+                                    self.switchChannel(channel.name);
+                                }
                             });
+
+                            return; // Can't add a message to a non-existent channel
                         } else {
                             $timeout(function() {
                                 self.getChannel(channel).removeUser(nick);
@@ -362,6 +365,25 @@ App.Irc.factory('IrcManager',
                             }
 
                             var logMessage = self.newMessage(channel.name, nick, nick + " has quit (Reason: " + reason + ")", {
+                                muted: true
+                            });
+
+                            self.pushMessageToChannel(logMessage.to, logMessage);
+                        }
+                    });
+
+                    this.client.addListener('nick', function (oldnick, newnick, channels, message) {
+                        for (var key in self.channelList) {
+                            var channel = self.channelList[key];
+
+                            if (!channel.userExists(oldnick)) {
+                                continue; // If we don't have the channel then don't do anything
+                            }
+
+                            channel.removeUser(oldnick);
+                            channel.addUser(newnick);
+
+                            var logMessage = self.newMessage(channel.name, channel.name, oldnick + " has changed their nickname to " + newnick, {
                                 muted: true
                             });
 
@@ -435,142 +457,7 @@ App.Irc.factory('IrcManager',
                         return function (irc) {
                             var logMessage;
 
-                            irc.on('data', function (data) {
-                                if (data.command == 'ERR_NICKNAMEINUSE') {
-                                    self.retrySuffix ++;
-                                    var newNickname = self.nickname + self.retrySuffix;
-                                    self.connect(newNickname, newNickname, '');
-                                    logMessage = self.newMessage(self.connectionDetails.serverHost, data.from, data.trailing);
-                                    self.pushMessageToChannel(self.connectionDetails.serverHost, logMessage);
-                                } else if (data.command == 'RPL_TOPIC') {
-                                    logMessage = self.newMessage(self.connectionDetails.serverHost, data.from, data.message);
-                                    self.pushMessageToChannel(self.connectionDetails.serverHost, logMessage);
-                                }
-                            });
 
-                            // Reset the actual nickname we got given...
-                            irc.on('welcome', function (nickname) {
-                                self.nickname = nickname;
-
-                                if (self.password != undefined && self.password.length > 0) {
-                                    setTimeout(function() {
-                                        self.client.send('NickServ', 'identify ' + self.password);
-                                    }, 1000);
-                                }
-
-                                var logMessage = self.newMessage(self.connectionDetails.serverHost, "", "Welcome " + nickname);
-                                self.pushMessageToChannel(logMessage.to, logMessage);
-                            });
-
-                            irc.on('message', function (message) {
-
-                                var logMessage = self.newMessage(message.to, message.from, message.message);
-
-                                var channel = null;
-                                if (!self.channelExists(message.to)) {
-                                    if (message.message.substring(0, 1) !== '#') {
-                                        // User channel initialize the channel to be the other user
-                                        channel = self.initChannel(message.from);
-                                        channel.privateUser = true;
-                                        channel.connected = true;
-                                    } else {
-                                        // It is a proper channel initialize it..
-                                        channel = self.initChannel(message.to);
-                                    }
-                                } else {
-                                    channel = self.getChannel(message.to);
-                                }
-
-                                if (channel.privateUser) {
-                                    logMessage.privateMsg = true;
-                                }
-
-                                if (message.message.indexOf('\u0001ACTION') > -1) {
-                                    logMessage.action = true;
-                                    logMessage.message = message.message.substring(7);
-                                }
-
-                                if (message.message.indexOf(self.nickname) > -1) {
-                                    self.$rootScope.$emit('irc.message.highlight', logMessage);
-                                }
-
-                                self.pushMessageToChannel(logMessage.to, logMessage);
-                            });
-
-                            irc.on('join', function (join) {
-
-                                var joinChannel = join.channel;
-                                if (join.nick == self.nickname) {
-                                    if (!self.channelExists(joinChannel)) {
-                                        self.initChannel(joinChannel);
-                                    }
-                                }
-
-                                self.getChannel(joinChannel).connected = true;
-
-                                var logMessage = self.newMessage(joinChannel, joinChannel, join.nick + " has joined " + joinChannel, {
-                                    from: join.nick,
-                                    muted: true
-                                });
-
-                                if (joinChannel.substring(0, 1) == '#') {
-                                    // Actual channel
-                                    self.switchChannel(joinChannel);
-                                }
-
-                                self.pushMessageToChannel(logMessage.to, logMessage);
-                                self.updateUserList(joinChannel);
-                            });
-
-                            irc.on('quit', function (quit) {
-                                console.log(self.channelList);
-                                for (var key in self.channelList) {
-                                    var channel = self.channelList[key];
-
-                                    if (channel.name == self.connectionDetails.serverHost) {
-                                        continue;
-                                    }
-
-                                    logMessage = self.newMessage(channel, part.nick, part.nick + " has quit. ", {
-                                        muted: true
-                                    });
-
-                                    self.pushMessageToChannel(logMessage.to, logMessage);
-                                    self.updateUserList(channel);
-                                }
-                            });
-
-                            irc.on('part', function (part) {
-                                for (var i = 0; i < part.channels.length; i++) {
-                                    var partedChannel = part.channels[i];
-
-                                    if (part.nick.toLowerCase() == self.nickname.toLowerCase()) {
-                                        $timeout(function() {
-                                            delete self.channelList[partedChannel];
-                                        });
-
-                                        continue;
-                                    }
-
-                                    var partMessage = part.message.length == 0 ? part.nick + " has left " + partedChannel : part.message;
-                                    logMessage = self.newMessage(partedChannel, part.nick, partMessage, {
-                                        muted: true
-                                    });
-
-                                    self.pushMessageToChannel(logMessage.to, logMessage);
-                                    self.updateUserList(partedChannel);
-                                }
-                            });
-
-                            irc.on('notice', function (notice) {
-                                if (notice.to == "*") {
-                                    notice.to = self.connectionDetails.serverHost;
-                                }
-
-                                logMessage = self.newMessage(notice.to, notice.from, notice.message);
-
-                                self.pushMessageToChannel(logMessage.to, logMessage);
-                            });
 
                             irc.on('nick', function (nick) {
                                 for (var key in self.channelList) {

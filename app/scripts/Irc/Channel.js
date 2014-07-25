@@ -18,6 +18,18 @@ App.Irc.Channel = (function () {
 
     Model.prototype = {
 
+        userExists: function (nick) {
+            for (var i = 0; i < this.users.length; i++) {
+                var user = this.users[i];
+
+                if (this.stripMode(user, true) == this.stripMode(nick, true)) {
+                    return true;
+                }
+            }
+
+            return false;
+        },
+
         addUser: function (user) {
             this.users.push(user);
             this.users = this.users.sort();
