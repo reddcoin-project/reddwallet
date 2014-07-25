@@ -481,6 +481,22 @@ App.Irc.factory('IrcManager',
                     this.client.addListener('error', function (message) {
                         self.debug("!! ERROR ---------------------------------");
                         self.debug(message);
+
+                        var logMessage = null;
+
+                        if (message.command == 'err_nosuchnick') {
+                            logMessage = self.newMessage(message.args[1], self.serverChannel.name, message.args[2], {
+                                muted: true
+                            });
+
+                            self.pushMessageToChannel(logMessage.to, logMessage);
+                        } else if (message.command == 'err_nosuchchannel') {
+                            logMessage = self.newMessage(self.serverChannel.name, self.serverChannel.name, message.args[2], {
+                                muted: true
+                            });
+
+                            self.pushMessageToChannel(logMessage.to, logMessage);
+                        }
                     });
                 },
 
