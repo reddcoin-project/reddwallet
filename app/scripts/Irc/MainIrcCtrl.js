@@ -23,7 +23,8 @@ App.Irc.controller(
                 password: '',
                 serverHost: 'irc.freenode.net',
                 serverPassword: '',
-                serverPort: 6667,
+                serverPort: 7000,
+                serverSsl: true,
                 defaultChannel: '#reddcoin'
             };
 

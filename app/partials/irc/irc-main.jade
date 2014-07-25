@@ -48,6 +48,12 @@
                         .col-sm-10
                             input.form-control(ng-model="connectionDetails.serverPort")
                     .form-group
+                        label.col-sm-2.control-label Secure
+                        .col-sm-10
+                            .checkbox
+                                .label
+                                    input(type="checkbox", ng-model="connectionDetails.serverSsl")
+                    .form-group
                         label.col-sm-2.control-label Default Channel
                         .col-sm-10
                             input.form-control(ng-model="connectionDetails.defaultChannel")

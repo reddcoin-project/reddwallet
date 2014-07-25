@@ -49,22 +49,22 @@ App.Irc.factory('IrcManager',
                     this.client = new this.irc.Client(connectionDetails.serverHost, connectionDetails.nickname, {
                         userName:  connectionDetails.username,
                         realName: connectionDetails.username,
-                        port: connectionDetails.serverPort,
+                        port: 7000,
                         password: connectionDetails.serverPassword,
-                        debug: false,
-                        showErrors: false,
+                        debug: true,
+                        showErrors: true,
                         autoRejoin: true,
                         autoConnection: true,
                         channels: [],
-                        secure: false,
+                        secure: connectionDetails.serverSsl,
                         selfSigned: false,
                         certExpired: false,
                         floodProtection: false,
                         floodProtectionDelay: 1000,
                         sasl: false,
-                        stripColors: false,
+                        stripColors: true,
                         channelPrefixes: "&#",
-                        messageSplit: 512
+                        messageSplit: 256
                     });
 
                     this.initializeServerChannel(connectionDetails.serverHost);
@@ -323,8 +323,9 @@ App.Irc.factory('IrcManager',
 
                     this.client.addListener('part', function (channel, nick, reason, message) {
                         if (nick.toLowerCase() == self.nickname.toLowerCase()) {
+                            var channelName = channel;
                             $timeout(function() {
-                                delete self.channelList[channel];
+                                delete self.channelList[channelName];
                                 // Switch to a new channel (so no blank screen)
                                 for (var key in self.channelList) {
                                     var channel = self.channelList[key];
@@ -395,18 +396,24 @@ App.Irc.factory('IrcManager',
                         var logMessage = self.newMessage(to, nick, text);
                         var channel = null;
 
-                        if (!self.channelExists(logMessage.to)) {
-                            if (message.message.substring(0, 1) !== '#') {
+                        var channelName = to;
+                        if (logMessage.to.substring(0, 1) !== '#') {
+                            // User, so the channel name needs to be changed to the "from" as its 1 on 1
+                            channelName = logMessage.from;
+                        }
+
+                        if (!self.channelExists(channelName)) {
+                            if (logMessage.to.substring(0, 1) !== '#') {
                                 // User channel initialize the channel to be the other user
-                                channel = self.initChannel(logMessage.from);
+                                channel = self.initChannel(channelName);
                                 channel.privateUser = true;
                                 channel.connected = true;
                             } else {
                                 // It is a proper channel initialize it..
-                                channel = self.initChannel(logMessage.to);
+                                channel = self.initChannel(channelName);
                             }
                         } else {
-                            channel = self.getChannel(logMessage.to);
+                            channel = self.getChannel(channelName);
                         }
 
                         if (channel.privateUser) {
