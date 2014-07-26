@@ -338,7 +338,8 @@ App.Irc.factory('IrcManager',
                             muted: true
                         });
 
-                        if (channel.substring(0, 1) == '#') {
+                        // Only switch if it is a channel and it is us that is joining it
+                        if (channel.substring(0, 1) == '#' && nick.toLowerCase() == self.nickname.toLowerCase()) {
                             self.switchChannel(channel);
                         }
 
