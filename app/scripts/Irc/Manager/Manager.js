@@ -382,12 +382,20 @@ App.Irc.factory('IrcManager',
                         for (var key in self.channelList) {
                             var channel = self.channelList[key];
 
+                            if (!channel.userExists(nick)) {
+                                continue;
+                            }
+
                             $timeout(function() {
                                 channel.removeUser(nick);
                             });
 
                             if (channel.name == self.connectionDetails.serverHost) {
                                 continue;
+                            }
+
+                            if (reason == undefined) {
+                                reason = "None";
                             }
 
                             var logMessage = self.newMessage(channel.name, nick, nick + " has quit (Reason: " + reason + ")", {
