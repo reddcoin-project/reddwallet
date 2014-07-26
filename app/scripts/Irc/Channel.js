@@ -14,7 +14,7 @@ App.Irc.Channel = (function () {
         this.privateUser = false;
 
         this.limitLog = true;
-        this.limitAmount = 250;
+        this.limitAmount = 100; // Only we to render quickly..
 
     }
 
