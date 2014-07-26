@@ -460,7 +460,7 @@ App.Irc.factory('IrcManager',
                             logMessage.message = logMessage.message.substring(7);
                         }
 
-                        if (logMessage.message.indexOf(self.nickname) > -1) {
+                        if (logMessage.message.indexOf(" " + self.nickname + " ") > -1) {
                             self.$rootScope.$emit('irc.message.highlight', logMessage);
                             logMessage.highlight = true;
                         }
