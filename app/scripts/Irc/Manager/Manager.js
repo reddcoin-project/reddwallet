@@ -132,10 +132,11 @@ App.Irc.factory('IrcManager',
                     }
                 },
 
-                switchChannel: function (channel) {
+                switchChannel: function (channelName) {
                     var self = this;
+                    self.currentChannel = channelName;
                     $timeout(function () {
-                        self.currentChannel = channel;
+                        self.getChannel(channelName).unseenMessages = 0
                     });
                 },
 
@@ -453,6 +454,10 @@ App.Irc.factory('IrcManager',
                         if (isUserPm) {
                             logMessage.privateMsg = true;
                             logMessage.sent = false;
+                        }
+
+                        if (channelName != self.currentChannel) {
+                            channel.unseenMessages ++;
                         }
 
                         if (logMessage.message.indexOf('\u0001ACTION') > -1) {

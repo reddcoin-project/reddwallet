@@ -2,7 +2,9 @@
     .col-sm-12
         ul.nav.nav-pills
             li(ng-repeat="channel in irc.channelList", ng-class="{active: channel.name == irc.currentChannel}")
-                a(href="", ng-click="switchChannel(channel)") {{ channel.prettyName }}
+                a(href="", ng-click="switchChannel(channel)")
+                    | {{ channel.prettyName }} &nbsp
+                    span(ng-show="channel.unseenMessages > 0") ({{channel.unseenMessages}})
             li.pull-right
                 .btn-group.btn-group.btn-group-sm
                     button.btn.btn-default(

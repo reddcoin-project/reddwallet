@@ -54,7 +54,7 @@ App.Irc.controller(
             };
 
             $scope.switchChannel = function (channel) {
-                $scope.irc.currentChannel = channel.name;
+                $scope.irc.switchChannel(channel.name);
             };
 
             $scope.partChannel = function () {

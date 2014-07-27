@@ -15,6 +15,7 @@ App.Irc.Channel = (function () {
 
         this.limitLog = true;
         this.limitAmount = 100; // Only we to render quickly..
+        this.unseenMessages = 0;
 
     }
 
