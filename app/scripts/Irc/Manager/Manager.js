@@ -100,6 +100,10 @@ App.Irc.factory('IrcManager',
                 },
 
                 joinChannel: function (channel, callback) {
+                    if (channel.substring(0, 1) !== '#') {
+                        channel = "#" + channel;
+                    }
+
                     this.client.join(channel, callback);
                 },
 
