@@ -162,6 +162,17 @@ App.Wallet.factory('walletRpc',
                     return deferred.promise;
                 },
 
+                getStakingInfo: function () {
+                    var self = this;
+                    var deferred = $q.defer();
+
+                    this.client.exec('getstakinginfo', function (err, info) {
+                        self.rpcToMessage(deferred, err, info);
+                    });
+
+                    return deferred.promise;
+                },
+
                 getTxOutSetInfo: function () {
                     var self = this;
                     var deferred = $q.defer();

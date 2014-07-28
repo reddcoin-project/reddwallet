@@ -247,20 +247,6 @@ App.Daemon.Bootstrap = (function () {
         setupDaemonListeners: function () {
             var self = this;
 
-            this.daemon.stdout.on('data', function (data) {
-                if (data.indexOf != undefined) {
-                    console.log(data);
-                    if (data.indexOf('WALLET') !== -1 || data.indexOf('ALERT') !== -1) {
-                        self.$rootScope.$emit('daemon.notifications.block');
-                        console.log("notifications block");
-                    }
-                }
-            });
-
-            this.daemon.stderr.on('error', function (data) {
-                self.debug("Received daemon error from 'stderr'");
-            });
-
             // When the main window (the one starting this) is closed, kill the daemon.
             this.win.on('close', function() {
                 self.daemon.kill('SIGTERM', function() {
@@ -290,30 +276,40 @@ App.Daemon.Bootstrap = (function () {
                 this.daemon = this.childProcess.spawn(this.daemonFilePath, [
                     '-conf=' + this.configPath,
                     '-datadir=' + this.daemonDirPath,
-                    '-pid=' + this.pidPath,
+                    //'-pid=' + this.pidPath,
                     '-alertnotify=echo "ALERT:%s"',
-                    '-walletnotify=echo "WALLET:%s"'
-                    //'-blocknotify=echo "BLOCK:%s"'
+                    '-walletnotify=echo "WALLET:%s"',
+                    '-blocknotify=echo "BLOCK:%s"'
                 ]);
             } catch (ex) {
+                console.log(ex);
                 self.deferred.reject(new App.Global.Message(
                     false, 2, "We cannot start the daemon, please check no other wallets are running."
                 ));
             }
 
+            this.daemon.stderr.setEncoding('utf8');
             this.daemon.stderr.on('data', function (data) {
 
-                self.deferred.reject(new App.Global.Message(
-                    false, 2, "We cannot start the daemon, please check no other wallets are running."
-                ));
-
-                if (/^execvp\(\)/.test(data)) {
+                console.log(data);
+                if (/^execvp\(\)/.test(data) || data.toLowerCase().indexOf("error") !== -1) {
                     console.log('Failed to start child process.');
+                    console.log(data);
+                    self.deferred.reject(new App.Global.Message(
+                        false, 2, data
+                    ));
                 }
+
             });
 
+            this.daemon.stdout.setEncoding('utf8');
             this.daemon.stdout.on('data', function (data) {
-                //console.log(data);
+
+                console.log(data);
+
+                if (data.indexOf('BLOCK') > 0) {
+                    self.$rootScope.$emit('daemon.notifications.block');
+                }
             });
         },
 

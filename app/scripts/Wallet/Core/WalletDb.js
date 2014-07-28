@@ -22,6 +22,7 @@ App.Wallet.factory('walletDb',
                 this.walletRpc = walletRpc;
 
                 this.overviewModel = new App.Wallet.OverviewModel(this);
+                this.stakingInfoModel = new App.Wallet.StakingInfoModel(this);
 
                 this.accounts = App.Global.NeDB.collection('wallet_accounts');
                 this.accounts.ensureIndex({
@@ -47,17 +48,32 @@ App.Wallet.factory('walletDb',
                  */
                 updateOverview: function () {
                     var self = this;
-                    var promise = this.walletRpc.getOverview();
+                    var overview = this.walletRpc.getOverview();
 
-                    this.applyModelPromise(this.overviewModel, promise);
+                    this.applyModelPromise(this.overviewModel, overview);
 
-                    promise.then(function (message) {
+                    overview.then(function (message) {
                         self.$timeout(function () {
                             self.overviewModel = message.model;
                         });
                     });
 
-                    return promise;
+                    return overview;
+                },
+
+                updateStaking: function () {
+                    var self = this;
+                    var staking = this.walletRpc.getStakingInfo();
+
+                    this.applyModelPromise(this.stakingInfoModel, staking);
+
+                    staking.then(function (message) {
+                        self.$timeout(function () {
+                            self.stakingInfoModel = message.model;
+                        });
+                    });
+
+                    return staking;
                 },
 
                 getReceivingAccounts: function () {

@@ -167,10 +167,16 @@ function rpcCodeToMessage (code) {
 
     };
 
-    if (codeMap[code.toString()] == undefined) {
-        return "Unknown code " + code;
-    }
+    try {
 
-    return codeMap[code.toString()].description;
+        if (codeMap[code.toString()] == undefined) {
+            return "Unknown code " + code;
+        }
+
+        return codeMap[code.toString()].description;
+
+    } catch (error) {
+        return "Unknown code";
+    }
 
 }

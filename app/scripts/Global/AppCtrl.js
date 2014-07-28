@@ -7,6 +7,8 @@ App.Global.controller(
             $scope.walletDb = walletDb;
 
             $scope.walletOverview = {};
+            $scope.walletStakingInfo = {};
+
             $scope.blockHeight = 0;
             $scope.blocksSynced = false;
 
@@ -53,12 +55,26 @@ App.Global.controller(
             });
 
             function fetchOverview() {
-                $scope.walletDb.updateOverview().then(function (message) {
-                    $scope.walletOverview = $scope.walletDb.overviewModel;
-                    $scope.errors = {
-                        message: $scope.walletOverview.errors
-                    };
-                });
+                $scope.walletDb.updateOverview().then(
+                    function (message) {
+                        $scope.walletOverview = $scope.walletDb.overviewModel;
+                        $scope.errors = {
+                            message: $scope.walletOverview.errors
+                        };
+                    }
+                );
+
+                $scope.walletDb.updateStaking().then(
+                    function (message) {
+                        $scope.walletStakingInfo = $scope.walletDb.stakingInfoModel;
+                    }
+                );
+
+                $scope.walletDb.walletRpc.getStakingInfo().then(
+                    function(message) {
+                        $scope.walletStaking = message.rpcInfo;
+                    }
+                );
 
                 $scope.walletDb.walletRpc.getWork().then(
                     function success (message) {
