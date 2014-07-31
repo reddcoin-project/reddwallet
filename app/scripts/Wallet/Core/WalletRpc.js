@@ -129,6 +129,17 @@ App.Wallet.factory('walletRpc',
                     return deferred.promise;
                 },
 
+                setTxFee: function (value) {
+                    var self = this;
+                    var deferred = $q.defer();
+
+                    self.client.exec('settxfee', value, function (err, info) {
+                        self.rpcToMessage(deferred, err, info);
+                    });
+
+                    return deferred.promise;
+                },
+
                 send: function (data) {
                     var self = this;
                     var deferred = $q.defer();
@@ -212,6 +223,21 @@ App.Wallet.factory('walletRpc',
                     var async = require('async');
 
                     this.client.exec('listreceivedbyaddress', 1, true, function (err, info) {
+                        self.rpcToMessage(deferred, err, info);
+                    });
+
+                    return deferred.promise;
+                },
+
+                unlockWallet: function (password, staking) {
+                    var self = this;
+                    var deferred = $q.defer();
+
+                    if (staking == undefined) {
+                        staking = false;
+                    }
+
+                    this.client.exec('walletpassphrase', password, 99999999, staking, function (err, info) {
                         self.rpcToMessage(deferred, err, info);
                     });
 

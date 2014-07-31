@@ -14,15 +14,10 @@ form.form-horizontal
     .form-group
         label.col-sm-3.control-label Amount
         .col-sm-9
-            input.form-control(type='text', ng-model="send.amount", ng-change="updateMetaTotal()", maxlength="15", required, min="1")
-    //.form-group
-    //    label.col-sm-3.control-label Your Comment
-    //    .col-sm-9
-    //        input.form-control(ng-model="send.payerComment")
-    //.form-group
-    //    label.col-sm-3.control-label Their Comment
-    //    .col-sm-9
-    //        input.form-control(ng-model="send.payeeComment")
+            input.form-control(type='text', ng-model="send.amount", ng-change="updateMetaTotal()", maxlength="13", required, min="1")
+    .form-group
+        label.col-sm-3(style='text-align: right;') Fee
+        .col-sm-6 {{ meta.fee | number:8 }}
     .form-group
         label.col-sm-3.lead(style='text-align: right;') Total
         .col-sm-6.lead

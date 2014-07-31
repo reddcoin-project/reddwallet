@@ -32,7 +32,8 @@ App.Wallet.controller(
                     amount: 1,
                     address: '',
                     payerComment: '',
-                    payeeComment: ''
+                    payeeComment: '',
+                    fee: 0.1
                 };
                 $scope.updateMetaTotal();
             };
@@ -54,27 +55,44 @@ App.Wallet.controller(
                 });
 
                 confirm.$scope.confirm = function () {
-                    var promise = walletDb.getRpc().send(sendClone);
-                    promise.then(
-                        function success(message) {
-                            $alert({
-                                "title": "Sent " + sendClone.amount + " RDD ",
-                                "content": "to " + sendClone.address,
-                                "type": "success"
-                            });
-                            $scope.reset();
-                            $scope.walletDb.updateOverview();
-                        },
-                        function error(message) {
-                            var errorMessage = message.message;
 
+                    var fee = $scope.walletDb.calculateFee(sendClone.amount);
+
+                    var transactionFeePromise = walletDb.getRpc().setTxFee(fee);
+
+                    transactionFeePromise.then(
+                        function success (message) {
+                            var promise = walletDb.getRpc().send(sendClone);
+                            promise.then(
+                                function success(message) {
+                                    $alert({
+                                        "title": "Sent " + sendClone.amount + " RDD ",
+                                        "content": "to " + sendClone.address,
+                                        "type": "success"
+                                    });
+                                    $scope.reset();
+                                    $scope.walletDb.updateOverview();
+                                },
+                                function error(message) {
+                                    var errorMessage = message.message;
+
+                                    $alert({
+                                        "title": "Sending Failed",
+                                        "content": errorMessage,
+                                        "type": "warning"
+                                    });
+                                }
+                            );
+                        },
+                        function error (message) {
                             $alert({
                                 "title": "Sending Failed",
-                                "content": errorMessage,
+                                "content": message.message,
                                 "type": "warning"
                             });
                         }
                     );
+
                 };
 
                 confirm.$promise.then(confirm.show);
@@ -83,11 +101,14 @@ App.Wallet.controller(
             $scope.updateMetaTotal = function () {
                 var result = parseFloat($scope.send.amount);
                 if (result == null || isNaN(result)) {
-                    result = "";
+                    result = 0;
                     $scope.disableSend = true;
                 } else {
                     $scope.disableSend = false;
+                    result = result + $scope.walletDb.calculateFee(result);
                 }
+
+                $scope.disableSend = result >= parseFloat($scope.walletDb.overviewModel.balance);
 
                 if ($scope.send.address == '') {
                     $scope.disableSend = true;
@@ -95,9 +116,8 @@ App.Wallet.controller(
                     $scope.disableSend = false;
                 }
 
-                $scope.disableSend = result > $scope.walletDb.overviewModel.balance;
-
                 $scope.meta.totalAmount = result;
+                $scope.meta.fee = $scope.walletDb.calculateFee(result);
             };
 
             $scope.reset();
