@@ -10,7 +10,7 @@ form.form-horizontal
     .form-group
         label.col-sm-3.control-label Address
         .col-sm-9
-            input.form-control(ng-model="send.address", placeholder="Enter contact name", ng-options="acc as acc.label for acc in accounts", bs-typeahead, required)
+            input.form-control(ng-model="send.address", ng-change="updateMetaTotal()", placeholder="Enter contact name", ng-options="acc as acc.label for acc in accounts", bs-typeahead, required)
     .form-group
         label.col-sm-3.control-label Amount
         .col-sm-9
@@ -24,7 +24,6 @@ form.form-horizontal
             strong {{ meta.totalAmount | number:8 }}
         .col-sm-3
             .btn-group.pull-right
-                button.btn.btn-warning.btn-sm(ng-click="reset()") Reset
                 button.btn.btn-primary.btn-sm(
                     ng-click="confirmSend()",
                     ng-disabled="disableSend"
