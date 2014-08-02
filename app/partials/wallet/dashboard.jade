@@ -7,13 +7,13 @@ h1.page-header
             tbody
                 tr
                     td BTC/USD
-                    td {{ marketData.btc }}
+                    td {{ marketData.btc | number:8 }}
                 tr
                     td RDD/BTC
-                    td {{ marketData.rddBtc }}
+                    td {{ marketData.rddBtc | number:8 }}
                 tr
                     td RDD/LTC
-                    td {{ marketData.rddLtc }}
+                    td {{ marketData.rddLtc | number:8 }}
                 tr
                     td Est. USD
                     td {{ marketData.rddBtc * marketData.btc * walletOverview.balance | number:2 }}
