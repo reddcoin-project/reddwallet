@@ -11,8 +11,7 @@ App.Wallet.controller(
         function ($scope, $alert, $modal, $timeout, walletDb, fileDialog, DaemonManager) {
 
             $scope.walletDb = walletDb;
-
-            $scope.isEncrypted = walletDb.getRpc().isEncrypted;
+            $scope.walletOverview = walletDb.overviewModel;
 
             $scope.changePassphrase = function() {
 
@@ -98,16 +97,6 @@ App.Wallet.controller(
                             $timeout(function() {
                                 DaemonManager.killDaemon();
                                 DaemonManager.initialize();
-                                DaemonManager.getBootstrap().getPromise().then(function success() {
-                                    walletDb.getRpc().updateWalletLock().then(
-                                        function success() {
-                                            $scope.isEncrypted = walletDb.getRpc().isEncrypted;
-                                        },
-                                        function error() {
-                                            $scope.isEncrypted = walletDb.getRpc().isEncrypted;
-                                        }
-                                    );
-                                });
                                 DaemonManager.getBootstrap().startLocal();
                             });
                         },
@@ -115,6 +104,83 @@ App.Wallet.controller(
                             $alert({
                                 title: "Wallet Encryption",
                                 content: "Failed",
+                                type: "danger"
+                            });
+                        }
+                    );
+                };
+
+                modal.$promise.then(modal.show);
+
+            };
+
+            $scope.lockWallet = function () {
+                var promise = walletDb.getRpc().lockWallet();
+                promise.then(
+                    function success(message) {
+                        $timeout(function( ) {
+                            $scope.walletDb.overviewModel.locked = true;
+                            $scope.walletOverview.locked = true;
+                        });
+                        $alert({
+                            title: "Lock Wallet",
+                            content: "Successful",
+                            type: "success",
+                            duration: 2
+                        });
+                    },
+                    function error(message) {
+                        $alert({
+                            title: "Lock Wallet",
+                            content: "An error occurred",
+                            type: "warning"
+                        });
+                    }
+                );
+            };
+
+            $scope.unlockWallet = function() {
+
+                var modal = $modal({
+                    title: 'Unlock Wallet',
+                    content: "Unlock your wallet only for staking, this will prevent unauthorized transactions from occurring. " +
+                    "Alternatively unlock it fully if you have a lot of transactions to process.",
+                    template: 'scripts/Wallet/Settings/unlock-wallet-dialog.html',
+                    show: false
+                });
+
+                modal.$scope.passphrase = '';
+                modal.$scope.stakingOnly = true;
+                modal.$scope.unlock = function(passphrase) {
+
+                    if (passphrase == '' || passphrase == null) {
+                        $alert({
+                            title: "Unlock Failed",
+                            content: "You cannot have a blank passphrase",
+                            type: "warning"
+                        });
+                        return;
+                    }
+
+                    var promise = walletDb.getRpc().unlockWallet(passphrase, $scope.stakingOnly);
+                    promise.then(
+                        function success(message) {
+                            $timeout(function( ) {
+                                $scope.walletDb.overviewModel.locked = false;
+                                $scope.walletOverview.locked = false;
+                            });
+
+                            $alert({
+                                title: "Unlock Wallet",
+                                content: "Successful",
+                                type: "success",
+                                duration: 2
+                            });
+                        },
+                        function error(message) {
+                            $alert({
+                                title: "Unlock Wallet",
+                                content: "Incorrect passphrase",
                                 type: "danger"
                             });
                         }

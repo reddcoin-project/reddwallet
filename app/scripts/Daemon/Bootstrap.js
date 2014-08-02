@@ -151,8 +151,6 @@ App.Daemon.Bootstrap = (function () {
                     self.$rootScope.$broadcast('daemon.notifications.block');
                 }, 5 * 1000);
 
-                self.walletRpc.updateWalletLock();
-
                 self.$interval.cancel(intervalCode);
 
             };
@@ -304,11 +302,14 @@ App.Daemon.Bootstrap = (function () {
 
             this.daemon.stdout.setEncoding('utf8');
             this.daemon.stdout.on('data', function (data) {
-
-                console.log(data);
-
-                if (data.indexOf('BLOCK') > 0) {
+                if (data.indexOf('BLOCK') !== -1) {
                     self.$rootScope.$emit('daemon.notifications.block');
+
+                } else if (data.indexOf('ALERT') !== -1) {
+                    self.$rootScope.$emit('daemon.notifications.alert');
+
+                } else if (data.indexOf('WALLET') !== -1) {
+                    self.$rootScope.$emit('daemon.notifications.wallet');
                 }
             });
         },

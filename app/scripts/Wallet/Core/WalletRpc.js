@@ -7,11 +7,7 @@ App.Wallet.factory('walletRpc',
         function ($q, $modal, $timeout, $rootScope) {
 
             var WalletModel = function () {
-
                 this.client = null;
-                this.isEncrypted = false;
-
-                var self = this;
             };
 
             WalletModel.prototype = {
@@ -242,22 +238,6 @@ App.Wallet.factory('walletRpc',
                     });
 
                     return deferred.promise;
-                },
-
-                updateWalletLock: function () {
-                    var self = this;
-                    var promise = this.lockWallet();
-
-                    promise.then(
-                        function success (message) {
-                            self.isEncrypted = true;
-                        },
-                        function failure (message) {
-                            self.isEncrypted = false;
-                        }
-                    );
-
-                    return promise;
                 },
 
                 handlePassPhraseCallback: function (command, args, callback) {

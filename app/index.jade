@@ -51,12 +51,19 @@ html(lang='en', ng-app='app')
                                 span.glyphicon.glyphicon-refresh.text-success(ng-show="blocksSynced")
                                 span.glyphicon.glyphicon-refresh.text-warning(ng-show="!blocksSynced")
                                 | &nbsp {{ walletOverview.blocks }} &nbsp
+                            li.locked-icon
+                                .not-locked(ng-show="!walletOverview.locked")
+                                    span.glyphicon.glyphicon-lock.text-default
+                                    | &nbsp Unlocked
+                                .staking(ng-show="walletOverview.locked")
+                                    span.glyphicon.glyphicon-lock.text-success
+                                    | &nbsp Locked
                             li.staking-icon
                                 .not-staking(ng-show="!walletStakingInfo.staking")
-                                    span.glyphicon.glyphicon-ban-circle.text-warning
+                                    span.glyphicon.glyphicon-ban-circle.text-default
                                     | &nbsp Not Staking
                                 .staking(ng-show="walletStakingInfo.staking")
-                                    span.glyphicon.glyphicon-ok-sign.text-success
+                                    span.glyphicon.glyphicon-ok-sign.text-info
                                     | &nbsp Staking
                             li
                                 .has-error(ng-show="errors.message.length > 0", container="#tooltip-container", data-placement="stationary-tooltip", data-type="danger", data-animation="am-fade-and-scale", bs-tooltip="errors.message")

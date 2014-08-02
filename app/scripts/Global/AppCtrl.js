@@ -52,6 +52,8 @@ App.Global.controller(
                 $scope.daemon.running = true;
 
                 $rootScope.$on('daemon.notifications.block', fetchOverview);
+                $rootScope.$on('daemon.notifications.alert', fetchOverview);
+                $rootScope.$on('daemon.notifications.wallet', fetchOverview);
             });
 
             function fetchOverview() {

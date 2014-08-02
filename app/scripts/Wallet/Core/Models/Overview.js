@@ -23,6 +23,10 @@ App.Wallet.OverviewModel = (function () {
         this.mininput = 0.00;
         this.errors = "";
 
+
+        this.locked = false;
+        this.encrypted = false;
+
     }
 
     Model.prototype = {
