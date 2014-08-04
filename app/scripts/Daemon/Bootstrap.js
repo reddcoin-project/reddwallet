@@ -289,14 +289,20 @@ App.Daemon.Bootstrap = (function () {
             this.daemon.stderr.setEncoding('utf8');
             this.daemon.stderr.on('data', function (data) {
 
-                console.log(data);
                 if (/^execvp\(\)/.test(data) || data.toLowerCase().indexOf("error") !== -1) {
                     console.log('Failed to start child process.');
-                    console.log(data);
                     self.deferred.reject(new App.Global.Message(
                         false, 2, data
                     ));
                 }
+
+                if (data.indexOf("Corrupted block database detected") !== -1) {
+                    data = "Corrupt block database detected, please reindex or delete the block database to rebuild it.";
+                }
+
+                self.deferred.reject(new App.Global.Message(
+                    false, 2, data
+                ));
 
             });
 
