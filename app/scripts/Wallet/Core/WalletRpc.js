@@ -207,6 +207,11 @@ App.Wallet.factory('walletRpc',
                     var deferred = $q.defer();
 
                     this.client.exec('getwork', function (err, info) {
+                        if (err.code == -1) {
+                            // Code -1 means no more PoW blocks.. aka blockchain has synced
+                            err = null;
+                        }
+
                         self.rpcToMessage(deferred, err, info);
                     });
 

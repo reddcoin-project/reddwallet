@@ -10,6 +10,7 @@ App.Wallet.OverviewModel = (function () {
         this.protocolversion = "";
         this.walletversion = "";
         this.balance = 0;
+        this.stake = 0;
         this.unconfirmedbalance = 0;
         this.blocks = 0;
         this.timeoffset = 0;

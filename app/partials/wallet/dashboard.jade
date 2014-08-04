@@ -27,7 +27,11 @@ h1.page-header
                     td RDD
                 tr
                     td Unconfirmed
-                    td(style="text-align: right") {{ walletOverview.unconfirmedbalance | number:8 }}
+                    td {{ walletOverview.unconfirmedbalance | number:8 }}
+                    td RDD
+                tr
+                    td Staking
+                    td {{ walletOverview.stake | number:8 }}
                     td RDD
                 tr
                     td Total
