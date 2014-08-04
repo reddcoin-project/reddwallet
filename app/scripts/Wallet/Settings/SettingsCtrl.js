@@ -162,7 +162,7 @@ App.Wallet.controller(
                         return;
                     }
 
-                    var promise = walletDb.getRpc().unlockWallet(passphrase, $scope.stakingOnly);
+                    var promise = walletDb.getRpc().unlockWallet(passphrase, modal.$scope.stakingOnly);
                     promise.then(
                         function success(message) {
                             $timeout(function( ) {
