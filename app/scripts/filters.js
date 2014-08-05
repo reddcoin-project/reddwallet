@@ -8,8 +8,6 @@ angular.module('app.filters', []).filter('interpolate', [
     }
 ]);
 
-
-
 function smartTrim(string, maxLength) {
 
     if (!string) return string;
@@ -51,6 +49,38 @@ angular.module('app.filters').filter('to_trusted', ['$sce', function($sce){
         return $sce.trustAsHtml(text);
     };
 }]);
+
+angular.module('app.filters').filter('stakedate', ['$filter', function ($filter) {
+    return function(timestamp) {
+
+        if (timestamp == null || timestamp == -1) {
+            return "Unknown";
+        }
+
+        var currentTimestamp = new Date().getTime();
+        var millisecondsToStake = currentTimestamp + (timestamp * 1000);
+
+        var date = $filter('date')(new Date(millisecondsToStake), 'yyyy-dd-MM HH:mm:ss');
+
+        return date.toUpperCase();
+    }
+}]);
+
+angular.module('app.filters').filter('staketime', ['$filter', function ($filter) {
+    return function(timestamp) {
+
+        if (timestamp == null || timestamp == -1) {
+            return "Unknown";
+        }
+
+        var days = timestamp / 60 / 60 / 24;
+        var hours = (timestamp % 84600) / 60 / 60;
+
+
+        return Math.floor(days) + " days, " + Math.floor(hours) + " hours";
+    }
+}]);
+
 
 angular.module('app.filters').filter('link2fn', ['$sce', function($sce){
     return function(text) {

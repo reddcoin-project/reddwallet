@@ -41,6 +41,7 @@ App.config([
             .when('/transactions', { controller: 'TransactionsCtrl', templateUrl: '/partials/transactions.html' })
             .when('/addresses', { controller: 'AddressesCtrl', templateUrl: '/partials/addresses.html' })
             .when('/settings', { controller: 'SettingsCtrl', templateUrl: '/partials/settings.html' })
+            .when('/statistics', { controller: 'StatisticsCtrl', templateUrl: '/partials/statistics.html' })
             .when('/help', { controller: 'HelpCtrl', templateUrl: '/partials/help.html' })
 
             .when('/irc', { controller: 'MainIrcCtrl', templateUrl: '/partials/irc-main.html' })
