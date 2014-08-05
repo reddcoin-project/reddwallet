@@ -254,14 +254,21 @@ App.Wallet.factory('walletRpc',
                         show: false
                     });
 
+                    modal.$scope.stakingOnly = true;
                     modal.$scope.passphrase = '';
                     modal.$scope.confirm = function (passphrase) {
+
+                        var timeout = 1;
+
+                        if (modal.$scope.stakingOnly) {
+                            timeout = 99999999;
+                        }
 
                         if (passphrase == '' || passphrase == null) {
                             callback(new Error('No passphrase entered.'));
                         }
 
-                        callback(null, passphrase, 1);
+                        callback(null, passphrase, timeout, modal.$scope.stakingOnly);
 
                     };
 
