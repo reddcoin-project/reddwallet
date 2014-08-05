@@ -71,6 +71,7 @@ App.Wallet.controller(
                                         "type": "success"
                                     });
                                     $scope.reset();
+                                    $scope.updateMetaTotal();
                                     $scope.walletDb.updateOverview();
                                 },
                                 function error(message) {
@@ -100,13 +101,17 @@ App.Wallet.controller(
 
             $scope.updateMetaTotal = function () {
 
+                var result = parseFloat($scope.send.amount);
+
                 if ($scope.send.address == '') {
                     $scope.disableSend = true;
+                    $scope.meta.totalAmount = $scope.send.amount;
+                    result = result + $scope.walletDb.calculateFee(result);
+                    $scope.meta.fee = $scope.walletDb.calculateFee(result);
 
                     return;
                 }
 
-                var result = parseFloat($scope.send.amount);
                 if (result == null || isNaN(result)) {
                     result = 0;
                     $scope.disableSend = true;
