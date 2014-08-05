@@ -76,7 +76,13 @@ App.Wallet.factory('walletDb',
 
                     staking.then(function (message) {
                         self.$timeout(function () {
+                            // Sometimes it may say staking when the wallet is locked, lets not try
+                            // and show that as it may confuse users.
                             self.stakingInfoModel = message.model;
+
+                            if (self.overviewModel.locked) {
+                                self.stakingInfoModel.staking = false;
+                            }
                         });
                     });
 
