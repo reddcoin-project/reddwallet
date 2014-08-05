@@ -3,12 +3,12 @@ module.exports = function (grunt) {
         pkg: grunt.file.readJSON('_public/package.json'),
         nodewebkit: {
             options: {
-                version: "0.8.3",
+                version: "0.10.0",
                 build_dir: './dist',
                 mac: true,
-                win: true,
-                linux32: true,
-                linux64: true
+                win: false,
+                linux32: false,
+                linux64: false
             },
             src: './_public/**/*'
         }
