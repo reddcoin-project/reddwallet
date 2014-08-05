@@ -60,7 +60,7 @@ angular.module('app.filters').filter('stakedate', ['$filter', function ($filter)
         var currentTimestamp = new Date().getTime();
         var millisecondsToStake = currentTimestamp + (timestamp * 1000);
 
-        var date = $filter('date')(new Date(millisecondsToStake), 'yyyy-dd-MM HH:mm:ss');
+        var date = $filter('date')(new Date(millisecondsToStake), 'yyyy-MM-dd HH:mm:ss');
 
         return date.toUpperCase();
     }
