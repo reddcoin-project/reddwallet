@@ -36,7 +36,7 @@ h1.page-header
                 a.btn.btn-sm.btn-info.pull-right(ng-click="unlockWallet()") Unlock Wallet
                 | Partially unlock your wallet just for staking or unlock it fully.
 
-        .panel.panel-default(ng-show="!walletOverview.locked")
+        .panel.panel-default(ng-show="!walletOverview.locked && walletOverview.encrypted")
             .panel-heading Lock Wallet
             .panel-body.text-middle
                 a.btn.btn-sm.btn-info.pull-right(ng-click="lockWallet()") Lock
