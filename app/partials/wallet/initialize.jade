@@ -3,4 +3,4 @@ img.loading-logo.reddcoin-icon(src='reddcoin_logo.png', width='64', style='botto
 hr
 div
     h1 {{ loadingStatus }}
-    p {{ loadingStatusError }}
+    p(ng-bind-html="loadingStatusError")

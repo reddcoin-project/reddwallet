@@ -1,8 +1,8 @@
 App.Global.controller(
     'InitializeCtrl',
     [
-        '$scope', '$location', '$resource', '$rootScope', 'DaemonManager',
-        function($scope, $location, $resource, $rootScope, DaemonManager) {
+        '$scope', '$location', '$resource', '$rootScope', '$sce', 'DaemonManager',
+        function($scope, $location, $resource, $rootScope, $sce, DaemonManager) {
 
             var bootstrap = DaemonManager.getBootstrap();
 
@@ -23,7 +23,7 @@ App.Global.controller(
 
             $scope.displayError = function (title, message) {
                 $scope.loadingStatus = title;
-                $scope.loadingStatusError = message;
+                $scope.loadingStatusError = $sce.trustAsHtml(message.replace(/(?:\n)/g, '<hr>'));
             };
 
             $scope.initialize = function() {
