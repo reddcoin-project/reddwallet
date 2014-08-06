@@ -11,6 +11,8 @@ App.Irc.controller(
 
             $scope.glued = true;
 
+            $scope.focusSendMessage = false;
+
             $scope.message = '';
             $scope.messageHistory = {
                 list: [],
@@ -44,6 +46,30 @@ App.Irc.controller(
             $scope.showAdvanced = false;
 
             $scope.irc = IrcManager;
+
+            $scope.autocomplete = function (event) {
+                var userList = $scope.irc.getCurrentChannel().users;
+                var currentMessage = $scope.message;
+                var messageParts = properSplit(currentMessage, " ");
+                var lastWord = messageParts[messageParts.length - 1];
+
+                for (var i = 0; i < userList.length; i++) {
+                    var user = userList[i];
+
+                    if (user.indexOf("@") === 1 || user.indexOf('+') === 1) {
+                        user = user.substring(1); // Cut off the start of the string
+                    }
+
+                    if (user.toLowerCase().indexOf(lastWord.toLowerCase()) === 0) {
+                        messageParts[messageParts.length - 1] = user;
+                        break;
+                    }
+
+                }
+
+                $scope.message = messageParts.join(" ");
+                $scope.focusSendMessage = true;
+            };
 
             $scope.scrollHistory = function (event) {
                 console.log(event);

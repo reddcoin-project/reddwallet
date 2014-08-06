@@ -21,3 +21,17 @@ angular.module('app.directives', ['app.services']).directive('appVersion', [
         }
     }
 ]);
+
+angular.module('app.directives', ['app.services']).directive('ngTab', function () {
+    return function (scope, element, attrs) {
+        element.bind("keydown", function (event) {
+            if(event.which === 9) {
+                scope.$apply(function (){
+                    scope.$eval(attrs.ngTab);
+                });
+
+                event.preventDefault();
+            }
+        });
+    }
+});

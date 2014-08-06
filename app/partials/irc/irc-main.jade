@@ -86,6 +86,6 @@ form#wrapper(ng-show="irc.connected")
 
     #bottom-panel
         .input-group
-            input.form-control(type='text', ng-model="message", placeholder='Say something...')
+            input.form-control(type='text', ng-tab="autocomplete()", focus-me="focusSendMessage", ng-model="message", placeholder='Say something...')
             span.input-group-btn
                 button.btn.btn-primary(type='submit', ng-keydown="scrollHistory(event)", ng-click="sendMessage()", ng-disabled="irc.channelList[irc.currentChannel].connected == false") Send

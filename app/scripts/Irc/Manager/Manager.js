@@ -81,6 +81,10 @@ App.Irc.factory('IrcManager',
                     return this.connected;
                 },
 
+                getCurrentChannel: function () {
+                    return this.channelList[this.currentChannel];
+                },
+
                 initializeServerChannel: function (hostname) {
                     var self = this;
 
