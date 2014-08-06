@@ -240,7 +240,7 @@ App.Irc.factory('IrcManager',
 
                     if (message.indexOf("/") === 0) {
                         message = message.substring(1);
-                        if (message.indexOf("PRIVMSG") == 0 || message.toLowerCase().indexOf("msg") == 0) {
+                        if (message.toLowerCase().indexOf("privmsg") == 0 || message.toLowerCase().indexOf("msg") == 0) {
                             parts = properSplit(message, " ", 2);
                             if (parts.length == 2)  return;
 
@@ -269,6 +269,9 @@ App.Irc.factory('IrcManager',
 
                             messageToSend = "slaps " + parts[1] + " round the face with a large trout.";
                             msgOptions.action = true;
+                        } else {
+                            // Do nothing as anything with a / should not reach anything without it being a valid command.
+                            return;
                         }
                     }
 
