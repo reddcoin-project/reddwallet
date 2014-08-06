@@ -4,17 +4,14 @@ module.exports = function (grunt) {
         nodewebkit: {
             options: {
                 version: "0.10.0",
-                build_dir: './dist',
-                mac: true,
-                win: false,
-                linux32: false,
-                linux64: false
+                buildDir: './dist',
+                platforms: ['win', 'osx', 'linux64', 'linux32']
             },
             src: './_public/**/*'
         }
     });
 
     grunt.loadNpmTasks('grunt-node-webkit-builder');
-
     grunt.registerTask('default', ['nodewebkit']);
+
 };
