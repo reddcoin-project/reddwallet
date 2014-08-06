@@ -10,7 +10,7 @@ module.exports = function (grunt) {
                 appVersion: "1.0.0",
                 buildType: "versioned",
                 winIco: "reddcoin-favi.ico",
-                macIcns: "reddcoin_logo.icns"
+                macIcns: "_public/reddcoin_logo.icns"
             },
             src: './_public/**/*'
         }
