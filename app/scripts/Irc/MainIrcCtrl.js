@@ -72,7 +72,6 @@ App.Irc.controller(
                         });
                     },
                     function error (error) {
-                        console.log(error);
                         $alert({
                             "title": "IRC",
                             "content": "Could not save connection settings",
