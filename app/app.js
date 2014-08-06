@@ -63,6 +63,23 @@ App.config(['$alertProvider', function($alertProvider) {
 
 App.run(['$rootScope', '$route', '$location', 'DaemonManager', function ($rootScope, $route, $location, DaemonManager) {
 
+    /*
+     * Set up some key listeners for general window management
+     */
+
+    var exitApplication = function() {
+        var gui = require('nw.gui');
+
+        gui.App.quit();
+    };
+
+    key('⌘+q, ctrl+q', exitApplication);
+
+    /*
+     * Add listener for route change and redirect
+     * them to the initialize page if the daemon is not running.
+     */
+
     $rootScope.$on("$routeChangeStart", function (event, next) {
         if (next != undefined && next.$$route != undefined) {
 
