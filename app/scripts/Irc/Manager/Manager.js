@@ -112,23 +112,24 @@ App.Irc.factory('IrcManager',
                 },
 
                 partChannel: function (channel, callback) {
+                    var self = this;
+
                     if (channel == this.connectionDetails.serverHost) {
                         this.disconnect();
                         return;
                     }
 
-                    var self = this;
                     if (this.channelExists(channel)) {
-
                         var channelObj = this.getChannel(channel);
 
                         if (channelObj.privateUser) {
                             $timeout(function() {
-                                delete this.channelList[channelObj.name];
+                                delete self.channelList[channelObj.name];
                                 // Switch to a new channel (so no blank screen)
                                 for (var key in self.channelList) {
                                     var channel = self.channelList[key];
                                     self.switchChannel(channel.name);
+
                                     break;
                                 }
                             });
@@ -295,20 +296,68 @@ App.Irc.factory('IrcManager',
                     this.pushMessageToChannel(channelTarget, this.newSelfMessage(channelTarget, messageToSend, msgOptions));
                 },
 
+                handleMessage: function (nick, to, text, message) {
+                    var self = this;
+
+                    var logMessage = self.newMessage(to, nick, text);
+                    var channel = null;
+
+                    var channelName = to;
+                    var isUserPm = self.isUserPm(channelName);
+
+                    if (isUserPm) {
+                        // User, so the channel name needs to be changed to the "from" as its 1 on 1
+                        channelName = logMessage.from;
+                    }
+
+                    if (!self.channelExists(channelName)) {
+                        if (isUserPm) {
+                            // User channel initialize the channel to be the other user
+                            channel = self.initUserPmChannel(channelName);
+                        } else {
+                            // It is a proper channel initialize it..
+                            channel = self.initChannel(channelName);
+                        }
+                    } else {
+                        channel = self.getChannel(channelName);
+                    }
+
+                    if (isUserPm) {
+                        logMessage.privateMsg = true;
+                        logMessage.sent = false;
+                    }
+
+                    if (channelName != self.currentChannel) {
+                        channel.unseenMessages ++;
+                    }
+
+                    if (logMessage.message.indexOf('\u0001ACTION') > -1) {
+                        logMessage.action = true;
+                        logMessage.message = logMessage.message.substring(7);
+                    }
+
+                    if (logMessage.message.indexOf(" " + self.nickname + " ") > -1) {
+                        self.$rootScope.$emit('irc.message.highlight', logMessage);
+                        logMessage.highlight = true;
+                    }
+
+                    self.pushMessageToChannel(logMessage.to, logMessage);
+                },
+
                 setupListeners: function () {
                     var self = this;
 
                     this.client.addListener('registered', function (message) {
                         self.debug("Connected, now joining default channel.");
 
+                        var logMessage = self.newMessage(self.connectionDetails.serverHost, "", "Welcome " + self.nickname);
+                        self.pushMessageToChannel(logMessage.to, logMessage);
+
                         if (self.password != undefined && self.password.length > 0) {
                             setTimeout(function() {
                                 self.client.send('NickServ', 'identify ' + self.password);
-                            }, 1000);
+                            }, 2000);
                         }
-
-                        var logMessage = self.newMessage(self.connectionDetails.serverHost, "", "Welcome " + self.nickname);
-                        self.pushMessageToChannel(logMessage.to, logMessage);
 
                         self.joinChannel(self.connectionDetails.defaultChannel);
                     });
@@ -319,12 +368,17 @@ App.Irc.factory('IrcManager',
                     });
 
                     this.client.addListener('notice', function (nick, to, text, message) {
-                        if (to == "*") {
-                            to = self.serverChannel.name;
+                        to = (to == "*") ? self.serverChannel.name : to;
+
+                        if (nick == undefined) {
+                            var logMessage = self.newMessage(to, nick, text);
+                            self.pushMessageToChannel(logMessage.to, logMessage);
+
+                            return;
                         }
 
-                        var logMessage = self.newMessage(to, nick, text);
-                        self.pushMessageToChannel(logMessage.to, logMessage);
+                        self.handleMessage(nick, to, text, message);
+
                     });
 
                     this.client.addListener('topic', function (channel, topic, nick, message) {
@@ -439,49 +493,8 @@ App.Irc.factory('IrcManager',
                     });
 
                     this.client.addListener('message', function (nick, to, text, message) {
-                        var logMessage = self.newMessage(to, nick, text);
-                        var channel = null;
 
-                        var channelName = to;
-                        var isUserPm = self.isUserPm(channelName);
-
-                        if (isUserPm) {
-                            // User, so the channel name needs to be changed to the "from" as its 1 on 1
-                            channelName = logMessage.from;
-                        }
-
-                        if (!self.channelExists(channelName)) {
-                            if (isUserPm) {
-                                // User channel initialize the channel to be the other user
-                                channel = self.initUserPmChannel(channelName);
-                            } else {
-                                // It is a proper channel initialize it..
-                                channel = self.initChannel(channelName);
-                            }
-                        } else {
-                            channel = self.getChannel(channelName);
-                        }
-
-                        if (isUserPm) {
-                            logMessage.privateMsg = true;
-                            logMessage.sent = false;
-                        }
-
-                        if (channelName != self.currentChannel) {
-                            channel.unseenMessages ++;
-                        }
-
-                        if (logMessage.message.indexOf('\u0001ACTION') > -1) {
-                            logMessage.action = true;
-                            logMessage.message = logMessage.message.substring(7);
-                        }
-
-                        if (logMessage.message.indexOf(" " + self.nickname + " ") > -1) {
-                            self.$rootScope.$emit('irc.message.highlight', logMessage);
-                            logMessage.highlight = true;
-                        }
-
-                        self.pushMessageToChannel(logMessage.to, logMessage);
+                        self.handleMessage(nick, to, text, message);
 
                     });
 
@@ -521,6 +534,8 @@ App.Irc.factory('IrcManager',
                             });
 
                             self.pushMessageToChannel(logMessage.to, logMessage);
+                        } else {
+
                         }
                     });
                 },
