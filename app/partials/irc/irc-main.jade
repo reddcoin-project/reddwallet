@@ -66,7 +66,7 @@
                 button.btn.btn-info.btn-sm(ng-click="saveConnectionDetails()") Save Connection Details
                 button.btn.btn-primary.btn-sm.pull-right(ng-click="connect()") Connect
 
-form#wrapper(ng-show="irc.connected")
+form#wrapper(ng-show="irc.connected", nwdisable, newfaketop)
     #upper-panel
         #chat(scroll-glue, ng-model="glued", wheel-speed="50", refresh-on-change="irc.channelList[irc.currentChannel].log", ng-class="{'full-right': irc.channelList[irc.currentChannel].privateUser}")
             table#irc-messages
