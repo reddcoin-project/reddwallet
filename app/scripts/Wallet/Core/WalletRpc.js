@@ -229,6 +229,25 @@ App.Wallet.factory('walletRpc',
 
                     return deferred.promise;
                 },
+                
+                importPrivateKey: function (privkey, label, rescan) {
+                    var self = this;
+                    var deferred = $q.defer();
+                    
+                    if (label == undefined) {
+                        label = "Imported";
+                    }                    
+                    
+                    if (rescan == undefined) {
+                        rescan = false;
+                    }
+
+                    this.client.exec('importprivkey', privkey, label, rescan, function (err, info) {
+                        self.rpcToMessage(deferred, err, info);
+                    });
+
+                    return deferred.promise;
+                },
 
                 unlockWallet: function (password, staking) {
                     var self = this;

@@ -31,7 +31,7 @@ App.Wallet.factory('walletDb',
                 });
                 this.accounts.ensureIndex({
                     fieldName: 'name',
-                    unique: true
+                    unique: false
                 });
 
                 this.receivingAccounts = [];

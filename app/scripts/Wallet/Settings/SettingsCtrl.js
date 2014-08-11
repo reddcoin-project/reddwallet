@@ -216,6 +216,77 @@ App.Wallet.controller(
 
                 }, 'wallet-backup.dat');
             };
+            
+            $scope.importKey = function() {
+
+                var modal = $modal({
+                    title: 'Import private key',
+                    content: "Import a private key to be able to spend its funds",
+                    template: 'scripts/Wallet/Settings/import-key-dialog.html',
+                    show: false
+                });
+
+                modal.$scope.privkey = '';
+                modal.$scope.rescan = true;
+                modal.$scope.import = function(privkey) {
+
+                    if (privkey == '' || privkey == null) {
+                        $alert({
+                            title: "Key Import Failed",
+                            content: "You cannot have a blank private key",
+                            type: "warning"
+                        });
+                        return;
+                    }
+
+                    var promise = walletDb.getRpc().importPrivateKey(privkey, modal.$scope.label, modal.$scope.rescan);
+						  if(modal.$scope.rescan) {                   
+                        $alert({
+                            title: "Private Key Import",
+                            content: "Rescan requested. Stand by.",
+                            type: "warning",
+                            duration: 4
+                        });
+                    }
+                    promise.then(
+                        function success(message) {
+                            walletDb.syncAccounts();
+                            if(modal.$scope.rescan) {                   
+                                $alert({
+                                    title: "Private Key Import",
+                                    content: "Rescan completed.",
+                                    type: "success",
+                                    duration: 4
+                                });
+                            }
+                            $alert({
+                                title: "Private Key Import",
+                                content: "Successful",
+                                type: "success",
+                                duration: 2
+                            });
+                        },
+                        function error(message) {
+                            if(modal.$scope.rescan) {                   
+                                $alert({
+                                    title: "Private Key Import",
+                                    content: "Rescan canceled.",
+                                    type: "warning",
+                                    duration: 4
+                                });
+                            }
+                            $alert({
+                                title: "Private Key Import",
+                                content: "Failed",
+                                type: "danger"
+                            });
+                        }
+                    );
+                };
+
+                modal.$promise.then(modal.show);
+
+            };
 
         }
     ]
