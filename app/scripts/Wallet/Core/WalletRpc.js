@@ -230,6 +230,17 @@ App.Wallet.factory('walletRpc',
                     return deferred.promise;
                 },
                 
+                exportPrivateKey: function (pubkey) {
+                    var self = this;
+                    var deferred = $q.defer();
+
+                    this.client.exec('dumpprivkey', pubkey, function (err, info) {
+                        self.rpcToMessage(deferred, err, info);
+                    });
+
+                    return deferred.promise;
+                },
+                
                 importPrivateKey: function (privkey, label, rescan) {
                     var self = this;
                     var deferred = $q.defer();
