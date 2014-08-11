@@ -217,6 +217,70 @@ App.Wallet.controller(
                 }, 'wallet-backup.dat');
             };
             
+            $scope.exportKey = function() {
+
+                var modal = $modal({
+                    title: 'Export private key',
+                    content: "Export a private key to be able to spend its funds elsewhere",
+                    template: 'scripts/Wallet/Settings/export-key-dialog.html',
+                    show: false
+                });
+
+                modal.$scope.pubkey = '';
+                modal.$scope.privkey = '';
+                modal.$scope.copy = function () {
+
+                    var gui = require('nw.gui');
+
+                    var clipboard = gui.Clipboard.get();
+
+                    clipboard.set(modal.$scope.privkey);
+
+                    $alert({
+                        "title": "Copied private key",
+                        "content": "Public key: " + modal.$scope.pubkey,
+                        "type": "info",
+                        duration: 1.5
+                    });
+                };
+                
+                modal.$scope.export = function(pubkey) {
+
+                    if (pubkey == '' || pubkey == null) {
+                        $alert({
+                            title: "Key Export Failed",
+                            content: "You cannot have a blank public key",
+                            type: "warning"
+                        });
+                        return;
+                    }
+
+                    var promise = walletDb.getRpc().exportPrivateKey(pubkey);
+	
+                    promise.then(
+                        function success(message) {
+                            $alert({
+                                title: "Private Key Export",
+                                content: "Successful",
+                                type: "success",
+                                duration: 2
+                            });
+                            modal.$scope.privkey = message.rpcInfo;
+                        },
+                        function error(message) {
+                            $alert({
+                                title: "Private Key Export",
+                                content: "Failed",
+                                type: "danger"
+                            });
+                        }
+                    );
+                };
+            
+                modal.$promise.then(modal.show);
+
+            };
+            
             $scope.importKey = function() {
 
                 var modal = $modal({
