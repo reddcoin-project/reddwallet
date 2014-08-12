@@ -27,6 +27,7 @@ App.Wallet.OverviewModel = (function () {
 
         this.locked = false;
         this.encrypted = false;
+        this.stakingOnly = false;
 
     }
 
