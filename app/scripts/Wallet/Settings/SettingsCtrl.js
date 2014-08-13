@@ -162,6 +162,8 @@ App.Wallet.controller(
                         return;
                     }
 
+                    $scope.walletOverview.stakingOnly = modal.$scope.stakingOnly;
+
                     var promise = walletDb.getRpc().unlockWallet(passphrase, modal.$scope.stakingOnly);
                     promise.then(
                         function success(message) {
@@ -245,6 +247,13 @@ App.Wallet.controller(
                 };
                 
                 modal.$scope.export = function(pubkey) {
+                
+                    var modalHidden = false;
+                	  
+                    if($scope.walletOverview.locked || $scope.walletOverview.stakingOnly) {
+			modal.hide();
+			modalHidden = true;
+                    }
 
                     if (pubkey == '' || pubkey == null) {
                         $alert({
@@ -265,6 +274,9 @@ App.Wallet.controller(
                                 type: "success",
                                 duration: 2
                             });
+                            if(modalHidden) {
+                                modal.show(); 
+					        }
                             modal.$scope.privkey = message.rpcInfo;
                         },
                         function error(message) {
