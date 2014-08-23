@@ -45,9 +45,12 @@ App.Wallet.factory('walletDb',
 
                 calculateFee: function (amount) {
                     var minimumFee = 0.1;
+                    var maxFee = 10;
                     var feePercentage = 0.0001;
 
-                    return Math.max(minimumFee, feePercentage * parseFloat(amount));
+                    var calculatedAmount = feePercentage * parseFloat(amount);
+
+                    return Math.max(minimumFee, Math.min(maxFee, calculatedAmount));
                 },
 
                 /**
