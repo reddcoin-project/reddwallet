@@ -1,17 +1,26 @@
 'use strict';
 
+/**
+ * Initialise the main App module and its dependencies & sub modules.
+ *
+ */
 var App = angular.module('app', [
+
+    // Dependanices
     'ngCookies',
     'ngResource',
     'ngRoute',
     'ngAnimate',
     'ngTable',
     'ngSanitize',
+    'nwFileDialog',
+
     'mgcrea.ngStrap',
     'pasvaz.bindonce',
-    'nwFileDialog',
     'luegg.directives',
     'perfect_scrollbar',
+
+    // Sub Modules
     'app.wallet',
     'app.global',
     'app.daemon',
@@ -20,15 +29,22 @@ var App = angular.module('app', [
     'app.filters',
     'app.services',
     'partials'
+
 ]);
 
-// Setting up namespaces for the applications
+/**
+ * Set up accessible variables for some of the modules.
+ */
+
 App.Wallet = angular.module('app.wallet', []);
 App.Global = angular.module('app.global', []);
 App.Daemon = angular.module('app.daemon', []);
 App.Utils = angular.module('app.utils', []);
 App.Irc = angular.module('app.irc', []);
-App.Filters = angular.module('app.filters', []);
+
+/**
+ * Routes configuration.
+ */
 
 App.config([
     '$routeProvider', '$locationProvider', function ($routeProvider, $locationProvider, config) {
@@ -53,6 +69,10 @@ App.config([
     }
 ]);
 
+/**
+ * Default configuration for the alerts.
+ */
+
 App.config(['$alertProvider', function($alertProvider) {
     angular.extend($alertProvider.defaults, {
         animation: 'am-fade',
@@ -62,22 +82,37 @@ App.config(['$alertProvider', function($alertProvider) {
     });
 }]);
 
+/**
+ * This will run once Angular has configured and set up everything it needs to.
+ */
+
 App.run(['$rootScope', '$route', '$location', 'DaemonManager', function ($rootScope, $route, $location, DaemonManager) {
 
-    /*
-     * Set up some key listeners for general window management
+    /**
+     * Here we set up the applications miscellaneous stuff such as shortcuts and menus.
      */
-
-    var exitApplication = function() {
-        var gui = require('nw.gui');
-
-        gui.App.quit();
-    };
-
-    key('⌘+q, ctrl+q', exitApplication);
 
     var gui = require('nw.gui');
     var win = gui.Window.get();
+
+    var option = {
+        key : "Ctrl+Q",
+        active : function() {
+            gui.App.quit();
+        },
+        failed : function(msg) {
+            // :(, fail to register the |key| or couldn't parse the |key|.
+            console.log(msg);
+        }
+    };
+
+    // Create a shortcut with |option|.
+    var quitShortcut = new gui.Shortcut(option);
+
+    /**
+     * Set up Mac OSX text shortcut functions such as copy & paste.
+     */
+
     var nativeMenuBar = new gui.Menu({ type: "menubar" });
     try {
         nativeMenuBar.createMacBuiltin("My App");
@@ -86,9 +121,8 @@ App.run(['$rootScope', '$route', '$location', 'DaemonManager', function ($rootSc
         console.log(ex.message);
     }
 
-    /*
-     * Add listener for route change and redirect
-     * them to the initialize page if the daemon is not running.
+    /**
+     * If the daemon is not initialized (loaded) then we will redirect them to the /initialize page.
      */
 
     $rootScope.$on("$routeChangeStart", function (event, next) {
@@ -102,36 +136,3 @@ App.run(['$rootScope', '$route', '$location', 'DaemonManager', function ($rootSc
     });
 
 }]);
-
-String.prototype.toTitleCase = function() {
-    var i, j, str, lowers, uppers;
-    str = this.replace(/([^\W_]+[^\s-]*) */g, function(txt) {
-        return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
-    });
-
-    // Certain minor words should be left lowercase unless
-    // they are the first or last words in the string
-    lowers = ['A', 'An', 'The', 'And', 'But', 'Or', 'For', 'Nor', 'As', 'At',
-              'By', 'For', 'From', 'In', 'Into', 'Near', 'Of', 'On', 'Onto', 'To', 'With'];
-    for (i = 0, j = lowers.length; i < j; i++)
-        str = str.replace(new RegExp('\\s' + lowers[i] + '\\s', 'g'),
-            function(txt) {
-                return txt.toLowerCase();
-            });
-
-    // Certain words such as initialisms or acronyms should be left uppercase
-    uppers = ['Id', 'Tv'];
-    for (i = 0, j = uppers.length; i < j; i++)
-        str = str.replace(new RegExp('\\b' + uppers[i] + '\\b', 'g'),
-            uppers[i].toUpperCase());
-
-    return str;
-};
-
-String.prototype.toUpperFirst = function() {
-    return this.substring(0, 1).toUpperCase() + this.substring(1);
-};
-
-String.prototype.toLowerFirst = function() {
-    return this.substring(0, 1).toLowerCase() + this.substring(1);
-};
