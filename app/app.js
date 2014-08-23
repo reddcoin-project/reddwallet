@@ -75,6 +75,16 @@ App.run(['$rootScope', '$route', '$location', 'DaemonManager', function ($rootSc
 
     key('⌘+q, ctrl+q', exitApplication);
 
+    var gui = require('nw.gui');
+    var win = gui.Window.get();
+    var nativeMenuBar = new gui.Menu({ type: "menubar" });
+    try {
+        nativeMenuBar.createMacBuiltin("My App");
+        win.menu = nativeMenuBar;
+    } catch (ex) {
+        console.log(ex.message);
+    }
+
     /*
      * Add listener for route change and redirect
      * them to the initialize page if the daemon is not running.
