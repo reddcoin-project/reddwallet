@@ -28,6 +28,7 @@ App.Global = angular.module('app.global', []);
 App.Daemon = angular.module('app.daemon', []);
 App.Utils = angular.module('app.utils', []);
 App.Irc = angular.module('app.irc', []);
+App.Filters = angular.module('app.filters', []);
 
 App.config([
     '$routeProvider', '$locationProvider', function ($routeProvider, $locationProvider, config) {

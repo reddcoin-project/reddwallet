@@ -22,6 +22,3 @@
                 span.text-muted By &nbsp;
                 | {{ post.data.author }}
                 span.text-muted &nbsp; on {{ post.data.timestamp | date:'EEE, d MMM yyyy HH:mm:ss Z' }}
-
-            p.reddit-content(ng-hide="true")
-                span.reddit-content(ng-bind-html="post.data.html_content_text | cut:true:200 | to_trusted")

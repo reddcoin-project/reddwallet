@@ -7,6 +7,13 @@ App.Wallet.controller(
         'News',
         function ($scope, $timeout, $alert, News) {
 
+            // Handle the external URL's
+            var window = require('nw.gui').Window.get();
+            window.on('new-win-policy', function (frame, url, policy) {
+                require('nw.gui').Shell.openExternal(url);
+                policy.ignore();
+            });
+
             $scope.hasRun = false;
             $scope.loaded = false;
             $scope.postData = [];

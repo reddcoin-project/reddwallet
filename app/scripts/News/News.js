@@ -152,6 +152,16 @@ App.Irc.factory('News',
                             var components = item.title.split(delimiter);
                             var parts = [ components.shift(), components.join(delimiter) ]
 
+                            var parser = new DOMParser();
+                            var doc = parser.parseFromString(item.description, "text/html");
+
+                            // The elements can only be <a> tags. Loop through and add an attribute
+                            _.forEach(doc.body.getElementsByTagName("a"), function (element) {
+                                element.setAttribute('target', '_blank');
+                            });
+
+                            item.description = doc.body.innerHTML;
+
                             self.announcements.items.push({
                                 data: {
                                     title: item.description,

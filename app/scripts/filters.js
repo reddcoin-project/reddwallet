@@ -44,7 +44,7 @@ function properSplit(str, separator, limit) {
     return str;
 }
 
-angular.module('app.filters').filter('to_trusted', ['$sce', function($sce){
+angular.module('app.filters').filter('to_trusted', ['$sce', function($sce) {
     return function(text) {
         return $sce.trustAsHtml(text);
     };
