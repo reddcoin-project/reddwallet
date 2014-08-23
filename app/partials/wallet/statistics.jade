@@ -8,46 +8,59 @@ h1.page-header
             tbody
                 tr
                     td Confirmed Balance
-                    td {{ overview.balance }}
+                    td
+                        strong {{ overview.balance }}
                 tr
                     td Unconfirmed Balance
-                    td {{ overview.unconfirmedbalance }}
+                    td
+                        strong {{ overview.unconfirmedbalance }}
                 tr
                     td Blocks
-                    td {{ overview.blocks | number:0 }}
+                    td
+                        strong {{ overview.blocks | number:0 }}
                 tr
                     td Connections
-                    td {{ overview.connections }}
+                    td
+                        strong {{ overview.connections }}
                 tr
                     td Difficulty
-                    td {{ overview.difficulty }}
+                    td
+                        strong {{ overview.difficulty }}
                 tr
                     td Money Supply
-                    td {{ overview.moneysupply | number:0 }}
+                    td
+                        strong {{ overview.moneysupply | number:0 }}
                 tr
                     td Test Net
-                    td {{ overview.testnet }}
+                    td
+                        strong {{ overview.testnet }}
     .col-md-6
         h3 Staking
         table.table.staking-table
             tbody
                 tr
                     td Stake Amount
-                    td {{ overview.stake }}
+                    td
+                        strong {{ overview.stake }}
                 tr
                     td Average Weight
-                    td {{ staking.averageweight | number:0 }}
+                    td
+                        strong {{ staking.averageweight | number:0 }}
                 tr
                     td Total Weight
-                    td {{ staking.totalweight | number:0 }}
+                    td
+                        strong {{ staking.totalweight | number:0 }}
                 tr
                     td Net Stake Weight
-                    td {{ staking.netstakeweight | number:0 }}
+                    td
+                        strong {{ staking.netstakeweight | number:0 }}
                 tr
                     td Expected Stake Date
-                    td {{ staking.expectedtime | stakedate }}
+                    td
+                        strong {{ staking.expectedtime | stakedate }}
                 tr
                     td Expected Stake Time
-                    td {{ staking.expectedtime | staketime }}
+                    td
+                        strong {{ staking.expectedtime | staketime }}
 
 

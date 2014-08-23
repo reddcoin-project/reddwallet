@@ -7,35 +7,43 @@ h1.page-header
             tbody
                 tr
                     td BTC/USD
-                    td {{ marketData.btc | number:8 }}
+                    td
+                        strong {{ marketData.btc | number:8 }}
                 tr
                     td RDD/BTC
-                    td {{ marketData.rddBtc | number:8 }}
+                    td
+                        strong {{ marketData.rddBtc | number:8 }}
                 tr
                     td RDD/LTC
-                    td {{ marketData.rddLtc | number:8 }}
+                    td
+                        strong {{ marketData.rddLtc | number:8 }}
                 tr
                     td Est. USD
-                    td {{ marketData.rddBtc * marketData.btc * walletOverview.balance | number:2 }}
+                    td
+                        strong {{ marketData.rddBtc * marketData.btc * walletOverview.balance | number:2 }}
 
     .col-md-6
         table.table.totals-table
             tbody
                 tr
                     td Confirmed
-                    td {{ walletOverview.balance | number:8 }}
+                    td
+                        strong {{ walletOverview.balance | number:8 }}
                     td RDD
                 tr
                     td Unconfirmed
-                    td {{ walletOverview.unconfirmedbalance | number:8 }}
+                    td
+                        strong {{ walletOverview.unconfirmedbalance | number:8 }}
                     td RDD
                 tr
                     td Staking
-                    td {{ walletOverview.stake | number:8 }}
+                    td
+                        strong {{ walletOverview.stake | number:8 }}
                     td RDD
                 tr
                     td Total
-                    td {{ walletOverview.balance + walletOverview.unconfirmedbalance | number:8 }}
+                    td
+                        strong {{ walletOverview.balance + walletOverview.unconfirmedbalance | number:8 }}
                     td RDD
 
 
