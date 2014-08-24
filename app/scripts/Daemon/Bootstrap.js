@@ -424,25 +424,27 @@ App.Daemon.Bootstrap = (function () {
             var self = this;
             var deferred = this.$q.defer();
 
-            if (this.killMethod == 'pid') {
-                if (this.fs.existsSync(this.pidPath)) {
-                    var pid = this.fs.readFileSync(this.pidPath, {
-                        encoding: 'utf8'
-                    });
-                    try {
-                        process.kill(pid, 'SIGTERM');
-                        this.$timeout(function() {
-                            self.debug("Resolved");
-                            deferred.resolve(true);
-                        }, 500);
-                    } catch (ex) {
-                        this.debug("Error trying to kill pid, most likely no process exists with that pid");
-                        deferred.reject(false);
+            self.$timeout(function() {
+                if (self.killMethod == 'pid') {
+                    if (self.fs.existsSync(self.pidPath)) {
+                        var pid = self.fs.readFileSync(this.pidPath, {
+                            encoding: 'utf8'
+                        });
+                        try {
+                            process.kill(pid, 'SIGTERM');
+                            self.$timeout(function() {
+                                self.debug("Resolved");
+                                deferred.resolve(true);
+                            }, 500);
+                        } catch (ex) {
+                            self.debug("Error trying to kill with PID, most likely no process exists with that PID");
+                            deferred.reject(false);
+                        }
+                    } else {
+                        deferred.resolve(true);
                     }
-                } else {
-                    deferred.resolve(true);
                 }
-            }
+            }, 250);
 
             return deferred.promise;
         },
