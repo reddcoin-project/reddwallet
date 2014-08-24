@@ -74,6 +74,8 @@ App.Daemon.Bootstrap = (function () {
         startLocal: function () {
 
             var self = this;
+
+            this.debug("Running pre checks");
             var message = this.runPreChecks();
 
             if (!message.result) {
@@ -85,11 +87,13 @@ App.Daemon.Bootstrap = (function () {
                 return this.deferred.promise;
             }
 
+            this.debug("Init config...");
             var promise = this.initializeConfiguration();
 
             promise.then(
                 function success () {
 
+                    self.debug("Running pre daemon spawn tasks");
                     self.parseConfigurationFiles();
                     self.runOsSpecificTasks();
 
@@ -193,6 +197,7 @@ App.Daemon.Bootstrap = (function () {
 
             try {
 
+                this.debug("Checking if the daemon directory exists...");
                 // Check if the daemon data directory exists
                 if (!this.fs.existsSync(this.daemonDirPath)) {
                     this.fs.mkdirSync(this.daemonDirPath);
@@ -200,11 +205,14 @@ App.Daemon.Bootstrap = (function () {
                 }
 
                 // Check if the daemon directory has a reddcoin.conf file, if not then create one
+                this.debug("Checking if the reddcoin.conf file exists...");
                 if (!this.fs.existsSync(this.configPath)) {
+                    this.debug("Copying default config over to app data dir");
                     var defaultConf = this.fs.readFileSync('daemons/reddcoin.default.conf', {
                         encoding: 'utf8'
                     });
 
+                    this.debug("Generating random password for daemon rpc...");
                     // Replace the %PASSWORD with a random value..
                     var crypto = require('crypto');
                     crypto.randomBytes(32, function(ex, buf) {
@@ -218,6 +226,9 @@ App.Daemon.Bootstrap = (function () {
                         self.debug("Copied default daemon configuration file to " + self.configPath);
                         deferred.resolve();
                     });
+                } else {
+                    // It does exist.
+                    deferred.resolve();
                 }
 
             } catch (ex) {
@@ -282,53 +293,56 @@ App.Daemon.Bootstrap = (function () {
             var self = this;
 
             try {
-                this.debug("spawnDaemon() - spawning...");
-                this.daemon = this.childProcess.spawn(this.daemonFilePath, [
-                    '-datadir="' + this.daemonDirPath + '"',
+                self.debug("spawnDaemon() - spawning...");
+
+                self.daemon = self.childProcess.spawn(self.daemonFilePath, [
+                    '-conf="' + self.configPath + "'",
+                    '-datadir="' + self.daemonDirPath + '"',
                     '-alertnotify=echo "ALERT:%s"',
                     '-walletnotify=echo "WALLET:%s"',
                     '-blocknotify=echo "BLOCK:%s"'
                 ]);
+
+                self.daemon.stderr.setEncoding('utf8');
+                self.daemon.stderr.on('data', function (data) {
+
+                    if (/^execvp\(\)/.test(data) || data.toLowerCase().indexOf("error") !== -1) {
+                        self.debug('Failed to start child process. ' + data);
+                        self.deferred.reject(new App.Global.Message(
+                            false, 2, data
+                        ));
+                    }
+
+                    if (data.indexOf("Corrupted block database detected") !== -1) {
+                        data = "Corrupt block database detected, please reindex or delete the block database to rebuild it.";
+                    }
+
+                    self.deferred.reject(new App.Global.Message(
+                        false, 2, data
+                    ));
+
+                });
+
+                self.daemon.stdout.setEncoding('utf8');
+                self.daemon.stdout.on('data', function (data) {
+                    if (data.indexOf('BLOCK') !== -1) {
+                        self.$rootScope.$emit('daemon.notifications.block');
+                        self.debug("[BLOCK] Notification " + data);
+                    } else if (data.indexOf('ALERT') !== -1) {
+                        self.$rootScope.$emit('daemon.notifications.alert');
+                        self.debug("[ALERT] Notification " + data);
+                    } else if (data.indexOf('WALLET') !== -1) {
+                        self.$rootScope.$emit('daemon.notifications.wallet');
+                        self.debug("[WALLET] Notification " + data);
+                    }
+                });
+
             } catch (ex) {
                 this.debug(ex);
                 self.deferred.reject(new App.Global.Message(
                     false, 2, "We cannot start the daemon, please check no other wallets are running."
                 ));
             }
-
-            this.daemon.stderr.setEncoding('utf8');
-            this.daemon.stderr.on('data', function (data) {
-
-                if (/^execvp\(\)/.test(data) || data.toLowerCase().indexOf("error") !== -1) {
-                    self.debug('Failed to start child process. ' + data);
-                    self.deferred.reject(new App.Global.Message(
-                        false, 2, data
-                    ));
-                }
-
-                if (data.indexOf("Corrupted block database detected") !== -1) {
-                    data = "Corrupt block database detected, please reindex or delete the block database to rebuild it.";
-                }
-
-                self.deferred.reject(new App.Global.Message(
-                    false, 2, data
-                ));
-
-            });
-
-            this.daemon.stdout.setEncoding('utf8');
-            this.daemon.stdout.on('data', function (data) {
-                if (data.indexOf('BLOCK') !== -1) {
-                    self.$rootScope.$emit('daemon.notifications.block');
-                    self.debug("[BLOCK] Notification " + data);
-                } else if (data.indexOf('ALERT') !== -1) {
-                    self.$rootScope.$emit('daemon.notifications.alert');
-                    self.debug("[ALERT] Notification " + data);
-                } else if (data.indexOf('WALLET') !== -1) {
-                    self.$rootScope.$emit('daemon.notifications.wallet');
-                    self.debug("[WALLET] Notification " + data);
-                }
-            });
         },
 
         /**
@@ -424,27 +438,25 @@ App.Daemon.Bootstrap = (function () {
             var self = this;
             var deferred = this.$q.defer();
 
-            self.$timeout(function() {
-                if (self.killMethod == 'pid') {
-                    if (self.fs.existsSync(self.pidPath)) {
-                        var pid = self.fs.readFileSync(this.pidPath, {
-                            encoding: 'utf8'
-                        });
-                        try {
-                            process.kill(pid, 'SIGTERM');
-                            self.$timeout(function() {
-                                self.debug("Resolved");
-                                deferred.resolve(true);
-                            }, 500);
-                        } catch (ex) {
-                            self.debug("Error trying to kill with PID, most likely no process exists with that PID");
-                            deferred.reject(false);
-                        }
-                    } else {
-                        deferred.resolve(true);
+            if (self.killMethod == 'pid') {
+                if (self.fs.existsSync(self.pidPath)) {
+                    var pid = self.fs.readFileSync(this.pidPath, {
+                        encoding: 'utf8'
+                    });
+                    try {
+                        process.kill(pid, 'SIGTERM');
+                        self.$timeout(function() {
+                            self.debug("Resolved");
+                            deferred.resolve(true);
+                        }, 500);
+                    } catch (ex) {
+                        self.debug("Error trying to kill with PID, most likely no process exists with that PID");
+                        deferred.reject(false);
                     }
+                } else {
+                    deferred.resolve(true);
                 }
-            }, 250);
+            }
 
             return deferred.promise;
         },
