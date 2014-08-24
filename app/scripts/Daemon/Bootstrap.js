@@ -117,8 +117,46 @@ App.Daemon.Bootstrap = (function () {
             return this.deferred.promise;
         },
 
-        killDaemon: function () {
-            this.daemon.kill('SIGTERM');
+        /**
+         * Checks that the daemon can run on the OS, initialises the path to the daemon & makes sure
+         * the daemon actually exists.
+         *
+         * @returns {App.Global.Message}
+         */
+        runPreChecks: function () {
+            if (!this.hasValidDaemon()) {
+                return new App.Global.Message(
+                    false, 1, 'This operating system does not support running the Reddcoin daemon.'
+                );
+            }
+
+            this.initializeFilePath();
+
+            if (!this.fs.existsSync(this.daemonFilePath)) {
+                var platform = this.os.platform() + ' ' + this.os.arch();
+                return new App.Global.Message(
+                    false, 2, 'Cannot find the daemon for this operating system: ' + platform
+                );
+            }
+
+            return new App.Global.Message(true, 0, 'Pre-checks complete');
+        },
+
+        /**
+         * Runs commands based on the OS, on *nix you need the chmod the daemon just in case.
+         */
+        runOsSpecificTasks: function() {
+            if (!this.isWindows()) {
+                this.debug("Chmodding " + this.daemonFilePath);
+
+                try {
+                    var result = this.fs.chmodSync(this.daemonFilePath, '775');
+                } catch (error) {
+                    this.debug(error);
+                }
+
+                this.debug("Chmod Sync Finish");
+            }
         },
 
         startDaemonLaunch: function() {
@@ -132,11 +170,6 @@ App.Daemon.Bootstrap = (function () {
 
             this.debug("spawnDaemon()");
             this.spawnDaemon();
-
-            this.debug("saveDaemonPid()");
-            this.saveDaemonPid();
-
-            this.setupDaemonListeners();
 
             // We will do an interval function to check every second to see if the daemon has loaded.
             var daemonStartedSuccess = function success (message) {
@@ -260,6 +293,41 @@ App.Daemon.Bootstrap = (function () {
         },
 
         /**
+         * Spawns the daemon.
+         */
+        spawnDaemon: function() {
+            var self = this;
+
+            try {
+                self.debug("spawnDaemon() - spawning...");
+
+                var arguments = [
+                    '-conf=' + self.configPath,
+                    '-datadir=' + self.daemonDirPath,
+                    '-alertnotify=echo "ALERT:%s"',
+                    '-walletnotify=echo "WALLET:%s"',
+                    '-blocknotify=echo "BLOCK:%s"'
+                ];
+
+                self.debug(arguments);
+
+                self.daemon = self.childProcess.spawn(self.daemonFilePath, arguments);
+
+                self.debug("setupDaemonListeners()");
+                self.setupDaemonListeners();
+
+                self.debug("saveDaemonPid()");
+                self.saveDaemonPid();
+
+            } catch (ex) {
+                self.debug(ex);
+                self.deferred.reject(new App.Global.Message(
+                    false, 2, "We cannot start the daemon, please check no other wallets are running."
+                ));
+            }
+        },
+
+        /**
          * The daemon outputs various data, setup listeners to catch this fire and off events.
          */
         setupDaemonListeners: function () {
@@ -274,6 +342,40 @@ App.Daemon.Bootstrap = (function () {
                 this.close(true);
             });
 
+            self.daemon.stderr.setEncoding('utf8');
+            self.daemon.stderr.on('data', function (data) {
+
+                if (/^execvp\(\)/.test(data) || data.toLowerCase().indexOf("error") !== -1) {
+                    self.debug('Failed to start child process. ' + data);
+                    self.deferred.reject(new App.Global.Message(
+                        false, 2, data
+                    ));
+                }
+
+                if (data.indexOf("Corrupted block database detected") !== -1) {
+                    data = "Corrupt block database detected, please reindex or delete the block database to rebuild it.";
+                }
+
+                self.deferred.reject(new App.Global.Message(
+                    false, 2, data
+                ));
+
+            });
+
+            self.daemon.stdout.setEncoding('utf8');
+            self.daemon.stdout.on('data', function (data) {
+                if (data.indexOf('BLOCK') !== -1) {
+                    self.$rootScope.$emit('daemon.notifications.block');
+                    self.debug("[BLOCK] Notification " + data);
+                } else if (data.indexOf('ALERT') !== -1) {
+                    self.$rootScope.$emit('daemon.notifications.alert');
+                    self.debug("[ALERT] Notification " + data);
+                } else if (data.indexOf('WALLET') !== -1) {
+                    self.$rootScope.$emit('daemon.notifications.wallet');
+                    self.debug("[WALLET] Notification " + data);
+                }
+            });
+
             this.daemon.on('close', function (data) {
                 self.fs.unlink(self.pidPath, function(ex) {
                     if (ex != null) {
@@ -284,107 +386,6 @@ App.Daemon.Bootstrap = (function () {
                 self.debug("Daemon child process has ended.");
                 self.debug(data);
             });
-        },
-
-        /**
-         * Spawns the daemon.
-         */
-        spawnDaemon: function() {
-            var self = this;
-
-            try {
-                self.debug("spawnDaemon() - spawning...");
-
-                self.daemon = self.childProcess.spawn(self.daemonFilePath, [
-                    '-conf="' + self.configPath + "'",
-                    '-datadir="' + self.daemonDirPath + '"',
-                    '-alertnotify=echo "ALERT:%s"',
-                    '-walletnotify=echo "WALLET:%s"',
-                    '-blocknotify=echo "BLOCK:%s"'
-                ]);
-
-                self.daemon.stderr.setEncoding('utf8');
-                self.daemon.stderr.on('data', function (data) {
-
-                    if (/^execvp\(\)/.test(data) || data.toLowerCase().indexOf("error") !== -1) {
-                        self.debug('Failed to start child process. ' + data);
-                        self.deferred.reject(new App.Global.Message(
-                            false, 2, data
-                        ));
-                    }
-
-                    if (data.indexOf("Corrupted block database detected") !== -1) {
-                        data = "Corrupt block database detected, please reindex or delete the block database to rebuild it.";
-                    }
-
-                    self.deferred.reject(new App.Global.Message(
-                        false, 2, data
-                    ));
-
-                });
-
-                self.daemon.stdout.setEncoding('utf8');
-                self.daemon.stdout.on('data', function (data) {
-                    if (data.indexOf('BLOCK') !== -1) {
-                        self.$rootScope.$emit('daemon.notifications.block');
-                        self.debug("[BLOCK] Notification " + data);
-                    } else if (data.indexOf('ALERT') !== -1) {
-                        self.$rootScope.$emit('daemon.notifications.alert');
-                        self.debug("[ALERT] Notification " + data);
-                    } else if (data.indexOf('WALLET') !== -1) {
-                        self.$rootScope.$emit('daemon.notifications.wallet');
-                        self.debug("[WALLET] Notification " + data);
-                    }
-                });
-
-            } catch (ex) {
-                this.debug(ex);
-                self.deferred.reject(new App.Global.Message(
-                    false, 2, "We cannot start the daemon, please check no other wallets are running."
-                ));
-            }
-        },
-
-        /**
-         * Checks that the daemon can run on the OS, initialises the path to the daemon & makes sure
-         * the daemon actually exists.
-         *
-         * @returns {App.Global.Message}
-         */
-        runPreChecks: function () {
-            if (!this.hasValidDaemon()) {
-                return new App.Global.Message(
-                    false, 1, 'This operating system does not support running the Reddcoin daemon.'
-                );
-            }
-
-            this.initializeFilePath();
-
-            if (!this.fs.existsSync(this.daemonFilePath)) {
-                var platform = this.os.platform() + ' ' + this.os.arch();
-                return new App.Global.Message(
-                    false, 2, 'Cannot find the daemon for this operating system: ' + platform
-                );
-            }
-
-            return new App.Global.Message(true, 0, 'Pre-checks complete');
-        },
-
-        /**
-         * Runs commands based on the OS, on *nix you need the chmod the daemon just in case.
-         */
-        runOsSpecificTasks: function() {
-            if (!this.isWindows()) {
-                this.debug("Chmodding " + this.daemonFilePath);
-
-                try {
-                    var result = this.fs.chmodSync(this.daemonFilePath, '775');
-                } catch (error) {
-                    this.debug(error);
-                }
-
-                this.debug("Chmod Sync Finish");
-            }
         },
 
         /**
@@ -477,6 +478,13 @@ App.Daemon.Bootstrap = (function () {
          */
         isWindows: function() {
             return this.os.platform() === 'win32';
+        },
+
+        /**
+         * Tries to kill the daemon
+         */
+        killDaemon: function () {
+            this.daemon.kill('SIGTERM');
         },
 
         /**
