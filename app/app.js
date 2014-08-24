@@ -6,7 +6,7 @@
  */
 var App = angular.module('app', [
 
-    // Dependanices
+    // Dependencies
     'ngCookies',
     'ngResource',
     'ngRoute',
@@ -31,6 +31,17 @@ var App = angular.module('app', [
     'partials'
 
 ]);
+
+/**
+ * Require public objects
+ *
+ * @public
+ */
+
+var _ = require('lodash');
+var nwGui = require('nw.gui');
+var nwWin = nwGui.Window.get();
+var nodeFs = require('fs');
 
 /**
  * Set up accessible variables for some of the modules.
@@ -59,9 +70,8 @@ App.config([
             .when('/addresses', { controller: 'AddressesCtrl', templateUrl: '/partials/addresses.html' })
             .when('/settings', { controller: 'SettingsCtrl', templateUrl: '/partials/settings.html' })
             .when('/statistics', { controller: 'StatisticsCtrl', templateUrl: '/partials/statistics.html' })
-            .when('/help', { controller: 'HelpCtrl', templateUrl: '/partials/help.html' })
-
             .when('/irc', { controller: 'MainIrcCtrl', templateUrl: '/partials/irc-main.html' })
+            .when('/help', { controller: 'HelpCtrl', templateUrl: '/partials/help.html' })
 
             .otherwise({ redirectTo: '/dashboard' });
 
@@ -92,31 +102,28 @@ App.run(['$rootScope', '$route', '$location', 'DaemonManager', function ($rootSc
      * Here we set up the applications miscellaneous stuff such as shortcuts and menus.
      */
 
-    var gui = require('nw.gui');
-    var win = gui.Window.get();
-
     var option = {
         key : "Ctrl+Q",
         active : function() {
-            gui.App.quit();
+            nwGui.App.quit();
         },
         failed : function(msg) {
-            // :(, fail to register the |key| or couldn't parse the |key|.
             console.log(msg);
         }
     };
 
     // Create a shortcut with |option|.
-    var quitShortcut = new gui.Shortcut(option);
+    var quitShortcut = new nwGui.Shortcut(option);
 
     /**
      * Set up Mac OSX text shortcut functions such as copy & paste.
      */
 
-    var nativeMenuBar = new gui.Menu({ type: "menubar" });
+    var nativeMenuBar = new nwGui.Menu({ type: "menubar" });
+
     try {
-        nativeMenuBar.createMacBuiltin("My App");
-        win.menu = nativeMenuBar;
+        nativeMenuBar.createMacBuiltin("ReddWallet");
+        nwWin.menu = nativeMenuBar;
     } catch (ex) {
         console.log(ex.message);
     }

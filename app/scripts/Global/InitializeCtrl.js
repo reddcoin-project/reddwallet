@@ -23,7 +23,7 @@ App.Global.controller(
 
             $scope.displayError = function (title, message) {
                 $scope.loadingStatus = title;
-                $scope.loadingStatusError = $sce.trustAsHtml(message.replace(/(?:\n)/g, '<hr>'));
+                $scope.loadingStatusError = $sce.trustAsHtml(String(message).replace(/(?:\n)/g, '<hr>'));
             };
 
             $scope.initialize = function() {

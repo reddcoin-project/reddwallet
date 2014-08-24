@@ -15,16 +15,13 @@ App.Daemon.factory('DaemonManager',
 
                 initialize: function() {
                     var self = this;
-
                     this.running = false;
 
-                    this.bootstrap = new App.Daemon.Bootstrap($q, $timeout, $interval, $rootScope, walletDb);
+                    var configParser = new App.Wallet.ConfigParser();
+                    this.walletConfig = configParser.getConfig();
+                    this.bootstrap = new App.Daemon.Bootstrap($q, $timeout, $interval, $rootScope, this.walletConfig, walletDb);
 
-                    /**
-                     * This promise callback will set the running bool once the bootstrap has completed.
-                     *
-                     * @param {App.Global.Message} message
-                     */
+                    // Hook the running property to the promise of the bootstrap.
                     this.bootstrap.getPromise().then(function(message) {
                         self.running = message.result;
 
@@ -39,6 +36,10 @@ App.Daemon.factory('DaemonManager',
 
                 getBootstrap: function() {
                     return this.bootstrap;
+                },
+
+                getConfig: function () {
+                    return this.walletConfig;
                 },
 
                 isRunning: function() {

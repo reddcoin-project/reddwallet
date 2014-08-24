@@ -8,13 +8,16 @@ App.Daemon.Bootstrap = (function () {
      * @param $timeout
      * @param $interval
      * @param $rootScope
+     * @param {App.Wallet.ConfigModel} walletConfig
      * @param walletDb
      * @constructor
      */
 
-    function Bootstrap ($q, $timeout, $interval, $rootScope, walletDb) {
+    function Bootstrap ($q, $timeout, $interval, $rootScope, walletConfig, walletDb) {
 
-        this.debugEnabled = false;
+        this.walletConfig = walletConfig;
+
+        this.debugEnabled = walletConfig.config.debug;
         this.killMethod = 'pid'; // either pid or daemon (buggy atm)
 
         this.$q = $q;
@@ -34,8 +37,14 @@ App.Daemon.Bootstrap = (function () {
         this.app = this.gui.App;
         this.win = this.gui.Window.get();
         this.childProcess = require('child_process');
+        this.pollInterval = walletConfig.config.localDaemon.pollInterval;
 
         this.daemonDirPath = this.app.dataPath + '/daemon';
+
+        if (walletConfig.config.localDaemon.directory != "$APP") {
+            this.daemonDirPath = walletConfig.config.localDaemon.directory;
+        }
+
         this.configPath = this.daemonDirPath + "/reddcoin.conf";
         this.pidPath = this.daemonDirPath + "/reddwallet.pid";
 
@@ -62,11 +71,6 @@ App.Daemon.Bootstrap = (function () {
 
     Bootstrap.prototype = {
 
-        /**
-         * # Main Function
-
-         * Start the local daemon
-         */
         startLocal: function () {
 
             var self = this;
@@ -86,11 +90,8 @@ App.Daemon.Bootstrap = (function () {
             promise.then(
                 function success () {
 
-                    self.parseConfigurationFile();
-
-                    self.debug("Before OS Specific Tasks");
+                    self.parseConfigurationFiles();
                     self.runOsSpecificTasks();
-                    self.debug("After OS Specific Tasks");
 
                     var killPromise = self.killExistingPid();
 
@@ -102,12 +103,12 @@ App.Daemon.Bootstrap = (function () {
                             self.startDaemonLaunch();
                         }
                     );
+
                 },
                 function error (err) {
                     self.deferred.reject(new App.Global.Message(false, 4, err));
                 }
             );
-
 
             return this.deferred.promise;
         },
@@ -125,15 +126,17 @@ App.Daemon.Bootstrap = (function () {
             // This is so we can use an RPC call to wait on the daemon to start..
             this.walletRpc.initializeConfig(this.daemonConfig);
 
+            this.debug("spawnDaemon()");
             this.spawnDaemon();
 
+            this.debug("saveDaemonPid()");
             this.saveDaemonPid();
 
             this.setupDaemonListeners();
 
             // We will do an interval function to check every second to see if the daemon has loaded.
             var daemonStartedSuccess = function success (message) {
-                self.debug("Daemon has started started.");
+                self.debug("Daemon has started...");
 
                 var newMessage = new App.Global.Message(true, 0, 'Daemon Ready');
 
@@ -149,7 +152,7 @@ App.Daemon.Bootstrap = (function () {
                 // This wallet is not designed to connect to daemons outside of a local network as it may be sluggish.
                 var blockInterval = self.$interval(function() {
                     self.$rootScope.$broadcast('daemon.notifications.block');
-                }, 5 * 1000);
+                }, self.pollInterval * 1000);
 
                 self.$interval.cancel(intervalCode);
 
@@ -159,6 +162,12 @@ App.Daemon.Bootstrap = (function () {
                 self.walletRpc.lockWallet().then(
                     daemonStartedSuccess,
                     function error (message) {
+                        if (message.rpcError.code == undefined) {
+                            self.debug("Daemon still not started.. (weird rpcError)");
+                            self.debug(message);
+                            return;
+                        }
+
                         if (message.rpcError.code == 'ECONNREFUSED') {
                             self.debug("Daemon still not started..");
                             self.debug(message);
@@ -179,64 +188,64 @@ App.Daemon.Bootstrap = (function () {
          * then it will create the folder and configuration file. After that it will set the config by reading the file.
          */
         initializeConfiguration: function() {
+            var self = this;
             var deferred = this.$q.defer();
 
             try {
 
+                // Check if the daemon data directory exists
                 if (!this.fs.existsSync(this.daemonDirPath)) {
                     this.fs.mkdirSync(this.daemonDirPath);
+                    this.debug("Created directory for " + this.daemonDirPath);
                 }
 
+                // Check if the daemon directory has a reddcoin.conf file, if not then create one
                 if (!this.fs.existsSync(this.configPath)) {
                     var defaultConf = this.fs.readFileSync('daemons/reddcoin.default.conf', {
                         encoding: 'utf8'
                     });
 
-                    var self = this;
                     // Replace the %PASSWORD with a random value..
                     var crypto = require('crypto');
                     crypto.randomBytes(32, function(ex, buf) {
                         if (ex == null) {
-                            defaultConf = defaultConf.replace("%PASSWORD", crypto.pseudoRandomBytes(32).toString('hex'));
+                            defaultConf = defaultConf.replace("$PASSWORD", crypto.pseudoRandomBytes(32).toString('hex'));
                         } else {
-                            defaultConf = defaultConf.replace("%PASSWORD", buf.toString('hex'));
+                            defaultConf = defaultConf.replace("$PASSWORD", buf.toString('hex'));
                         }
 
                         self.fs.writeFileSync(self.configPath, defaultConf);
+                        self.debug("Copied default daemon configuration file to " + self.configPath);
                         deferred.resolve();
                     });
-                } else {
-                    // Resole immediately as the files already exist.
-                    deferred.resolve();
                 }
 
             } catch (ex) {
                 deferred.reject(ex);
+                this.debug("Error initializing daemon configuration. " + ex);
             }
 
             return deferred.promise;
         },
 
-        parseConfigurationFile: function () {
-
+        parseConfigurationFiles: function () {
             try {
-                var conf = this.fs.readFileSync(this.configPath, {
+
+                var daemonConf = this.fs.readFileSync(this.configPath, {
                     encoding: 'utf8'
                 });
-            } catch (ex) {
-                this.debug("An error occurred trying to read the config file " + this.configPath);
-                this.debug(ex);
-            }
 
-            var lines = conf.split("\n");
-            for (var i = 0; i < lines.length; i++) {
-                var parts = lines[i].split("=");
-                if (parts.length == 2) {
-                    this.daemonConfig[parts[0].trim()] = parts[1].trim();
+                var lines = daemonConf.split("\n");
+                for (var i = 0; i < lines.length; i++) {
+                    var parts = lines[i].split("=");
+                    if (parts.length == 2) {
+                        this.daemonConfig[parts[0].trim()] = parts[1].trim();
+                    }
                 }
-            }
 
-            this.debug(this.daemonConfig);
+            } catch (ex) {
+                this.deferred.reject("An error occurred whilst trying to parse the daemon configuration file.");
+            }
         },
 
         /**
@@ -260,7 +269,9 @@ App.Daemon.Bootstrap = (function () {
                         self.debug(ex);
                     }
                 });
+
                 self.debug("Daemon child process has ended.");
+                self.debug(data);
             });
         },
 
@@ -271,16 +282,15 @@ App.Daemon.Bootstrap = (function () {
             var self = this;
 
             try {
+                this.debug("spawnDaemon() - spawning...");
                 this.daemon = this.childProcess.spawn(this.daemonFilePath, [
-                    '-conf=' + this.configPath,
-                    '-datadir=' + this.daemonDirPath,
-                    //'-pid=' + this.pidPath,
+                    '-datadir="' + this.daemonDirPath + '"',
                     '-alertnotify=echo "ALERT:%s"',
                     '-walletnotify=echo "WALLET:%s"',
                     '-blocknotify=echo "BLOCK:%s"'
                 ]);
             } catch (ex) {
-                console.log(ex);
+                this.debug(ex);
                 self.deferred.reject(new App.Global.Message(
                     false, 2, "We cannot start the daemon, please check no other wallets are running."
                 ));
@@ -290,7 +300,7 @@ App.Daemon.Bootstrap = (function () {
             this.daemon.stderr.on('data', function (data) {
 
                 if (/^execvp\(\)/.test(data) || data.toLowerCase().indexOf("error") !== -1) {
-                    console.log('Failed to start child process.');
+                    self.debug('Failed to start child process. ' + data);
                     self.deferred.reject(new App.Global.Message(
                         false, 2, data
                     ));
@@ -310,12 +320,13 @@ App.Daemon.Bootstrap = (function () {
             this.daemon.stdout.on('data', function (data) {
                 if (data.indexOf('BLOCK') !== -1) {
                     self.$rootScope.$emit('daemon.notifications.block');
-
+                    self.debug("[BLOCK] Notification " + data);
                 } else if (data.indexOf('ALERT') !== -1) {
                     self.$rootScope.$emit('daemon.notifications.alert');
-
+                    self.debug("[ALERT] Notification " + data);
                 } else if (data.indexOf('WALLET') !== -1) {
                     self.$rootScope.$emit('daemon.notifications.wallet');
+                    self.debug("[WALLET] Notification " + data);
                 }
             });
         },
@@ -358,8 +369,7 @@ App.Daemon.Bootstrap = (function () {
                     this.debug(error);
                 }
 
-                this.debug("Chmod Sync Result");
-                this.debug(result);
+                this.debug("Chmod Sync Finish");
             }
         },
 
@@ -431,25 +441,6 @@ App.Daemon.Bootstrap = (function () {
                     }
                 } else {
                     deferred.resolve(true);
-                }
-            }
-
-            if (this.killMethod == 'daemon') {
-                try {
-                    this.childProcess.exec(this.daemonFilePath, [
-                        '-conf=' + this.configPath,
-                        '-datadir=' + this.daemonDirPath,
-                        '-pid=' + this.pidPath,
-                        'stop'
-                    ], function() {
-                        self.$timeout(function() {
-                            self.debug("Tried killing any daemons using built-in method.")
-                            deferred.resolve(true);
-                        }, 500);
-                    });
-                } catch (ex) {
-                    self.debug(ex);
-                    deferred.reject(false);
                 }
             }
 

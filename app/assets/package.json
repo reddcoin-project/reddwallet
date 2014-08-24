@@ -37,6 +37,8 @@
         "irc": "latest",
         "request": "latest",
         "feedparser": "0.16.5",
-        "sanitizer": "0.0.1"
+        "sanitizer": "0.0.1",
+        "strip-json-comments": "1.0.1",
+        "lodash": "2.4.1"
     }
 }
