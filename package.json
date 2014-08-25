@@ -2,7 +2,7 @@
   "author": "Reddcoin",
   "name": "ReddWallet",
   "description": "Reddcoin wallet built ontop of node-webkit",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "homepage": "https://github.com/reddcoin-project/reddwallet",
   "repository": {
     "type": "git",
