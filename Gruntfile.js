@@ -5,7 +5,7 @@ module.exports = function (grunt) {
             options: {
                 version: "0.10.0",
                 buildDir: './dist',
-                platforms: ['linux64', 'linux32'],
+                platforms: ['win', 'osx', 'linux64', 'linux32'],
                 appName: "ReddWallet",
                 appVersion: "1.1.0",
                 buildType: "versioned",
