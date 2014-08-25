@@ -83,7 +83,3 @@ angular.module('app.filters').filter('cut', function () {
         return value + (tail || ' …');
     };
 });
-
-function nl2br (str) {
-    return (str + '').replace(/\n/g, "<br />");
-}

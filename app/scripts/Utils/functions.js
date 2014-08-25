@@ -31,6 +31,9 @@ String.prototype.toLowerFirst = function() {
     return this.substring(0, 1).toLowerCase() + this.substring(1);
 };
 
+function nl2br (str) {
+    return (str + '').replace(/\n/g, "<br />");
+}
 
 function smartTrim(string, maxLength) {
 
