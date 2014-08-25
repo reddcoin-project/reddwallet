@@ -9,7 +9,7 @@ module.exports = function (grunt) {
                 appName: "ReddWallet",
                 appVersion: "1.1.0",
                 buildType: "versioned",
-                winIco: "reddcoin-favi.ico",
+                winIco: "_public/reddcoin-favi.ico",
                 macIcns: "_public/reddcoin_logo.icns"
             },
             src: './_public/**/*'
