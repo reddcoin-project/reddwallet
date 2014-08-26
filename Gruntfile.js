@@ -7,7 +7,7 @@ module.exports = function (grunt) {
                 buildDir: './dist',
                 platforms: ['win', 'osx', 'linux64', 'linux32'],
                 appName: "ReddWallet",
-                appVersion: "1.1.0",
+                appVersion: "1.1.1",
                 buildType: "versioned",
                 winIco: "_public/reddcoin-favi.ico",
                 macIcns: "_public/reddcoin_logo.icns"
