@@ -14,24 +14,62 @@ App.Daemon.factory('DaemonManager',
             Manager.prototype = {
 
                 initialize: function() {
-                    var self = this;
                     this.running = false;
+                    this.deferred = $q.defer();
+                    this.walletConfig = new App.Wallet.ConfigParser().getConfig();
+                    this.daemonLocal = this.walletConfig.config.localDaemon.enabled;
 
-                    var configParser = new App.Wallet.ConfigParser();
-                    this.walletConfig = configParser.getConfig();
-                    this.bootstrap = new App.Daemon.Bootstrap($q, $timeout, $interval, $rootScope, this.walletConfig, walletDb);
-
-                    // Hook the running property to the promise of the bootstrap.
-                    this.bootstrap.getPromise().then(function(message) {
-                        self.running = message.result;
-
-                        return message;
-                    });
+                    this.bootstrap = new App.Daemon.Bootstrap(
+                        $q,
+                        $timeout,
+                        $interval,
+                        $rootScope,
+                        this.walletConfig,
+                        walletDb
+                    );
 
                 },
 
+                start: function () {
+                    var self = this;
+
+                    /**
+                     * This will run the local daemon and wrap that daemons promise in its own one. (Managers promise).
+                     *
+                     * This way abstracts the other files relying on this promise. So they won't even know what type
+                     * of daemon has been loaded. Just that everything has been initialized.
+                     */
+                    if (this.isDaemonLocal()) {
+
+                        // Wrap the promises
+                        this.getBootstrap().getPromise().then(
+                            function success(message) {
+                                self.running = message.result;
+                                self.deferred.resolve(message);
+                                return message;
+                            },
+                            function error(message) {
+                                self.deferred.reject(message);
+                            }
+                        );
+
+                        // Start
+                        this.getBootstrap().startLocal();
+                    } else {
+                        // Remote daemon
+                    }
+                },
+
+                isDaemonLocal: function () {
+                    return this.daemonLocal;
+                },
+
+                getPromise: function () {
+                    return this.deferred;
+                },
+
                 killDaemon: function () {
-                    this.bootstrap.killDaemon();
+                    this.getBootstrap().killDaemon();
                 },
 
                 getBootstrap: function() {

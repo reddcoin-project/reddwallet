@@ -46,7 +46,7 @@ App.Global.controller(
                 require('nw.gui').Shell.openExternal(url);
             };
 
-            daemon.getBootstrap().getPromise().then(function(message) {
+            daemon.getPromise().then(function(message) {
                 fetchOverview();
                 $scope.walletDb.syncAccounts();
                 $scope.daemon.running = true;

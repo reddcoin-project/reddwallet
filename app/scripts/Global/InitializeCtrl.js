@@ -4,9 +4,7 @@ App.Global.controller(
         '$scope', '$location', '$resource', '$rootScope', '$sce', 'DaemonManager',
         function($scope, $location, $resource, $rootScope, $sce, DaemonManager) {
 
-            var bootstrap = DaemonManager.getBootstrap();
-
-            bootstrap.getPromise().then(
+            DaemonManager.getPromise().then(
                 function success(message) {
                     if (message.result) {
                         $location.path('/dashboard');
@@ -28,7 +26,7 @@ App.Global.controller(
 
             $scope.initialize = function() {
                 // WHERE IT ALL BEGINS, THE BIRTH OF THE WALLET!
-                bootstrap.startLocal();
+                DaemonManager.start();
             };
 
             $scope.initialize();
