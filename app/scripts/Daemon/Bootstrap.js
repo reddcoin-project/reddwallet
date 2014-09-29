@@ -301,7 +301,7 @@ App.Daemon.Bootstrap = (function () {
             try {
                 self.debug("spawnDaemon() - spawning...");
 
-                var arguments = [
+                var argument = [
                     '-conf=' + self.configPath,
                     '-datadir=' + self.daemonDirPath,
                     '-alertnotify=echo "ALERT:%s"',
@@ -309,9 +309,9 @@ App.Daemon.Bootstrap = (function () {
                     '-blocknotify=echo "BLOCK:%s"'
                 ];
 
-                self.debug(arguments);
+                self.debug(argument);
 
-                self.daemon = self.childProcess.spawn(self.daemonFilePath, arguments);
+                self.daemon = self.childProcess.spawn(self.daemonFilePath, argument);
 
                 self.debug("setupDaemonListeners()");
                 self.setupDaemonListeners();
