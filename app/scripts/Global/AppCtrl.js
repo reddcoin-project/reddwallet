@@ -1,8 +1,8 @@
 App.Global.controller(
     'AppCtrl',
     [
-        '$scope', '$interval', '$location', '$resource', '$rootScope', 'walletDb', 'DaemonManager', 'News',
-        function($scope, $interval, $location, $resource, $rootScope, walletDb, daemon, News) {
+        '$scope', '$interval', '$location', '$resource', '$rootScope', 'walletDb', 'DaemonManager',
+        function($scope, $interval, $location, $resource, $rootScope, walletDb, DaemonManager) {
 
             $scope.walletDb = walletDb;
 
@@ -46,7 +46,7 @@ App.Global.controller(
                 require('nw.gui').Shell.openExternal(url);
             };
 
-            daemon.getBootstrap().getPromise().then(function(message) {
+            DaemonManager.getBootstrap().getPromise().then(function(message) {
                 fetchOverview();
                 $scope.walletDb.syncAccounts();
                 $scope.daemon.running = true;
