@@ -47,6 +47,7 @@ var nodeFs = require('fs');
  * Set up accessible variables for some of the modules.
  */
 
+//require('nw.gui').Window.get().showDevTools();
 App.Wallet = angular.module('app.wallet', []);
 App.Global = angular.module('app.global', []);
 App.Daemon = angular.module('app.daemon', []);
