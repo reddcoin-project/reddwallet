@@ -81,12 +81,12 @@ App.Wallet.controller(
                 };
 
                 aside.$scope.viewTxOnline = function (transaction) {
-                    var url = "http://bitinfocharts.com/reddcoin/tx/" + transaction.txid;
+                    var url = "http://live.reddcoin.com/tx/" + transaction.txid;
                     require('nw.gui').Shell.openExternal(url);
                 };
 
                 aside.$scope.viewAddressOnline = function (transaction) {
-                    var url = "http://bitinfocharts.com/reddcoin/address/" + transaction.address;
+                    var url = "http://live.reddcoin.com/address/" + transaction.address;
                     require('nw.gui').Shell.openExternal(url);
                 };
 
