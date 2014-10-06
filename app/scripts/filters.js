@@ -16,6 +16,10 @@ angular.module('app.filters').filter('to_trusted', ['$sce', function($sce) {
 
 angular.module('app.filters').filter('stakedate', ['$filter', function ($filter) {
     return function(timestamp) {
+        // max integer overflow
+        if (timestamp === timestamp + 1) {
+            return "Too far away";
+        }
 
         if (timestamp == null || timestamp == -1) {
             return "Unknown";
@@ -32,6 +36,10 @@ angular.module('app.filters').filter('stakedate', ['$filter', function ($filter)
 
 angular.module('app.filters').filter('staketime', ['$filter', function ($filter) {
     return function(timestamp) {
+        // max integer overflow
+        if (timestamp === timestamp + 1) {
+            return "Too long";
+        }
 
         if (timestamp == null || timestamp == -1) {
             return "Unknown";
