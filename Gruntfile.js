@@ -3,11 +3,11 @@ module.exports = function (grunt) {
         pkg: grunt.file.readJSON('_public/package.json'),
         nodewebkit: {
             options: {
-                version: "0.10.0",
+                version: "0.10.5",
                 buildDir: './dist',
                 platforms: ['win', 'osx', 'linux64', 'linux32'],
                 appName: "ReddWallet",
-                appVersion: "1.1.1",
+                appVersion: "1.4.0",
                 buildType: "versioned",
                 winIco: "_public/reddcoin-favi.ico",
                 macIcns: "_public/reddcoin_logo.icns"
