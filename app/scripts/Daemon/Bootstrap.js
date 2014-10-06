@@ -62,9 +62,8 @@ App.Daemon.Bootstrap = (function () {
                 'default': 'daemons/reddcoind-win-32.exe'
             },
             'darwin': {
-                'x32': 'daemons/reddcoind-mac-32',
-                'x64': 'daemons/reddcoind-mac-32',
-                'default': 'daemons/reddcoind-mac-32'
+                'x64': 'daemons/reddcoind-mac-64',
+                'default': 'daemons/reddcoind-mac-64'
             }
         };
         console.log("end of constructor of Bootstrap");
