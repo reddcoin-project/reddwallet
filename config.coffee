@@ -1,8 +1,8 @@
 exports.config =
-  # See docs at http://brunch.readthedocs.org/en/latest/config.html.
+  # See docs at https://github.com/brunch/brunch/tree/stable/docs
   conventions:
-    assets:  /^app[\/\\]+assets[\/\\]+/
-    ignored: /^(bower_components[\/\\]+bootstrap-less(-themes)?|app[\/\\]+styles[\/\\]+overrides|(.*?[\/\\]+)?[_]\w*)/
+    assets:  /^app[\\/]assets[\\/]/
+    ignored: /^((bower_components[\\/]bootstrap\-less(\-themes)?)|(app[\\/]styles[\\/]overrides))/
   modules:
     definition: false
     wrapper: false
@@ -16,7 +16,7 @@ exports.config =
 
     stylesheets:
       joinTo:
-        'css/app.css': /^(app|vendor|bower_components[^bootstrap])[^bootstrap]/
+        'css/app.css': /^(app|vendor|(bower_components[\\/]bootstrap))/
       order:
         before: [
           'app/styles/app.less'
@@ -34,4 +34,4 @@ exports.config =
       locals: {}
 
   # Enable or disable minifying of result js / css files.
-  minify: false
+  minify: true
