@@ -30,7 +30,7 @@ html(lang='en', ng-app='app')
                     .navbar-brand {{ walletOverview.balance | number:8 }} RDD
                 .navbar-collapse.collapse
                     form.navbar-form.navbar-right.search-form(ng-submit="searchExplorer()")
-                        input.form-control(type='text', ng-model="explorerSearch", placeholder='Tx, address, block')
+                        input.form-control(type='text', ng-model="explorerSearch", placeholder='tx, address, block')
                     div(ng-include="'/partials/topNav.html'")
 
         .container-fluid
