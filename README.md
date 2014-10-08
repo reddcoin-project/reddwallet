@@ -47,6 +47,11 @@ The steps for the temporary solution until the issue is fixed:
 - Rename the global `package.json` file to something else (eg `_package.json`). You'll probably need `sudo`.  `cd /usr/local/lib/node_modules/nodewebkit` then `sudo mv package.json _package.json`.
 - Run the app directly from inside the `/_public` folder. `cd _public` and then `nodewebkit .`. (Hence the reason for global install).
 
+To create DMG img:
+
+    export VERSION=1.4.0
+    sudo hdiutil create -fs HFS+ -volname "ReddWallet" -srcfolder dist/ReddWallet\ -\ v$VERSION/osx/ReddWallet.app/ dist/ReddWallet\ -\ v$VERSION/reddwallet-$VERSION-mac.dmg
+
 ### Windows
 
 Not yet tested.
