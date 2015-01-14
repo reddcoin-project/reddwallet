@@ -1,6 +1,6 @@
 # ReddWallet
 
-The Next Generation Reddcoin Wallet
+The Reddcoin Social Wallet
 
 ## Workflow
 

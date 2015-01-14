@@ -1,7 +1,7 @@
 {
-  "author": "Reddcoin",
+  "author": "Sam Vaughton, Larry Ren",
   "name": "ReddWallet",
-  "description": "Reddcoin wallet built ontop of node-webkit",
+  "description": "Reddcoin social wallet built on top of node-webkit",
   "version": "1.4.0",
   "homepage": "https://github.com/reddcoin-project/reddwallet",
   "repository": {
